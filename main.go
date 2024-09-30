@@ -34,9 +34,11 @@ type Item struct {
 }
 
 type Game struct {
-	player  *Player
-	enemies []*Enemy
-	items   []*Item
+	player        *Player
+	enemies       []*Enemy
+	items         []*Item
+	tilemapJSON   *TilemapJSON
+	tilemapeimage *ebiten.Image
 }
 
 func (g *Game) Update() error {
@@ -85,6 +87,40 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	opts := ebiten.DrawImageOptions{}
 
+	//loop through the tilemap
+
+	for _, layer := range g.tilemapJSON.Layers {
+		for index, id := range layer.Data {
+			//tile position
+			fmt.Printf("index %v\n", index)
+			x := index % layer.Width
+			y := index / layer.Width
+
+			fmt.Printf("tile position %v %v\n", x, y)
+
+			//pixel position
+			x *= 16
+			y *= 16
+
+			fmt.Printf("tile position %v %v\n", x, y)
+
+			srcX := (id - 1) % 22
+			srcY := (id - 1) / 22
+
+			srcX *= 16
+			srcY *= 16
+
+			opts.GeoM.Translate(float64(x), float64(y))
+
+			screen.DrawImage(
+				g.tilemapeimage.SubImage(image.Rect(srcX, srcY, srcX+16, srcY+16)).(*ebiten.Image),
+				&opts,
+			)
+
+			opts.GeoM.Reset()
+		}
+	}
+
 	// player position variable
 
 	opts.GeoM.Translate(g.player.X, g.player.Y)
@@ -118,7 +154,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	//draw item
 	for _, sprite := range g.items {
 		opts.GeoM.Translate(sprite.X, sprite.Y)
-		if sprite.Ifinv == false {
+		if !sprite.Ifinv {
 			screen.DrawImage(
 				sprite.Img.SubImage(
 					image.Rect(0, 0, 16, 16),
@@ -153,6 +189,18 @@ func main() {
 	}
 
 	fishImg, _, err := ebitenutil.NewImageFromFile("assets/images//items/Fish.png")
+	if err != nil {
+		//handle error
+		log.Fatal(err)
+	}
+
+	tilemapeimage, _, err := ebitenutil.NewImageFromFile("assets/images/map/TilesetFloor.png")
+	if err != nil {
+		//handle error
+		log.Fatal(err)
+	}
+
+	tilemapJSON, err := NewTilemapJSON("assets/images/map/startermap.json")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
@@ -200,6 +248,8 @@ func main() {
 				false,
 			},
 		},
+		tilemapJSON:   tilemapJSON,
+		tilemapeimage: tilemapeimage,
 	}
 
 	if err := ebiten.RunGame(&game); err != nil {
