@@ -22,7 +22,6 @@ type Player struct {
 	Health uint
 }
 
-
 type Enemy struct {
 	*Sprite
 	FollowsPlayer bool
@@ -38,7 +37,6 @@ type Game struct {
 	player  *Player
 	enemies []*Enemy
 	items   []*Item
-	inventory [3][3]*Item
 }
 
 func (g *Game) Update() error {
@@ -77,13 +75,6 @@ func (g *Game) Update() error {
 			fmt.Printf("Picked up an item! Health: %d\n", g.player.Health)
 		}
 	}
-	for _, item := 0; i < 3; i++ {
-        for j := 0; j < len(matrix[i]); j++ {
-            fmt.Printf("%d ", matrix[i][j])w
-        }
-        fmt.Println()
-    }
-
 
 	return nil
 }
