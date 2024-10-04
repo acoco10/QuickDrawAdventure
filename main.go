@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ShootEmUpAdventure/entities"
 	"fmt"
 	"image"
 	"image/color"
@@ -12,35 +13,18 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type Sprite struct {
-	Img  *ebiten.Image
-	X, Y float64
-}
-
-type Player struct {
-	*Sprite
-	Health uint
-}
-
-type Enemy struct {
-	*Sprite
-	FollowsPlayer bool
-}
-
-type Item struct {
-	*Sprite
-	AmtHeal int
-	Ifinv   bool
-}
-
+// structs
 type Game struct {
-	player        *Player
-	enemies       []*Enemy
-	items         []*Item
+	//game elements
+	player        *entities.Player
+	enemies       []*entities.Enemy
+	items         []*entities.Item
 	tilemapJSON   *TilemapJSON
 	tilemapeimage *ebiten.Image
+	cam           *Camera
 }
 
+// game update function
 func (g *Game) Update() error {
 	//react to key presses
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
@@ -76,43 +60,55 @@ func (g *Game) Update() error {
 			item.Ifinv = true
 			fmt.Printf("Picked up an item! Health: %d\n", g.player.Health)
 		}
+
 	}
+
+	g.cam.FollowTarget(g.player.X+16, g.player.Y+16, 640, 480)
+	g.cam.Constrain(
+		float64(g.tilemapJSON.Layers[0].Width)*16,
+		float64(g.tilemapJSON.Layers[0].Height)*16,
+		640,
+		480,
+	)
 
 	return nil
 }
 
+// drawing screen + sprites
 func (g *Game) Draw(screen *ebiten.Image) {
 
 	screen.Fill(color.RGBA{120, 180, 255, 255})
 
 	opts := ebiten.DrawImageOptions{}
-
+	//map
 	//loop through the tilemap
 
 	for _, layer := range g.tilemapJSON.Layers {
 		for index, id := range layer.Data {
-			//tile position
-			fmt.Printf("index %v\n", index)
+
+			//coordinates example 1%30=1 1/30=0 2%30=2 2/30 = 0 etc...
 			x := index % layer.Width
 			y := index / layer.Width
-
-			fmt.Printf("tile position %v %v\n", x, y)
 
 			//pixel position
 			x *= 16
 			y *= 16
 
-			fmt.Printf("tile position %v %v\n", x, y)
-
+			//tile location in asset image we subtract one becuase of json index
 			srcX := (id - 1) % 22
 			srcY := (id - 1) / 22
 
+			//pixel position of tile(each tile is a 16x16 square)
 			srcX *= 16
 			srcY *= 16
 
+			//placing in correct coordinates
 			opts.GeoM.Translate(float64(x), float64(y))
+			opts.GeoM.Translate(g.cam.X, g.cam.Y)
 
 			screen.DrawImage(
+				// beginning of tile = srcX, src Y
+				//end of tile = srcX + 16, srcY +16
 				g.tilemapeimage.SubImage(image.Rect(srcX, srcY, srcX+16, srcY+16)).(*ebiten.Image),
 				&opts,
 			)
@@ -124,12 +120,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// player position variable
 
 	opts.GeoM.Translate(g.player.X, g.player.Y)
+	opts.GeoM.Translate(g.cam.X, g.cam.Y)
 
 	// draw player
 	screen.DrawImage(
 		//grab a subimage of the Spritesheet
 		g.player.Img.SubImage(
-			image.Rect(0, 0, 16, 16),
+			image.Rect(0, 0, 32, 32),
 		).(*ebiten.Image),
 		&opts,
 	)
@@ -139,6 +136,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// draw enemy sprites
 	for _, sprite := range g.enemies {
 		opts.GeoM.Translate(sprite.X, sprite.Y)
+		opts.GeoM.Translate(g.cam.X, g.cam.Y)
 
 		screen.DrawImage(
 			sprite.Img.SubImage(
@@ -154,6 +152,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	//draw item
 	for _, sprite := range g.items {
 		opts.GeoM.Translate(sprite.X, sprite.Y)
+		opts.GeoM.Translate(g.cam.X, g.cam.Y)
 		if !sprite.Ifinv {
 			screen.DrawImage(
 				sprite.Img.SubImage(
@@ -176,7 +175,7 @@ func main() {
 	ebiten.SetWindowTitle("Quick Draw Adventure")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
-	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/ToughGuy.png")
+	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/Elyse.png")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
@@ -200,56 +199,60 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tilemapJSON, err := NewTilemapJSON("assets/images/map/startermap.json")
+	tilemapJSON, err := NewTilemapJSON("assets/images/map/level1.json")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
 	}
 
 	game := Game{
-		player: &Player{
-			Sprite: &Sprite{
+		player: &entities.Player{
+			Sprite: &entities.Sprite{
 				Img: playerImg,
-				X:   50.0,
-				Y:   50.0,
+				X:   75.0,
+				Y:   75.0,
 			},
 			Health: 10,
 		},
-		enemies: []*Enemy{
+		enemies: []*entities.Enemy{
 			{
-				&Sprite{Img: ghostImg,
-					X: 100.0,
-					Y: 100.0,
+				Sprite: &entities.Sprite{
+					Img: ghostImg,
+					X:   100.0,
+					Y:   100.0,
 				},
-				true,
+				FollowsPlayer: true,
 			},
 			{
-				&Sprite{Img: ghostImg,
-					X: 50.0,
-					Y: 50.0,
+				Sprite: &entities.Sprite{
+					Img: ghostImg,
+					X:   50.0,
+					Y:   50.0,
 				},
-				false,
+				FollowsPlayer: false,
 			},
 			{
-				&Sprite{Img: ghostImg,
-					X: 100.0,
-					Y: 100.0,
+				Sprite: &entities.Sprite{
+					Img: ghostImg,
+					X:   100.0,
+					Y:   100.0,
 				},
-				false,
+				FollowsPlayer: false,
 			},
 		},
-		items: []*Item{
+		items: []*entities.Item{
 			{
-				&Sprite{Img: fishImg,
+				Sprite: &entities.Sprite{Img: fishImg,
 					X: 335.0,
 					Y: 335.0,
 				},
-				rand.Intn(4),
-				false,
+				AmtHeal: rand.Intn(4),
+				Ifinv:   false,
 			},
 		},
 		tilemapJSON:   tilemapJSON,
 		tilemapeimage: tilemapeimage,
+		cam:           NewCamera(0.0, 0.0),
 	}
 
 	if err := ebiten.RunGame(&game); err != nil {

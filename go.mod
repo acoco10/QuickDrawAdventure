@@ -1,4 +1,4 @@
-module rpg
+module ShootEmUpAdventure
 
 go 1.23.1
 

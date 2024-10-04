@@ -1,0 +1,43 @@
+{
+    "activeFile": "level1.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "assets/images/map/houses/buildings.tsx": {
+            "dynamicWrapping": true
+        },
+        "assets/images/map/tiler /TilesetFloor.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "groundtiles.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.0081,
+            "scaleInEditor": 1
+        },
+        "level1.tmx": {
+            "scale": 0.9284,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 267.1262386902198,
+                "y": 305.3640672124085
+            }
+        }
+    },
+    "last.exportedFilePath": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/images/map",
+    "last.imagePath": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/images/map/houses",
+    "map.lastUsedExportFilter": "All Files (*)",
+    "openFiles": [
+        "level1.tmx",
+        "assets/images/map/tiler /TilesetFloor.tsx",
+        "groundtiles.tsx"
+    ],
+    "project": "shoot em up adventure level 1 .tiled-project",
+    "recentFiles": [
+        "groundtiles.tsx",
+        "assets/images/map/tiler /TilesetFloor.tsx",
+        "level1.tmx"
+    ],
+    "tileset.lastUsedFormat": "json",
+    "tileset.type": 1
+}
