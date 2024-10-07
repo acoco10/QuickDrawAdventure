@@ -6,7 +6,7 @@
      "width":1
     },
  "margin":0,
- "name":"buildings",
+ "name":"buildingsTileSet",
  "spacing":0,
  "tilecount":2,
  "tiledversion":"1.11.0",
@@ -14,13 +14,13 @@
  "tiles":[
         {
          "id":0,
-         "image":"house1.png",
+         "image":"..\/..\/images\/buildings\/house1.png",
          "imageheight":45,
          "imagewidth":64
         }, 
         {
          "id":1,
-         "image":"house2.png",
+         "image":"..\/..\/images\/buildings\/house2.png",
          "imageheight":47,
          "imagewidth":48
         }],
