@@ -16,12 +16,13 @@ import (
 // structs
 type Game struct {
 	//game elements
-	player        *entities.Player
-	enemies       []*entities.Enemy
-	items         []*entities.Item
-	tilemapJSON   *TilemapJSON
-	tilemapeimage *ebiten.Image
-	cam           *Camera
+	player       *entities.Player
+	enemies      []*entities.Enemy
+	items        []*entities.Item
+	tilemapJSON  *TilemapJSON
+	tilesets     []Tileset
+	tilemapimage *ebiten.Image
+	cam          *Camera
 }
 
 // game update function
@@ -63,12 +64,12 @@ func (g *Game) Update() error {
 
 	}
 
-	g.cam.FollowTarget(g.player.X+16, g.player.Y+16, 640, 480)
+	g.cam.FollowTarget(g.player.X+16, g.player.Y+16, 320, 240)
 	g.cam.Constrain(
 		float64(g.tilemapJSON.Layers[0].Width)*16,
 		float64(g.tilemapJSON.Layers[0].Height)*16,
-		640,
-		480,
+		320,
+		240,
 	)
 
 	return nil
@@ -80,11 +81,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{120, 180, 255, 255})
 
 	opts := ebiten.DrawImageOptions{}
+
 	//map
 	//loop through the tilemap
+	for layerIndex, layer := range g.tilemapJSON.Layers {
 
-	for _, layer := range g.tilemapJSON.Layers {
 		for index, id := range layer.Data {
+
+			if id == 0 {
+				continue
+			}
 
 			//coordinates example 1%30=1 1/30=0 2%30=2 2/30 = 0 etc...
 			x := index % layer.Width
@@ -94,35 +100,27 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			x *= 16
 			y *= 16
 
-			//tile location in asset image we subtract one becuase of json index
-			srcX := (id - 1) % 22
-			srcY := (id - 1) / 22
-
-			//pixel position of tile(each tile is a 16x16 square)
-			srcX *= 16
-			srcY *= 16
-
-			//placing in correct coordinates
+			img := g.tilesets[layerIndex].Img(id)
+			fmt.Println("Loading image from path:", g.tilesets)
 			opts.GeoM.Translate(float64(x), float64(y))
+
+			opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
+
 			opts.GeoM.Translate(g.cam.X, g.cam.Y)
 
-			screen.DrawImage(
-				// beginning of tile = srcX, src Y
-				//end of tile = srcX + 16, srcY +16
-				g.tilemapeimage.SubImage(image.Rect(srcX, srcY, srcX+16, srcY+16)).(*ebiten.Image),
-				&opts,
-			)
+			screen.DrawImage(img, &opts)
 
+			// reset the opts for the next tile
 			opts.GeoM.Reset()
+
 		}
 	}
 
-	// player position variable
+	//draw player
 
 	opts.GeoM.Translate(g.player.X, g.player.Y)
 	opts.GeoM.Translate(g.cam.X, g.cam.Y)
 
-	// draw player
 	screen.DrawImage(
 		//grab a subimage of the Spritesheet
 		g.player.Img.SubImage(
@@ -171,7 +169,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
-	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowSize(320, 240)
 	ebiten.SetWindowTitle("Quick Draw Adventure")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
@@ -193,16 +191,22 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tilemapeimage, _, err := ebitenutil.NewImageFromFile("assets/images/map/TilesetFloor.png")
+	tilemapimage, _, err := ebitenutil.NewImageFromFile("assets/images/terrain/TilesetFloor.png")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
 	}
 
-	tilemapJSON, err := NewTilemapJSON("assets/images/map/level1.json")
+	tilemapJSON, err := NewTilemapJSON("assets/map/demoMap.json")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
+	}
+	tilesets, err := tilemapJSON.GenTileSets()
+
+	if err != nil {
+
+		log.Fatalf("Failed to generate tilesets: %v", err)
 	}
 
 	game := Game{
@@ -242,17 +246,19 @@ func main() {
 		},
 		items: []*entities.Item{
 			{
-				Sprite: &entities.Sprite{Img: fishImg,
-					X: 335.0,
-					Y: 335.0,
+				Sprite: &entities.Sprite{
+					Img: fishImg,
+					X:   335.0,
+					Y:   335.0,
 				},
 				AmtHeal: rand.Intn(4),
 				Ifinv:   false,
 			},
 		},
-		tilemapJSON:   tilemapJSON,
-		tilemapeimage: tilemapeimage,
-		cam:           NewCamera(0.0, 0.0),
+		tilemapJSON:  tilemapJSON,
+		tilemapimage: tilemapimage,
+		tilesets:     tilesets,
+		cam:          NewCamera(0.0, 0.0),
 	}
 
 	if err := ebiten.RunGame(&game); err != nil {
