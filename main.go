@@ -11,6 +11,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 // structs
@@ -23,38 +24,105 @@ type Game struct {
 	tilesets     []Tileset
 	tilemapimage *ebiten.Image
 	cam          *Camera
+	colliders    []image.Rectangle
+}
+
+func CheckCollisionHorizontal(sprite *entities.Sprite, colliders []image.Rectangle) {
+	for _, collider := range colliders {
+		//check if player is colliding with collider
+		if collider.Overlaps(
+			image.Rect(
+				int(sprite.X),
+				int(sprite.Y),
+				int(sprite.X)+16,
+				int(sprite.Y)+16),
+		) {
+			if sprite.Dx > 0.0 { //check if player is going down
+				//update player velocity
+				sprite.X = float64(collider.Min.X) - 16.0
+			} else if sprite.Dx < 0.0 { //check if player is going up
+				sprite.X = float64(collider.Max.X)
+			}
+
+		}
+	}
+}
+
+func CheckCollisionVertical(sprite *entities.Sprite, colliders []image.Rectangle) {
+	for _, collider := range colliders {
+		//check if player is colliding with collider
+		if collider.Overlaps(
+			image.Rect(
+				int(sprite.X),
+				int(sprite.Y),
+				int(sprite.X)+16,
+				int(sprite.Y)+16),
+		) {
+			if sprite.Dy > 0.0 { //check if player is going down
+				//update player velocity
+				sprite.Y = float64(collider.Min.Y) - 16.0
+			} else if sprite.Dy < 0.0 { //check if player is going up
+				sprite.Y = float64(collider.Max.Y)
+			}
+
+		}
+	}
 }
 
 // game update function
 func (g *Game) Update() error {
-	//react to key presses
+
+	g.player.Dx = 0
+	g.player.Dy = 0
+	//react to key presses by adding directional velocity
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.player.X += 2
+		g.player.Dx = 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.player.X -= 2
+		g.player.Dx = -2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		g.player.Y += 2
+		g.player.Dy = 2
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		g.player.Y -= 2
+		g.player.Dy = -2
 	}
 
+	//increase players position by their velocity every update
+	g.player.X += g.player.Dx
+
+	CheckCollisionHorizontal(g.player.Sprite, g.colliders)
+
+	g.player.Y += g.player.Dy
+
+	CheckCollisionVertical(g.player.Sprite, g.colliders)
+
 	for _, enemy := range g.enemies {
+
+		enemy.Dx = 0.0
+
+		enemy.Dy = 0.0
+
 		if enemy.FollowsPlayer {
 			if enemy.X < g.player.X {
-				enemy.X += 1
+				enemy.Dx += 1
+
 			} else if enemy.X > g.player.X {
-				enemy.X -= 1
+				enemy.Dx -= 1
 			}
 			if enemy.Y < g.player.Y {
-				enemy.Y += 1
+				enemy.Dy += 1
+
 			} else if enemy.Y > g.player.Y {
-				enemy.Y -= 1
+				enemy.Dy -= 1
 			}
 		}
+		enemy.X += enemy.Dx
+		CheckCollisionHorizontal(enemy.Sprite, g.colliders)
+		enemy.Y += enemy.Dy
+		CheckCollisionVertical(enemy.Sprite, g.colliders)
 	}
+
 	for _, item := range g.items {
 		if math.Abs(item.X-g.player.X) <= 2 && math.Abs(item.Y-g.player.Y) <= 2 {
 			g.player.Health += uint(item.AmtHeal)
@@ -101,7 +169,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y *= 16
 
 			img := g.tilesets[layerIndex].Img(id)
-			fmt.Println("Loading image from path:", g.tilesets)
+
 			opts.GeoM.Translate(float64(x), float64(y))
 
 			opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
@@ -124,7 +192,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.DrawImage(
 		//grab a subimage of the Spritesheet
 		g.player.Img.SubImage(
-			image.Rect(0, 0, 32, 32),
+			image.Rect(0, 0, 16, 32),
 		).(*ebiten.Image),
 		&opts,
 	)
@@ -162,6 +230,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		opts.GeoM.Reset()
 	}
+
+	for _, collider := range g.colliders {
+		vector.StrokeRect(
+			screen,
+			float32(collider.Min.X)+float32(g.cam.X),
+			float32(collider.Min.Y)+float32(g.cam.Y),
+			float32(collider.Dx()),
+			float32(collider.Dy()),
+			1.0,
+			color.RGBA{255, 0, 0, 255},
+			false,
+		)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -173,7 +254,7 @@ func main() {
 	ebiten.SetWindowTitle("Quick Draw Adventure")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
-	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/Elyse.png")
+	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/Elysefront.png")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
@@ -259,6 +340,9 @@ func main() {
 		tilemapimage: tilemapimage,
 		tilesets:     tilesets,
 		cam:          NewCamera(0.0, 0.0),
+		colliders: []image.Rectangle{
+			image.Rect(100, 100, 116, 116),
+		},
 	}
 
 	if err := ebiten.RunGame(&game); err != nil {
