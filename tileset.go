@@ -20,20 +20,22 @@ type Tileset interface {
 
 // the tileset data deserialized from a standard, single-image tileset
 type UniformTilesetJSON struct {
-	Path string `json:"image"`
+	Path  string `json:"image"`
+	Width int    `json:"columns"`
 }
 
 // struct for storing uniform tile sets ie 16 x 16 ground tiles
 type UniformTileset struct {
-	img *ebiten.Image
-	gid int
+	img          *ebiten.Image
+	tilesetWidth int
+	gid          int
 }
 
 func (u *UniformTileset) Img(id int) *ebiten.Image {
 	// gets right sprite data based on starting point of tile set
 	id -= u.gid
-	srcX := id % 22
-	srcY := id / 22
+	srcX := id % u.tilesetWidth
+	srcY := id / u.tilesetWidth
 	//pixel position of tile(each tile is a 16x16 square)
 	srcX *= 16
 	srcY *= 16
@@ -83,7 +85,15 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 		return nil, fmt.Errorf("failed to read file %s: %w", path, err)
 	}
 
-	if strings.Contains(path, "Structures") || strings.Contains(path, "nature") {
+	var dynTilesetJSON DynTilesetJSON
+	err = json.Unmarshal(contents, &dynTilesetJSON)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal dyn tileset JSON: %w", err)
+	}
+
+	println(len(dynTilesetJSON.Tiles))
+
+	if len(dynTilesetJSON.Tiles) > 0 {
 		//return dyn tileset
 		var dynTilesetJSON DynTilesetJSON
 		err = json.Unmarshal(contents, &dynTilesetJSON)
@@ -138,7 +148,7 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 	tileJSONpath = filepath.Clean(tileJSONpath)
 	tileJSONpath = filepath.Join("assets", tileJSONpath)
 
-	fmt.Printf("Loading uniform tileset image from: %s\n", tileJSONpath)
+	fmt.Printf("Loading uniform tileset image from: %s %d\n", tileJSONpath, gid)
 
 	img, _, err := ebitenutil.NewImageFromFile(tileJSONpath)
 
@@ -147,6 +157,7 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 	}
 	uniformTileset.img = img
 	uniformTileset.gid = gid
+	uniformTileset.tilesetWidth = uniformTilesetJSON.Width
 
 	return &uniformTileset, nil
 }

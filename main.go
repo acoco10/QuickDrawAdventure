@@ -1,7 +1,9 @@
 package main
 
 import (
+	"ShootEmUpAdventure/animations"
 	"ShootEmUpAdventure/entities"
+	"ShootEmUpAdventure/spritesheet"
 	"fmt"
 	"image"
 	"image/color"
@@ -17,14 +19,14 @@ import (
 // structs
 type Game struct {
 	//game elements
-	player       *entities.Player
-	enemies      []*entities.Enemy
-	items        []*entities.Item
-	tilemapJSON  *TilemapJSON
-	tilesets     []Tileset
-	tilemapimage *ebiten.Image
-	cam          *Camera
-	colliders    []image.Rectangle
+	player            *entities.Player
+	playerSpriteSheet *spritesheet.SpriteSheet
+	enemies           []*entities.Enemy
+	items             []*entities.Item
+	tilemapJSON       *TilemapJSON
+	tilesets          []Tileset
+	cam               *Camera
+	colliders         []image.Rectangle
 }
 
 func CheckCollisionHorizontal(sprite *entities.Sprite, colliders []image.Rectangle) {
@@ -35,11 +37,11 @@ func CheckCollisionHorizontal(sprite *entities.Sprite, colliders []image.Rectang
 				int(sprite.X),
 				int(sprite.Y),
 				int(sprite.X)+16,
-				int(sprite.Y)+16),
+				int(sprite.Y)+32),
 		) {
 			if sprite.Dx > 0.0 { //check if player is going down
 				//update player velocity
-				sprite.X = float64(collider.Min.X) - 16.0
+				sprite.X = float64(collider.Min.X) - 16
 			} else if sprite.Dx < 0.0 { //check if player is going up
 				sprite.X = float64(collider.Max.X)
 			}
@@ -56,11 +58,11 @@ func CheckCollisionVertical(sprite *entities.Sprite, colliders []image.Rectangle
 				int(sprite.X),
 				int(sprite.Y),
 				int(sprite.X)+16,
-				int(sprite.Y)+16),
+				int(sprite.Y)+32),
 		) {
 			if sprite.Dy > 0.0 { //check if player is going down
 				//update player velocity
-				sprite.Y = float64(collider.Min.Y) - 16.0
+				sprite.Y = float64(collider.Min.Y) - 32
 			} else if sprite.Dy < 0.0 { //check if player is going up
 				sprite.Y = float64(collider.Max.Y)
 			}
@@ -73,19 +75,24 @@ func CheckCollisionVertical(sprite *entities.Sprite, colliders []image.Rectangle
 func (g *Game) Update() error {
 
 	g.player.Dx = 0
+
 	g.player.Dy = 0
 	//react to key presses by adding directional velocity
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.player.Dx = 2
+		g.player.Dx = 1.5
+		g.player.Direction = "L"
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.player.Dx = -2
+		g.player.Dx = -1.5
+		g.player.Direction = "R"
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		g.player.Dy = 2
+		g.player.Dy = 1.5
+		g.player.Direction = "U"
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		g.player.Dy = -2
+		g.player.Dy = -1.5
+		g.player.Direction = "D"
 	}
 
 	//increase players position by their velocity every update
@@ -123,6 +130,11 @@ func (g *Game) Update() error {
 		CheckCollisionVertical(enemy.Sprite, g.colliders)
 	}
 
+	activAnimation := g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy))
+	if activAnimation != nil {
+		activAnimation.Update()
+	}
+
 	for _, item := range g.items {
 		if math.Abs(item.X-g.player.X) <= 2 && math.Abs(item.Y-g.player.Y) <= 2 {
 			g.player.Health += uint(item.AmtHeal)
@@ -154,12 +166,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	//loop through the tilemap
 	for layerIndex, layer := range g.tilemapJSON.Layers {
 
+		if layer.Type == "objectgroup" {
+			for _, object := range layer.Objects {
+				img := image.Rect(
+					int(object.X),
+					int(object.Y),
+					int(object.Width),
+					int(object.Height))
+
+				g.colliders = append(g.colliders, img)
+			}
+		}
 		for index, id := range layer.Data {
 
 			if id == 0 {
 				continue
 			}
-
 			//coordinates example 1%30=1 1/30=0 2%30=2 2/30 = 0 etc...
 			x := index % layer.Width
 			y := index / layer.Width
@@ -189,10 +211,31 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	opts.GeoM.Translate(g.player.X, g.player.Y)
 	opts.GeoM.Translate(g.cam.X, g.cam.Y)
 
+	playerFrame := 0
+	activAnimation := g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy))
+	if activAnimation != nil {
+
+		playerFrame = activAnimation.Frame()
+	} else {
+		if g.player.Direction == "U" {
+			playerFrame = g.player.Animations[0].FirstF
+		}
+		if g.player.Direction == "D" {
+			playerFrame = g.player.Animations[1].FirstF
+		}
+		if g.player.Direction == "R" {
+			playerFrame = g.player.Animations[2].FirstF
+		}
+		if g.player.Direction == "L" {
+			playerFrame = g.player.Animations[3].FirstF
+		}
+
+	}
+
 	screen.DrawImage(
 		//grab a subimage of the Spritesheet
 		g.player.Img.SubImage(
-			image.Rect(0, 0, 16, 32),
+			g.playerSpriteSheet.Rect(playerFrame),
 		).(*ebiten.Image),
 		&opts,
 	)
@@ -254,17 +297,17 @@ func main() {
 	ebiten.SetWindowTitle("Quick Draw Adventure")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
-	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/Elysefront.png")
+	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/elyseSpriteSheet.png")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
 	}
-
-	ghostImg, _, err := ebitenutil.NewImageFromFile("assets/images//enemies/Ghost.png")
-	if err != nil {
-		//handle error
-		log.Fatal(err)
-	}
+	/*
+		ghostImg, _, err := ebitenutil.NewImageFromFile("assets/images//enemies/Ghost.png")
+		if err != nil {
+			//handle error
+			log.Fatal(err)
+		} */
 
 	fishImg, _, err := ebitenutil.NewImageFromFile("assets/images//items/Fish.png")
 	if err != nil {
@@ -272,35 +315,41 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tilemapimage, _, err := ebitenutil.NewImageFromFile("assets/images/terrain/TilesetFloor.png")
+	tilemapJSON, err := NewTilemapJSON("assets/map/openingLevel.json")
 	if err != nil {
 		//handle error
 		log.Fatal(err)
 	}
 
-	tilemapJSON, err := NewTilemapJSON("assets/map/demoMap.json")
-	if err != nil {
-		//handle error
-		log.Fatal(err)
-	}
 	tilesets, err := tilemapJSON.GenTileSets()
 
 	if err != nil {
-
 		log.Fatalf("Failed to generate tilesets: %v", err)
 	}
+
+	playerSpriteSheet := spritesheet.NewSpritesheet(4, 4, 18, 18, 31)
+
+	//player running animation calling animation package new animation function
 
 	game := Game{
 		player: &entities.Player{
 			Sprite: &entities.Sprite{
 				Img: playerImg,
-				X:   75.0,
-				Y:   75.0,
+				X:   125,
+				Y:   125,
 			},
 			Health: 10,
+			Animations: map[entities.PlayerState]*animations.Animation{
+				entities.Down:  animations.NewAnimation(0, 4, 4, 22.0),
+				entities.Up:    animations.NewAnimation(2, 6, 4, 22.0),
+				entities.Left:  animations.NewAnimation(1, 10, 4, 11.0),
+				entities.Right: animations.NewAnimation(3, 11, 4, 11.0),
+			},
 		},
-		enemies: []*entities.Enemy{
-			{
+
+		playerSpriteSheet: playerSpriteSheet,
+		/* 	enemies: []*entities.Enemy{ */
+		/* {
 				Sprite: &entities.Sprite{
 					Img: ghostImg,
 					X:   100.0,
@@ -324,7 +373,7 @@ func main() {
 				},
 				FollowsPlayer: false,
 			},
-		},
+		}, */
 		items: []*entities.Item{
 			{
 				Sprite: &entities.Sprite{
@@ -336,10 +385,9 @@ func main() {
 				Ifinv:   false,
 			},
 		},
-		tilemapJSON:  tilemapJSON,
-		tilemapimage: tilemapimage,
-		tilesets:     tilesets,
-		cam:          NewCamera(0.0, 0.0),
+		tilemapJSON: tilemapJSON,
+		tilesets:    tilesets,
+		cam:         NewCamera(0.0, 0.0),
 		colliders: []image.Rectangle{
 			image.Rect(100, 100, 116, 116),
 		},
