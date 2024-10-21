@@ -3,17 +3,34 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingLevel.json",
+    "activeFile": "",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingFloorTileset.json": {
+            "scaleInDock": 1
+        },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingLevel.json": {
-            "scale": 1.2248,
-            "selectedLayer": 0,
+            "scale": 3.73,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 234.73220117570213,
-                "y": 113.89614630960156
+                "x": 1278.686327077748,
+                "y": 144.23592493297588
             }
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/theRose.tsx": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/RoseExtras.Json": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/TheRosever2.json": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.9317,
+            "scaleInEditor": 1
         },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/backgroundTileset.json": {
             "dynamicWrapping": true,
@@ -21,11 +38,35 @@
         },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/openingFloorTileset.json": {
             "dynamicWrapping": false,
-            "scaleInDock": 1,
+            "scaleInDock": 2.8809,
+            "scaleInEditor": 1
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/rosever3.0.json": {
+            "dynamicWrapping": true
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/theRose.json": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.6433,
             "scaleInEditor": 1
         },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/theRose.tsx": {
             "dynamicWrapping": true
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/town1Map.json": {
+            "scale": 2.2166,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 365.19895335198044,
+                "y": 112.10863484616077
+            }
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/town1Map.json": {
+            "scale": 2.55,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 170.19607843137254,
+                "y": 178.43137254901964
+            }
         }
     },
     "last.externalTilesetPath": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets",
@@ -36,15 +77,18 @@
     "map.tileWidth": 16,
     "map.width": 50,
     "openFiles": [
-        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingLevel.json",
-        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/openingFloorTileset.json"
     ],
     "project": "Shootemupadventure.tiled-project",
     "recentFiles": [
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/TheRosever2.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/town1Map.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/RoseExtras.Json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/theRose.json",
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/openingFloorTileset.json",
-        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingLevel.json"
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingLevel.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/town1Map.json"
     ],
     "tileset.lastUsedFilter": "JSON tileset files (*.tsj *.json)",
-    "tileset.lastUsedFormat": "tsx",
+    "tileset.lastUsedFormat": "json",
     "tileset.type": 1
 }

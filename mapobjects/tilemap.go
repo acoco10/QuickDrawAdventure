@@ -1,4 +1,4 @@
-package main
+package mapobjects
 
 import (
 	"encoding/json"
@@ -13,6 +13,7 @@ type TilemapLayerJSON struct {
 	Name    string       `json:"name"`
 	Type    string       `json:"type"`
 	Objects []ObjectJSON `json:"objects"`
+	Class   string       `json:"class"`
 }
 
 // all layers in a tilemap

@@ -1,4 +1,4 @@
-package main
+package mapobjects
 
 import (
 	"encoding/json"
@@ -16,6 +16,7 @@ import (
 // every tileset must be able to give an image given an id
 type Tileset interface {
 	Img(id int) *ebiten.Image
+	Gid() int
 }
 
 // the tileset data deserialized from a standard, single-image tileset
@@ -29,6 +30,10 @@ type UniformTileset struct {
 	img          *ebiten.Image
 	tilesetWidth int
 	gid          int
+}
+
+func (u *UniformTileset) Gid() int {
+	return u.gid
 }
 
 func (u *UniformTileset) Img(id int) *ebiten.Image {
@@ -64,11 +69,13 @@ type DynTileset struct {
 	gid  int
 }
 
+func (d *DynTileset) Gid() int {
+	return d.gid
+}
+
 func (d *DynTileset) Img(id int) *ebiten.Image {
 
-	log.Printf("Before subtraction: id = %d, gid = %d", id, d.gid)
 	id -= d.gid
-	log.Printf("After subtraction: id = %d", id)
 	img := d.imgs[id]
 
 	if img == nil {
@@ -90,8 +97,6 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal dyn tileset JSON: %w", err)
 	}
-
-	println(len(dynTilesetJSON.Tiles))
 
 	if len(dynTilesetJSON.Tiles) > 0 {
 		//return dyn tileset

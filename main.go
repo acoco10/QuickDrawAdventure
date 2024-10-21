@@ -3,6 +3,7 @@ package main
 import (
 	"ShootEmUpAdventure/animations"
 	"ShootEmUpAdventure/entities"
+	"ShootEmUpAdventure/mapobjects"
 	"ShootEmUpAdventure/spritesheet"
 	"fmt"
 	"image"
@@ -23,60 +24,24 @@ type Game struct {
 	playerSpriteSheet *spritesheet.SpriteSheet
 	enemies           []*entities.Enemy
 	items             []*entities.Item
-	tilemapJSON       *TilemapJSON
-	tilesets          []Tileset
+	tilemapJSON       *mapobjects.TilemapJSON
+	tilesets          []mapobjects.Tileset
 	cam               *Camera
 	colliders         []image.Rectangle
-}
-
-func CheckCollisionHorizontal(sprite *entities.Sprite, colliders []image.Rectangle) {
-	for _, collider := range colliders {
-		//check if player is colliding with collider
-		if collider.Overlaps(
-			image.Rect(
-				int(sprite.X),
-				int(sprite.Y),
-				int(sprite.X)+16,
-				int(sprite.Y)+32),
-		) {
-			if sprite.Dx > 0.0 { //check if player is going down
-				//update player velocity
-				sprite.X = float64(collider.Min.X) - 16
-			} else if sprite.Dx < 0.0 { //check if player is going up
-				sprite.X = float64(collider.Max.X)
-			}
-
-		}
-	}
-}
-
-func CheckCollisionVertical(sprite *entities.Sprite, colliders []image.Rectangle) {
-	for _, collider := range colliders {
-		//check if player is colliding with collider
-		if collider.Overlaps(
-			image.Rect(
-				int(sprite.X),
-				int(sprite.Y),
-				int(sprite.X)+16,
-				int(sprite.Y)+32),
-		) {
-			if sprite.Dy > 0.0 { //check if player is going down
-				//update player velocity
-				sprite.Y = float64(collider.Min.Y) - 32
-			} else if sprite.Dy < 0.0 { //check if player is going up
-				sprite.Y = float64(collider.Max.Y)
-			}
-
-		}
-	}
+	entranceDoors     map[string]mapobjects.Door
+	exitDoors         map[string]mapobjects.Door
 }
 
 // game update function
 func (g *Game) Update() error {
 
+	if len(g.entranceDoors) == 0 {
+		//loading objects(colliders, doors)from tilesetJSON data
+		mapobjects.StoreMapObjects(*g.tilemapJSON, &g.colliders, g.entranceDoors, g.exitDoors)
+	}
 	g.player.Dx = 0
-
 	g.player.Dy = 0
+
 	//react to key presses by adding directional velocity
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
 		g.player.Dx = 1.5
@@ -98,11 +63,15 @@ func (g *Game) Update() error {
 	//increase players position by their velocity every update
 	g.player.X += g.player.Dx
 
-	CheckCollisionHorizontal(g.player.Sprite, g.colliders)
+	mapobjects.CheckCollisionHorizontal(g.player.Sprite, g.colliders)
 
 	g.player.Y += g.player.Dy
 
-	CheckCollisionVertical(g.player.Sprite, g.colliders)
+	mapobjects.CheckCollisionVertical(g.player.Sprite, g.colliders)
+
+	mapobjects.CheckEnterDoor(g.player, g.entranceDoors, g.exitDoors)
+
+	mapobjects.CheckExitDoor(g.player, g.entranceDoors, g.exitDoors)
 
 	for _, enemy := range g.enemies {
 
@@ -125,9 +94,13 @@ func (g *Game) Update() error {
 			}
 		}
 		enemy.X += enemy.Dx
-		CheckCollisionHorizontal(enemy.Sprite, g.colliders)
+
+		mapobjects.CheckCollisionHorizontal(enemy.Sprite, g.colliders)
+
 		enemy.Y += enemy.Dy
-		CheckCollisionVertical(enemy.Sprite, g.colliders)
+
+		mapobjects.CheckCollisionVertical(enemy.Sprite, g.colliders)
+
 	}
 
 	activAnimation := g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy))
@@ -158,31 +131,35 @@ func (g *Game) Update() error {
 // drawing screen + sprites
 func (g *Game) Draw(screen *ebiten.Image) {
 
-	screen.Fill(color.RGBA{120, 180, 255, 255})
-
 	opts := ebiten.DrawImageOptions{}
 
 	//map
 	//loop through the tilemap
-	for layerIndex, layer := range g.tilemapJSON.Layers {
 
+	for _, layer := range g.tilemapJSON.Layers {
 		if layer.Type == "objectgroup" {
-			for _, object := range layer.Objects {
-				img := image.Rect(
-					int(object.X),
-					int(object.Y),
-					int(object.Width),
-					int(object.Height))
-
-				g.colliders = append(g.colliders, img)
-			}
+			continue
 		}
+
 		for index, id := range layer.Data {
 
 			if id == 0 {
 				continue
 			}
+
+			tileindex := 0
+
+			for i := range len(g.tilesets) - 1 {
+				if id < g.tilesets[i].Gid() {
+					tileindex -= 1
+				}
+				if id >= g.tilesets[i+1].Gid() {
+					tileindex += 1
+				}
+			}
+
 			//coordinates example 1%30=1 1/30=0 2%30=2 2/30 = 0 etc...
+
 			x := index % layer.Width
 			y := index / layer.Width
 
@@ -190,7 +167,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			x *= 16
 			y *= 16
 
-			img := g.tilesets[layerIndex].Img(id)
+			img := g.tilesets[tileindex].Img(id)
 
 			opts.GeoM.Translate(float64(x), float64(y))
 
@@ -242,6 +219,58 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	opts.GeoM.Reset()
 
+	for _, layer := range g.tilemapJSON.Layers {
+		if layer.Class != "top" {
+			continue
+		}
+
+		for index, id := range layer.Data {
+
+			if id == 0 {
+				continue
+			}
+
+			tileindex := 0
+
+			for i := range len(g.tilesets) - 1 {
+				if id < g.tilesets[i].Gid() {
+					tileindex -= 1
+				}
+				if id >= g.tilesets[i+1].Gid() {
+					tileindex += 1
+				}
+			}
+
+			//coordinates example 1%30=1 1/30=0 2%30=2 2/30 = 0 etc...
+
+			x := index % layer.Width
+			y := index / layer.Width
+
+			//pixel position
+			x *= 16
+			y *= 16
+
+			if int(g.player.Y)+48 < y {
+
+				img := g.tilesets[tileindex].Img(id)
+
+				opts.GeoM.Translate(float64(x), float64(y))
+
+				opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
+
+				opts.GeoM.Translate(g.cam.X, g.cam.Y)
+
+				screen.DrawImage(img, &opts)
+
+				// reset the opts for the next tile
+				opts.GeoM.Reset()
+			}
+
+		}
+	}
+
+	opts.GeoM.Reset()
+
 	// draw enemy sprites
 	for _, sprite := range g.enemies {
 		opts.GeoM.Translate(sprite.X, sprite.Y)
@@ -274,6 +303,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		opts.GeoM.Reset()
 	}
 
+	//TESTING drawing colliders for testing
+
+	vector.StrokeRect(
+		screen,
+		float32(g.player.X)+float32(g.cam.X),
+		float32(g.player.Y)+27+float32(g.cam.Y),
+		14,
+		4,
+		1.0,
+		color.RGBA{255, 0, 0, 255},
+		false,
+	)
+
 	for _, collider := range g.colliders {
 		vector.StrokeRect(
 			screen,
@@ -286,6 +328,35 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			false,
 		)
 	}
+
+	//drawing doors for testing
+	for _, door := range g.entranceDoors {
+		vector.StrokeRect(
+			screen,
+			float32(door.Coord.Min.X)+float32(g.cam.X),
+			float32(door.Coord.Min.Y)+float32(g.cam.Y),
+			float32(door.Coord.Dx()),
+			float32(door.Coord.Dy()),
+			1.0,
+			color.RGBA{255, 0, 0, 255},
+			false,
+		)
+	}
+
+	for _, door := range g.exitDoors {
+		vector.StrokeRect(
+			screen,
+			float32(door.Coord.Min.X)+float32(g.cam.X),
+			float32(door.Coord.Min.Y)+float32(g.cam.Y),
+			float32(door.Coord.Dx()),
+			float32(door.Coord.Dy()),
+			1.0,
+			color.RGBA{255, 0, 0, 255},
+			false,
+		)
+
+	}
+
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -315,7 +386,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tilemapJSON, err := NewTilemapJSON("assets/map/openingLevel.json")
+	tilemapJSON, err := mapobjects.NewTilemapJSON("assets/map/town1Map.json")
+
 	if err != nil {
 		//handle error
 		log.Fatal(err)
@@ -385,12 +457,12 @@ func main() {
 				Ifinv:   false,
 			},
 		},
-		tilemapJSON: tilemapJSON,
-		tilesets:    tilesets,
-		cam:         NewCamera(0.0, 0.0),
-		colliders: []image.Rectangle{
-			image.Rect(100, 100, 116, 116),
-		},
+		tilemapJSON:   tilemapJSON,
+		tilesets:      tilesets,
+		cam:           NewCamera(0.0, 0.0),
+		entranceDoors: make(map[string]mapobjects.Door),
+		exitDoors:     make(map[string]mapobjects.Door),
+		colliders:     make([]image.Rectangle, 0),
 	}
 
 	if err := ebiten.RunGame(&game); err != nil {
