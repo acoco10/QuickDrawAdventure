@@ -1,6 +1,10 @@
 package entities
 
-import "ShootEmUpAdventure/animations"
+import (
+	"ShootEmUpAdventure/animations"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type PlayerState uint8
 
@@ -31,4 +35,24 @@ func (p *Player) ActiveAnimation(dX, dY int) *animations.Animation {
 		return p.Animations[Up]
 	}
 	return nil
+}
+
+func NewPlayer(pImg *ebiten.Image, spawnX float64, spawnY float64) (*Player, error) {
+	player := &Player{
+		Sprite: &Sprite{
+			Img:     pImg,
+			X:       spawnX,
+			Y:       spawnY,
+			Visible: true,
+		},
+		Health: 10,
+		Animations: map[PlayerState]*animations.Animation{
+			Down:  animations.NewAnimation(0, 4, 4, 22.0),
+			Up:    animations.NewAnimation(2, 6, 4, 22.0),
+			Left:  animations.NewAnimation(1, 10, 4, 11.0),
+			Right: animations.NewAnimation(3, 11, 4, 11.0),
+		},
+	}
+
+	return player, nil
 }

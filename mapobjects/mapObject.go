@@ -12,7 +12,12 @@ type ObjectJSON struct {
 	Type   string  `json:"type"`
 }
 
-func StoreMapObjects(tilemapJSON TilemapJSON, colliders *[]image.Rectangle, entDoors map[string]Door, exDoors map[string]Door) {
+func StoreMapObjects(tilemapJSON TilemapJSON) (colliders []image.Rectangle, entDoors map[string]Door, exDoors map[string]Door) {
+
+	colliders = []image.Rectangle{}
+	entDoors = make(map[string]Door)
+	exDoors = make(map[string]Door)
+
 	for _, layer := range tilemapJSON.Layers {
 		if layer.Type == "objectgroup" {
 			for _, object := range layer.Objects {
@@ -23,7 +28,7 @@ func StoreMapObjects(tilemapJSON TilemapJSON, colliders *[]image.Rectangle, entD
 						int(object.Width+object.X),
 						int(object.Y+object.Height)-32,
 					)
-					*colliders = append(*colliders, img)
+					colliders = append(colliders, img)
 				}
 				if object.Type == "entranceDoor" {
 					door := NewDoor(object)
@@ -37,4 +42,6 @@ func StoreMapObjects(tilemapJSON TilemapJSON, colliders *[]image.Rectangle, entD
 			}
 		}
 	}
+
+	return colliders, entDoors, exDoors
 }

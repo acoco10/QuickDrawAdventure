@@ -26,6 +26,9 @@ func (a *Animation) Frame() int {
 	return a.frame
 }
 
+func (a *Animation) ResetFrame() {
+	a.frame = a.FirstF
+}
 func NewAnimation(firstF int, lastF int, step int, speedinTPS float32) *Animation {
 	return &Animation{
 		firstF,
