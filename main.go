@@ -7,8 +7,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-
-
 func main() {
 
 	playerimg, _ := entities.NewSpriteImg("assets/images/characters/elyseSpriteSheet.png")

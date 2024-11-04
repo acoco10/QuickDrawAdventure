@@ -4,10 +4,9 @@ import (
 	"ShootEmUpAdventure/entities"
 	"ShootEmUpAdventure/mapobjects"
 	"ShootEmUpAdventure/spritesheet"
+	"github.com/hajimehoshi/ebiten/v2"
 	"image"
 	"log"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Game struct {
@@ -139,19 +138,27 @@ func (g *Game) Update() error {
 
 	//mapobjects.CheckCollisionVertical(enemy.Sprite, g.colliders)
 
+	//checking active player animation
 	playerActiveAnimation := g.player.ActiveAnimation(int(g.player.Dx), int(g.player.Dy))
 	if playerActiveAnimation != nil {
 		playerActiveAnimation.Update()
 	}
 
+	//updating camera to player position
 	g.cam.FollowTarget(g.player.X+16, g.player.Y+16, 320, 240)
+
+	//when player hits the edge of the map the camera does not follow
+	//need to update this logic for interiors, new map?
 	g.cam.Constrain(
+		//width of maps from map JSON * tile size
 		float64(g.tilemapJSON.Layers[0].Width)*16,
 		float64(g.tilemapJSON.Layers[0].Height)*16,
+		//screen resolution
 		320,
 		240,
 	)
 
+	//check if player has entered a door and update door object eventually this will need to be a loop for all object animations
 	if playerOnexDoor && g.objects.Status == "" {
 		g.player.InAnimation = true
 		g.objects.Status = "leaving"
@@ -162,6 +169,7 @@ func (g *Game) Update() error {
 		g.objects.Status = "entering"
 	}
 
+	//custom script animation for tavern door (swings forward on entrance)
 	objectAnimation := g.objects.ActiveAnimation(g.objects.Status)
 
 	if objectAnimation != nil {
@@ -169,6 +177,7 @@ func (g *Game) Update() error {
 			objectAnimation.Update()
 
 			if objectAnimation.Frame() == objectAnimation.LastF-3 {
+				//remove sprite on last frame before they are shown inside the building
 				g.player.Visible = false
 				objectAnimation.Update()
 			}
