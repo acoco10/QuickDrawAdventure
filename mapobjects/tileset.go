@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -165,4 +166,31 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 	uniformTileset.tilesetWidth = uniformTilesetJSON.Width
 
 	return &uniformTileset, nil
+}
+
+func DetermineTileSet(tiles []int, tilesetgids []int) int {
+
+	maxid := slices.Max(tiles)
+	tileindex := 0
+
+	if maxid >= tilesetgids[len(tilesetgids)-1] {
+		//id is greater then last gid make tileindex highest index
+		tileindex = len(tilesetgids) - 1
+		fmt.Printf("first print: maxid:%d tileindex:%d\n", maxid, tileindex)
+	} else if tilesetgids[tileindex] <= maxid && tilesetgids[tileindex+1] > maxid {
+		fmt.Printf("secondprintp1: maxid:%d tilesetindex+1gid:%d\n", maxid, tilesetgids[tileindex+1])
+		//goldilocks zone just return 0
+		fmt.Printf("secondprintp2: maxid:%d tileindex:%d\n", maxid, tileindex)
+	} else {
+		//tileindex gid is too small loop through and increase tileindex until max tile is smaller then next tileset gid
+		fmt.Printf("last print p1: maxid:%d tileindex+1gid:%d %t\n", maxid, tilesetgids[tileindex+1], tilesetgids[tileindex+1] > maxid)
+		for tilesetgids[tileindex+1] < maxid+1 {
+			fmt.Printf("last print tileindex:%d\n", tileindex)
+			tileindex += 1
+		}
+		fmt.Printf("last print p2: maxid:%d tileindex+1gid:%d\n", maxid, tilesetgids[tileindex+1])
+	}
+
+	return tileindex
+
 }

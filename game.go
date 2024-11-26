@@ -101,13 +101,13 @@ func (g *Game) Update() error {
 
 	mapobjects.CheckCollisionVertical(g.player.Sprite, g.colliders)
 
-	playerOnentDoor := false
-	playerOnexDoor := false
+	playerOnEntDoor := false
+	playerOnExDoor := false
 	if !g.player.InAnimation {
-		playerOnentDoor = mapobjects.CheckEntDoor(g.player, g.entranceDoors, g.exitDoors)
+		playerOnEntDoor = mapobjects.CheckEntDoor(g.player, g.entranceDoors, g.exitDoors)
 	}
 	if !g.player.InAnimation {
-		playerOnexDoor = mapobjects.CheckExDoor(g.player, g.entranceDoors, g.exitDoors)
+		playerOnExDoor = mapobjects.CheckExDoor(g.player, g.entranceDoors, g.exitDoors)
 	}
 
 	/* //for _, enemy := range g.enemies {
@@ -159,12 +159,12 @@ func (g *Game) Update() error {
 	)
 
 	//check if player has entered a door and update door object eventually this will need to be a loop for all object animations
-	if playerOnexDoor && g.objects.Status == "" {
+	if playerOnExDoor && g.objects.Status == "" {
 		g.player.InAnimation = true
 		g.objects.Status = "leaving"
 	}
 
-	if playerOnentDoor && g.objects.Status == "" {
+	if playerOnEntDoor && g.objects.Status == "" {
 		g.player.InAnimation = true
 		g.objects.Status = "entering"
 	}
@@ -215,34 +215,28 @@ func (g *Game) Update() error {
 	return nil
 }
 
-// drawing screen + sprites
+// Draw screen + sprites
 func (g *Game) Draw(screen *ebiten.Image) {
 
 	opts := ebiten.DrawImageOptions{}
 
 	//map
-	//loop through the tilemap
+	//loop through the tile map
 
 	for _, layer := range g.tilemapJSON.Layers {
 		if layer.Type == "objectgroup" {
 			continue
 		}
+		gids := make([]int, len(g.tilesets))
+		for i := range gids {
+			gids[i] = g.tilesets[i].Gid()
+		}
+		tileindex := mapobjects.DetermineTileSet(layer.Data, gids)
 
 		for index, id := range layer.Data {
 
 			if id == 0 {
 				continue
-			}
-
-			tileindex := 0
-
-			for i := range len(g.tilesets) - 1 {
-				if id < g.tilesets[i].Gid() {
-					tileindex -= 1
-				}
-				if id >= g.tilesets[i+1].Gid() {
-					tileindex += 1
-				}
 			}
 
 			//coordinates example 1%30=1 1/30=0 2%30=2 2/30 = 0 etc...
@@ -328,26 +322,23 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	opts.GeoM.Reset()
 
+	//make list of all gids in the games tilesets
+
 	for _, layer := range g.tilemapJSON.Layers {
-		if layer.Class != "top" {
+		if layer.Type == "objectgroup" {
 			continue
 		}
+
+		gids := make([]int, len(g.tilesets))
+		for i := range gids {
+			gids[i] = g.tilesets[i].Gid()
+		}
+		tileIndex := mapobjects.DetermineTileSet(layer.Data, gids)
 
 		for index, id := range layer.Data {
 
 			if id == 0 {
 				continue
-			}
-
-			tileindex := 0
-
-			for i := range len(g.tilesets) - 1 {
-				if id < g.tilesets[i].Gid() {
-					tileindex -= 1
-				}
-				if id >= g.tilesets[i+1].Gid() {
-					tileindex += 1
-				}
 			}
 
 			//coordinates example 1%30=1 1/30=0 2%30=2 2/30 = 0 etc...
@@ -359,20 +350,39 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			x *= 16
 			y *= 16
 
-			if int(g.player.Y)+48 < y {
+			if layer.Class == "above" || layer.Class == "above,below" {
+				if int(g.player.Y)+48 < y {
 
-				img := g.tilesets[tileindex].Img(id)
+					img := g.tilesets[tileIndex].Img(id)
 
-				opts.GeoM.Translate(float64(x), float64(y))
+					opts.GeoM.Translate(float64(x), float64(y))
 
-				opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
+					opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
 
-				opts.GeoM.Translate(g.cam.X, g.cam.Y)
+					opts.GeoM.Translate(g.cam.X, g.cam.Y)
 
-				screen.DrawImage(img, &opts)
+					screen.DrawImage(img, &opts)
 
-				// reset the opts for the next tile
-				opts.GeoM.Reset()
+					// reset the opts for the next tile
+					opts.GeoM.Reset()
+				}
+			}
+			if layer.Class == "below" || layer.Class == "above,below" {
+				if int(g.player.Y)-48 < y {
+
+					img := g.tilesets[tileIndex].Img(id)
+
+					opts.GeoM.Translate(float64(x), float64(y))
+
+					opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
+
+					opts.GeoM.Translate(g.cam.X, g.cam.Y)
+
+					screen.DrawImage(img, &opts)
+
+					// reset the opts for the next tile
+					opts.GeoM.Reset()
+				}
 			}
 
 		}

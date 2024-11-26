@@ -8,29 +8,23 @@
  "margin":0,
  "name":"natureTileset",
  "spacing":0,
- "tilecount":3,
+ "tilecount":2,
  "tiledversion":"1.11.0",
- "tileheight":46,
+ "tileheight":62,
  "tiles":[
         {
          "id":0,
-         "image":"..\/..\/images\/nature\/bigrock.png",
-         "imageheight":46,
-         "imagewidth":62
+         "image":"..\/..\/images\/nature\/deadtree1.png",
+         "imageheight":62,
+         "imagewidth":31
         }, 
         {
          "id":1,
-         "image":"..\/..\/images\/nature\/mediumRock.png",
-         "imageheight":33,
-         "imagewidth":32
-        }, 
-        {
-         "id":2,
-         "image":"..\/..\/images\/nature\/rock.png",
-         "imageheight":14,
-         "imagewidth":14
+         "image":"..\/..\/images\/nature\/deadishbush 1.png",
+         "imageheight":35,
+         "imagewidth":37
         }],
- "tilewidth":62,
+ "tilewidth":37,
  "type":"tileset",
  "version":"1.10"
 }

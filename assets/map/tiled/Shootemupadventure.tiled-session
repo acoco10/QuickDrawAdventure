@@ -3,11 +3,22 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/expirementmap.json",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/images/nature/deadtree1.tsj": {
+            "dynamicWrapping": true
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/expirementmap.json": {
+            "scale": 0.4071,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 729.5504789977891,
+                "y": 856.0550233357897
+            }
+        },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingFloorTileset.json": {
             "scaleInDock": 1
         },
@@ -32,19 +43,38 @@
             "scaleInDock": 0.9317,
             "scaleInEditor": 1
         },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/TownExpirementAll1tile.tsj": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/backgroundTileset.json": {
             "dynamicWrapping": true,
             "scaleInDock": 1
         },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/natureTileSet.json": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/openingFloorTileset.json": {
             "dynamicWrapping": false,
-            "scaleInDock": 2.8809,
-            "scaleInEditor": 1
+            "scaleInDock": 2.49,
+            "scaleInEditor": 3.43
         },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/rosever3.0.json": {
             "dynamicWrapping": true,
             "scaleInDock": 0.4782,
             "scaleInEditor": 0.7759
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/secret of mana tileset .tsj": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/secret of mana.tsj": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.316,
+            "scaleInEditor": 3.43
         },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/theRose.json": {
             "dynamicWrapping": true,
@@ -62,36 +92,48 @@
                 "y": 112.10863484616077
             }
         },
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/townexpirementtile.json": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.7257,
+            "scaleInEditor": 1
+        },
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/town1Map.json": {
-            "scale": 6,
-            "selectedLayer": 3,
+            "scale": 0.74,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 198.16666666666669,
-                "y": 156.08333333333331
+                "x": 322.29729729729723,
+                "y": 183.7837837837838
             }
         }
     },
     "last.externalTilesetPath": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets",
-    "last.imagePath": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/images/buildings",
+    "last.imagePath": "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets",
     "map.height": 50,
     "map.lastUsedFormat": "json",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "map.width": 50,
     "openFiles": [
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/town1Map.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/openingFloorTileset.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/expirementmap.json"
     ],
     "project": "Shootemupadventure.tiled-project",
     "recentFiles": [
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/town1Map.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/openingFloorTileset.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/expirementmap.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/secret of mana.tsj",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/townexpirementtile.json",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/secret of mana tileset .tsj",
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/natureTileSet.json",
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/rosever3.0.json",
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/TheRosever2.json",
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/RoseExtras.Json",
         "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/theRose.json",
-        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/openingFloorTileset.json",
-        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingLevel.json",
-        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/tilesets/town1Map.json"
+        "/Users/aidancoco/Desktop/Projects/go_projects/rpg/ShootEmUpAdventure/assets/map/openingLevel.json"
     ],
     "tileset.lastUsedFilter": "JSON tileset files (*.tsj *.json)",
     "tileset.lastUsedFormat": "json",
-    "tileset.type": 1
+    "tileset.type": 0
 }
