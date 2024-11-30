@@ -1,7 +1,7 @@
 package main
 
 import (
-	"QuickDrawAdventure/entities"
+	"github.com/acoco10/QuickDrawAdventure/entities"
 	"github.com/hajimehoshi/ebiten/v2"
 	"log"
 )

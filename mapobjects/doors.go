@@ -1,7 +1,7 @@
 package mapobjects
 
 import (
-	"QuickDrawAdventure/entities"
+	"github.com/acoco10/QuickDrawAdventure/entities"
 	"image"
 )
 

@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"QuickDrawAdventure/animations"
+	"github.com/acoco10/QuickDrawAdventure/animations"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )

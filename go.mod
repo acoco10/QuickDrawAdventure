@@ -1,4 +1,4 @@
-module QuickDrawAdventure
+module github.com/acoco10/QuickDrawAdventure
 
 go 1.23.1
 
