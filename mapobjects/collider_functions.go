@@ -1,7 +1,7 @@
 package mapobjects
 
 import (
-	"ShootEmUpAdventure/entities"
+	"QuickDrawAdventure/entities"
 	"image"
 )
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ShootEmUpAdventure/entities"
+	"QuickDrawAdventure/entities"
 	"github.com/hajimehoshi/ebiten/v2"
 	"log"
 )
@@ -15,7 +15,7 @@ func main() {
 	doorObject, _ := entities.NewObject(doorimg, 167.18, 158.76)
 
 	game := &Game{}
-	game = game.NewGame(player, doorObject, "assets/map/expirementmap.json")
+	game = game.NewGame(player, doorObject, "assets/map/town1Map.json")
 
 	ebiten.SetWindowSize(480, 270)
 	ebiten.SetWindowTitle("Quick Draw Adventure")

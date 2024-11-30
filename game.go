@@ -1,9 +1,9 @@
 package main
 
 import (
-	"ShootEmUpAdventure/entities"
-	"ShootEmUpAdventure/mapobjects"
-	"ShootEmUpAdventure/spritesheet"
+	"QuickDrawAdventure/entities"
+	"QuickDrawAdventure/mapobjects"
+	"QuickDrawAdventure/spritesheet"
 	"github.com/hajimehoshi/ebiten/v2"
 	"image"
 	"log"

@@ -1,4 +1,4 @@
-module ShootEmUpAdventure
+module QuickDrawAdventure
 
 go 1.23.1
 

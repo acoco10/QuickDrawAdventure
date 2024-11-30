@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"ShootEmUpAdventure/animations"
+	"QuickDrawAdventure/animations"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
