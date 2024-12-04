@@ -2,6 +2,8 @@ module github.com/acoco10/QuickDrawAdventure
 
 go 1.23.1
 
+
+
 require github.com/hajimehoshi/ebiten/v2 v2.7.10
 
 require (

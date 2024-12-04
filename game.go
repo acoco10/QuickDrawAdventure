@@ -1,9 +1,9 @@
 package main
 
 import (
-	"QuickDrawAdventure/entities"
-	"QuickDrawAdventure/mapobjects"
-	"QuickDrawAdventure/spritesheet"
+	"github.com/acoco10/QuickDrawAdventure/entities"
+	"github.com/acoco10/QuickDrawAdventure/mapobjects"
+	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/hajimehoshi/ebiten/v2"
 	"image"
 	"log"
@@ -44,9 +44,9 @@ func (g *Game) NewGame(player *entities.Player, object *entities.Object, tilemap
 
 	colliders, entranceDoors, exitDoors := mapobjects.StoreMapObjects(*tilemapJSON)
 
-	playerSpriteSheet := spritesheet.NewSpritesheet(4, 4, 18, 18, 31)
+	playerSpriteSheet := spritesheet.NewSpritesheet(4, 4, 18, 31)
 
-	objectSpriteSheet := spritesheet.NewSpritesheet(2, 2, 20, 20, 21)
+	objectSpriteSheet := spritesheet.NewSpritesheet(2, 2, 20, 21)
 
 	return &Game{
 		player,
