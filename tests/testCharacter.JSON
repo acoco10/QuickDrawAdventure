@@ -1,0 +1,14 @@
+{"characters":[
+    {"name": "elyse",
+    "stats": {
+        "health":    4,
+		"accuracy":  3,
+		"drawspeed": 2,
+		"fear":      0,
+		"anger":     2
+    },
+    "combat_skills": ["shoot", "focused_shot"],
+    "dialogue_skills": ["squint", "draw"]
+        }
+    ]
+}

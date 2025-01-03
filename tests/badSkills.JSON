@@ -1,0 +1,67 @@
+{"skills":[
+    {"name": "focused_shot",
+    "effects": {
+        "type": "attack",
+        "secondary type":"buff",
+        "stat": "accuracy",
+        "amount": 1,
+        "duration": 0,
+        "nShots": 3,
+        "initiativeL": 0,
+        "pHit": 50,
+        "damage": [1,5]
+    }
+},
+    {"name": "fan_shot",
+    "effects": {
+        "type": "attack",
+        "secondary type":"buff",
+        "stat": "accuracy",
+        "amount": -1,
+        "duration": 0,
+        "nshots": 0,
+        "initiativeL": 0,
+        "pHit": 10,
+        "damage": [1,2]
+    }
+},
+    {"name": "shoot",
+    "effects": {
+        "type": "attack",
+        "stat": "",
+        "amount": 0,
+        "duration": 0,
+        "nshots": 1,
+        "initiativeL": 0,
+        "phit": 0,
+        "damage": [1,4]
+        }
+    },
+   {"name": "squint",
+        "effects": {
+            "type": "buff",
+            "stat": "",
+            "amount": 1,
+            "duration": 10 
+        }
+},
+
+    {"name": "insult",
+    "effects": {
+        "type": "buff",
+        "stat": "fart",
+        "amount": 1,
+        "duration": 10 
+    }
+},
+
+    {"name": "draw",
+    "effects": {
+        "type": "draw",
+        "stat": "na",
+        "amount": 0,
+        "duration": 0
+    }
+}
+]
+}

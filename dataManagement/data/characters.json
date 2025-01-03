@@ -1,0 +1,40 @@
+{"characters":[
+    {"name": "Elyse",
+    "stats": {
+        "health":    8,
+		"accuracy":  3,
+		"drawSpeed": 2,
+		"fear":      0,
+		"anger":     2
+    },
+    "combat_skills": ["shoot", "focused_shot", "fan_shot", "reload"],
+    "dialogue_skills": ["stare down", "draw", "insult", "brag"]
+},
+
+{"name": "Cowardly Cowboy",
+"stats": {
+
+    "health":    7,
+    "accuracy":  2,
+    "drawSpeed": 1,
+    "fear":      2,
+    "anger":     0
+},
+"combat_skills": ["shoot", "focused_shot", "reload"],
+"dialogue_skills": ["stare down", "draw", "insult", "brag"]
+},
+
+{"name": "Gunslinger",
+        "stats": {
+
+            "health":    6,
+            "accuracy":  5,
+            "drawSpeed": 3,
+            "fear":      0,
+            "anger":     2
+        },
+        "combat_skills": ["shoot", "focused_shot", "reload"],
+        "dialogue_skills": ["stare down", "draw", "insult", "brag"]
+}
+]
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Form with Effects</title>
+</head>
+<body>
+
+<form id="skillForm">
+    <div id="skillList">
+        <!-- Initial Skill Input -->
+        <div class="skillEntry">
+            <label>Skill 1:</label><br>
+            <input type="text" id="skillname1" placeholder="Skill Name"><br><br>
+
+            <label>Effect Type:</label>
+            <input type="text" id="effecttype1" placeholder="Effect Type (e.g., buff)"><br>
+
+            <label>Stat:</label>
+            <select id="stat1">
+                <option value="health">Health</option>
+                <option value="accuracy">Accuracy</option>
+                <option value="drawspeed">Draw Speed</option>
+                <option value="fear">Fear</option>
+                <option value="anger">Anger</option>
+            </select><br>
+
+            <label>Amount:</label>
+            <input type="number" id="amount1" placeholder="Amount" min="0"><br>
+
+            <label>Duration:</label>
+            <input type="number" id="duration1" placeholder="Duration" min="0"><br><br>
+        </div>
+    </div>
+
+    <button type="button" onclick="addSkillInput()">Add Another Skill</button><br><br>
+    <button type="button" onclick="submitForm()">Submit</button>
+</form>
+
+<script>
+    let skillCount = 1; // Track the number of skills
+
+    // Function to add a new skill input section
+    function addSkillInput() {
+        skillCount++;
+        const skillListDiv = document.getElementById("skillList");
+
+        // Create a container for the new skill
+        const skillDiv = document.createElement("div");
+        skillDiv.classList.add("skillEntry");
+
+        // Create label and inputs for skill properties
+        skillDiv.innerHTML = `
+            <label>Skill ${skillCount}:</label><br>
+            <input type="text" id="skillName${skillCount}" placeholder="Skill Name"><br><br>
+
+            <label>Effect Type:</label>
+            <input type="text" id="effecttype${skillCount}" placeholder="Effect Type (e.g., buff)"><br>
+
+            <label>Stat:</label>
+            <select id="stat${skillCount}">
+                <option value="health">Health</option>
+                <option value="accuracy">Accuracy</option>
+                <option value="drawspeed">Draw Speed</option>
+                <option value="fear">Fear</option>
+                <option value="anger">Anger</option>
+            </select><br>
+
+            <label>Amount:</label>
+            <input type="number" id="amount${skillCount}" placeholder="Amount" min="0"><br>
+
+            <label>Duration:</label>
+            <input type="number" id="duration${skillCount}" placeholder="Duration" min="0"><br><br>
+        `;
+
+        // Append the new skill input section to the skill list
+        skillListDiv.appendChild(skillDiv);
+    }
+
+    // Function to gather all inputs and output as JSON
+    function submitForm() {
+        const skills = [];
+
+        // Loop through each skill entry
+        for (let i = 1; i <= skillCount; i++) {
+            const skillName = document.getElementById(`skillName${i}`).value;
+            const effectType = document.getElementById(`effecttype${i}`).value;
+            const stat = document.getElementById(`stat${i}`).value;
+            const amount = document.getElementById(`amount${i}`).value;
+            const duration = document.getElementById(`duration${i}`).value;
+
+            // Only add the skill if a name is provided
+            if (skillName) {
+                skills.push({
+                    name: skillName,
+                    effects: {
+                        type: effectType,
+                        stat: stat,
+                        amount: parseInt(amount) || 0,
+                        duration: parseInt(duration) || 0
+                    }
+                });
+            }
+        }
+
+        // Create the final JSON object with the list of skills
+        const result = { skills };
+
+        // Output JSON to the console
+        console.log(JSON.stringify(result));
+    }
+</script>
+
+</body>
+</html>

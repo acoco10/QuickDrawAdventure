@@ -1,0 +1,79 @@
+{
+    "characters": [
+        {
+            "name": "Elyse",
+            "skills": [
+                {
+                    "type": "insult",
+                    "successful": "Elyse: What's the matter, hun? Never looked a lady in her eye before?",
+                    "unsuccessful": "Elyse: You're about as sharp as a cactus, I mean a cactus with no spikes."
+                },
+                {
+                    "type": "brag",
+                    "successful": "Elyse: You aint heard o' me? I go by The Kid, my Posse will be here soon, an' all 12 know their way round a rifle.",
+                    "unsuccessful": "You best walk away, my Posse will be here soon, 500 strong, all killers."
+                },
+                {
+                    "type": "stare down",
+                    "successful": "Elyse manages to look super cool and super intimidating at the same time",
+                    "unsuccessful": "Elyse tries her best to squint in a cowboy-like fashion, but a bead of sweat rolls right into her eye and she ends up looking more consternated' than intimidatin'."
+                }
+                ],
+            "responses": [
+                {
+                    "type": "insult",
+                    "successful": "Elyse: How dare you bring up my mother!",
+                    "unsuccessful": "Elyse: That's a bit misogynistic don't you think?"
+                },
+                {
+                    "type": "brag",
+                    "successful": "Elyse: Gee you sound pretty violent mister (momma did say certain gunslingers you gotta watch out for).",
+                    "unsuccessful": "Elyse: I'm soooooo scared."
+                },
+                {
+                    "type": "stare down",
+                    "successful": "Elyse is shaking in her boots!!!",
+                    "unsuccessful": "Elyse: You couldn't scare the candy out of a baby."
+                }
+            ]
+        },
+
+        {
+            "name": "Cowardly Cowboy",
+            "skills": [
+                {
+                    "type": "insult",
+                    "successful": "Cowardly Cowboy: I'll leave you dead like your rodehard mother.",
+                    "unsuccessful": "Cowardly Cowboy: You're more suited for a pair of knitting needles than a pistol little girl."
+                },
+                {
+                    "type": "brag",
+                    "successful": "Cowardly Cowboy: I kilt girls like you before, it was easier than swatting a fly.",
+                    "unsuccessful": "You better watch out bitch... I uh know the Sheriff."
+                },
+                {
+                    "type": "stare down",
+                    "successful": "Cowardly Cowboy musters all his courage and stares you deep in the eyes.",
+                    "unsuccessful": "Cowardly Cowboy looks like he's going to crap himself."
+                }
+            ],
+            "responses": [
+                {
+                    "type": "insult",
+                    "successful": "Cowardly Cowboy: You're not very nice, are you.",
+                    "unsuccessful": "Cowardly Cowboy: HAH"
+                },
+                {
+                    "type": "brag",
+                    "successful": "Cowardly Cowboy: Aw jeez The Kid??? I never met a gunslinger with a real-life nickname. You sound p-p-pretty tough.",
+                    "unsuccessful": "Cowardly Cowboy: Nice try, sister, it takes a liar to know one and no one is better at spinning a yarn than me!"
+                },
+                {
+                    "type": "stare down",
+                    "successful": "Cowardly Cowboy is shaking in his boots!!!",
+                    "unsuccessful": "Cowardly Cowboy: I think you got something in your eye lil girl"
+                }
+            ]
+        }
+    ]
+}

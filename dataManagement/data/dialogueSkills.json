@@ -1,0 +1,63 @@
+{"skills":[ 
+    {"name": "stare down",
+        "index": 2,
+        "effects": [{
+            "type": "buff",
+            "on" : "enemy",
+            "stat": "fear",
+            "amount": 1,
+            "successPer": 70
+        },
+            {"type": "buff",
+                "on": "successfulSelf",
+            "stat": "accuracy",
+            "amount": 1,
+            "successPer": 50
+            }
+            ]
+    },
+    {"name": "brag",
+        "index": 0,
+        "effects": [
+            {
+                "type": "buff",
+                "on": "enemy",
+                "stat": "fear",
+                "amount": 2,
+                "successPer": 75
+            },
+            {
+                "type": "buff",
+                "on": "unsuccessfulSelf",
+                "stat": "fear",
+                "amount": 2,
+                "successPer": 65
+            }
+        ]
+    },
+
+    {"name": "insult",
+        "index": 1,
+    "effects": [
+        {
+            "type": "buff",
+            "on": "enemy",
+            "stat": "anger",
+            "amount": 3,
+            "successPer": 60
+        }
+    ]
+    },
+
+
+    {"name": "draw",
+        "index": 3,
+    "effects": [{
+        "type": "draw",
+        "stat": "na",
+        "amount": 0,
+        "successPer": 0
+    }]
+}
+]
+}
