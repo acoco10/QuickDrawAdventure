@@ -37,6 +37,20 @@ const (
 	Draw
 )
 
+type CharEffect uint8
+
+const (
+	NoEffect CharEffect = iota
+	Outline  CharEffect = iota
+)
+
+type CountDownEvent uint8
+
+const (
+	NoEvenet CountDownEvent = iota
+	TurnOffOutline
+)
+
 type OTSCAnimation uint8
 
 type BattleSprite struct {
@@ -54,6 +68,8 @@ type BattleSprite struct {
 	counter                  int
 	countdown                int
 	inAnimation              bool
+	EffectApplied            CharEffect
+	CountDownEvent           CountDownEvent
 }
 
 func (bs *BattleSprite) changeEvent(state SpriteBattleState, timer int) {
@@ -117,7 +133,19 @@ func (bs *BattleSprite) GetCycles() int {
 	return 0
 }
 
+func (bs *BattleSprite) TriggerCountDownEvent() {
+	if bs.CountDownEvent == TurnOffOutline {
+		bs.EffectApplied = NoEffect
+	}
+}
+
 func (bs *BattleSprite) Update() {
+	if bs.countdown == 1 {
+		bs.TriggerCountDownEvent()
+	}
+	if bs.countdown > 0 {
+		bs.countdown--
+	}
 
 	bsAnimation := bs.GetAnimation()
 
@@ -198,6 +226,12 @@ func (bs *BattleSprite) UpdateScale(scale float64) {
 	bs.Scale = scale
 }
 
+func (bs *BattleSprite) UpdateCharEffect(effect CharEffect, countDown int) {
+	bs.EffectApplied = effect
+	bs.countdown = countDown
+	bs.CountDownEvent = TurnOffOutline
+}
+
 func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x float64, y float64, scale float64) (*BattleSprite, error) {
 	bSprite := &BattleSprite{
 		Scale:       scale,
@@ -230,6 +264,7 @@ func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x
 		CurrentDialogueAnimation: NoDialogueSkill,
 		CurrentCombatAnimation:   NoCombatSkill,
 		inAnimation:              false,
+		EffectApplied:            NoEffect,
 	}
 
 	return bSprite, nil

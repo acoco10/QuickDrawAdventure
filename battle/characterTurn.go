@@ -22,13 +22,12 @@ func Shoot(aC int, a int, f int, ChanceToHit int, damageRange []int) (damage int
 }
 
 func Roll(successPer int) bool {
-	return rand.IntN(100)+1 > successPer
+	return rand.IntN(100) < successPer
 }
 
 func EnemyChooseSkill(battle Battle, enemySkills map[string]dataManagement.Skill) (skill dataManagement.Skill, err error) {
 
-	if battle.battlePhase == Dialogue && battle.turns[battle.Turn].WinningProb < 40 {
-		println("enemy chose skill:draw")
+	if battle.battlePhase == Dialogue && battle.WinningProb < 40 {
 		return enemySkills["draw"], nil
 	}
 
@@ -47,10 +46,8 @@ func EnemyChooseSkill(battle Battle, enemySkills map[string]dataManagement.Skill
 	i := 0
 	chosenIndex := 0
 	for _, skillIndex := range skillIndexes {
-		if randSkillInt == skillIndex {
-			if i == randSkillInt {
-				chosenIndex = skillIndex
-			}
+		if i == randSkillInt {
+			chosenIndex = skillIndex
 		}
 		i++
 	}

@@ -36,6 +36,7 @@ const (
 	BattleMusic
 	BlowingSmoke
 	TextOutput
+	StareDownEffect
 )
 
 var audioContext = audio.NewContext(44100)
@@ -101,6 +102,11 @@ func GameSFXLoader() *resource.Loader {
 		log.Fatal("cannot load textSFX")
 	}
 
+	stareDownEffect, err := combatSFX.ReadFile("sounds/combatSFX/stareDownSoundEffect.wav")
+	if err != nil {
+		log.Fatal("cannot load stare down SFX")
+	}
+
 	var SoundData = map[string][]byte{
 		"sounds/combatSFX/gunShot.wav":                    gunShot,
 		"sounds/combatSFX/whizz.wav":                      miss,
@@ -114,6 +120,7 @@ func GameSFXLoader() *resource.Loader {
 		"sounds/combatSFX/reload.wav":                     reload,
 		"sounds/combatSFX/blowingSmoke.wav":               victoryBlow,
 		"sounds/menuSFX/rpg-text-speech-sound-131477.wav": textSFX,
+		"sounds/combatSFX/stareDownSoundEffect.wav":       stareDownEffect,
 	}
 
 	l := resource.NewLoader(audioContext)
@@ -135,6 +142,7 @@ func GameSFXLoader() *resource.Loader {
 		Reload:          {Path: "sounds/combatSFX/reload.wav", Volume: -0.3},
 		BlowingSmoke:    {Path: "sounds/combatSFX/blowingSmoke.wav", Volume: 0.2},
 		TextOutput:      {Path: "sounds/menuSFX/rpg-text-speech-sound-131477.wav", Volume: 0.1},
+		StareDownEffect: {Path: "sounds/combatSFX/stareDownSoundEffect.wav", Volume: 0.1},
 	})
 
 	return l

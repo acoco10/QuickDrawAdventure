@@ -106,9 +106,9 @@ func (g *BattleScene) FirstLoad() {
 	statusContainer := MakeStatusContainer()
 
 	//to dynamically update we need to create and ebitenUI textInput widget
-	statusText := StatusTextInput()
-	statusTextLine2 := StatusTextInput()
-	statusTextLine3 := StatusTextInput()
+	statusText := StatusTextInput("b")
+	statusTextLine2 := StatusTextInput("b")
+	statusTextLine3 := StatusTextInput("b")
 	statusContainer.AddChild(statusText)
 	statusContainer.AddChild(statusTextLine2)
 	statusContainer.AddChild(statusTextLine3)
@@ -301,7 +301,7 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	}
 
 	g.ui.Draw(screen)
-
+	g.DrawCharOutline(screen, *g.playerBattleSprite)
 	DrawBattleSprite(*g.playerBattleSprite, screen, g.playerBattleSprite.Scale)
 	DrawBattleSprite(*g.enemyBattleSprite, screen, g.playerBattleSprite.Scale)
 
@@ -312,12 +312,12 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 }
 
 func PrintStatus(g *BattleScene, screen *ebiten.Image) {
-	face, err := LoadFont(20)
+	face, err := LoadFont(40)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dp := battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats())
+	dp := g.battle.WinningProb
 	playerAmmo := fmt.Sprintf("Player Ammo:%d", g.battle.PlayerAmmo)
 	enemyAmmo := fmt.Sprintf("Enemy Ammo :%d", g.battle.EnemyAmmo)
 
@@ -326,15 +326,20 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(dataManagement.Health))
 
 	dopts := text.DrawOptions{}
-	dopts.GeoM.Translate(100, 100)
+	dopts.DrawImageOptions.ColorScale.Scale(1, 0, 0, 255)
+	dopts.GeoM.Translate(400, 50)
 	text.Draw(screen, winningProbText, face, &dopts)
 	dopts.GeoM.Reset()
 
-	dopts.GeoM.Translate(200, 200)
+	face, err = LoadFont(16)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dopts.GeoM.Translate(250, 200)
 	text.Draw(screen, playerHealth, face, &dopts)
 	dopts.GeoM.Reset()
 
-	dopts.GeoM.Translate(200, 220)
+	dopts.GeoM.Translate(250, 220)
 	text.Draw(screen, playerAmmo, face, &dopts)
 	dopts.GeoM.Reset()
 

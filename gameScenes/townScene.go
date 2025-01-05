@@ -135,7 +135,7 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) {
 		g.dialoguei.Trigger()
-		LockCursorForDialogue()
+		//LockCursorForDialogue()
 	}
 
 	//increase players position by their velocity every update
@@ -296,7 +296,9 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	for _, npc := range g.NPC {
+		DrawDialoguePopup(*g.Player, *npc, screen, *g.cam)
+	}
 	return
 
 }

@@ -6,13 +6,13 @@
             "on" : "enemy",
             "stat": "fear",
             "amount": 1,
-            "successPer": 70
+            "successPer": 80
         },
             {"type": "buff",
                 "on": "successfulSelf",
             "stat": "accuracy",
             "amount": 1,
-            "successPer": 50
+            "successPer": 80
             }
             ]
     },

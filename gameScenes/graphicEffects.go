@@ -42,6 +42,7 @@ func (se *StaticEffect) Draw(screen *ebiten.Image) {
 	opts.GeoM.Reset()
 	opts.GeoM.Translate(se.x, se.y)
 	screen.DrawImage(se.img, opts)
+
 }
 
 func (se *StaticEffect) Update() {
@@ -86,12 +87,13 @@ type AnimatedEffect struct {
 	cycleCounter int
 	cycles       int
 	state        EffectState
+	scale        float64
 }
 
 func (e *AnimatedEffect) Draw(screen *ebiten.Image) {
 	img := e.img.SubImage(e.spriteSheet.Rect(e.frame)).(*ebiten.Image)
 	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Scale(4, 4)
+	opts.GeoM.Scale(e.scale, e.scale)
 	opts.GeoM.Translate(e.x, e.y)
 	screen.DrawImage(img, opts)
 }
@@ -128,7 +130,7 @@ func (e *AnimatedEffect) Image() *ebiten.Image {
 	return e.img
 }
 
-func NewEffect(img *ebiten.Image, sheet *spritesheet.SpriteSheet, x float64, y float64, lastF int, firstF int, step int, speed int) *AnimatedEffect {
+func NewEffect(img *ebiten.Image, sheet *spritesheet.SpriteSheet, x float64, y float64, lastF int, firstF int, step int, speed int, scale float64) *AnimatedEffect {
 	effect := &AnimatedEffect{
 		spriteSheet:  sheet,
 		img:          img,
@@ -143,6 +145,7 @@ func NewEffect(img *ebiten.Image, sheet *spritesheet.SpriteSheet, x float64, y f
 		cycleCounter: 1,
 		cycles:       1,
 		state:        NotTriggered,
+		scale:        scale,
 	}
 	return effect
 }

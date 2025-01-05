@@ -22,6 +22,8 @@ const (
 	NoEffect EffectType = iota
 	DrawEffect
 	DamageEffect
+	StareEffect
+	EnemyStareEffect
 )
 
 type GraphicalEffectSequencer struct {
@@ -57,6 +59,9 @@ func (e *GraphicalEffectSequencer) Update() {
 func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 	e.EffectQueue = make([]GraphicEffects, 0)
 	e.configured = true
+	if turn.PlayerSkillUsed.SkillName == "stare down" {
+		e.EffectQueue = append(e.EffectQueue, e.effects[StareEffect])
+	}
 	if turn.PlayerSkillUsed.SkillName == "draw" {
 		if turn.EnemySkillUsed.SkillName != "draw" {
 			e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
@@ -109,6 +114,9 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 			e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
 		}
 	}
+	if turn.EnemySkillUsed.SkillName == "stare down" {
+		e.EffectQueue = append(e.EffectQueue, e.effects[EnemyStareEffect])
+	}
 
 	for _, result := range turn.DamageToPlayer {
 		if result > 0 {
@@ -145,20 +153,36 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 }
 
 func (e *GraphicalEffectSequencer) loadCharacterEffects() {
+
 	drawImg, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/DrawAffect.png")
 	if err != nil {
 		log.Fatalf("ebitenutil.NewImageFromFile file not found%s\n", err)
 	}
 
 	drawEffectSpriteSheet := spritesheet.NewSpritesheet(1, 4, 199, 125)
-	drawEffect := NewEffect(drawImg, drawEffectSpriteSheet, 450, 200, 3, 0, 1, 12)
+	drawEffect := NewEffect(drawImg, drawEffectSpriteSheet, 450, 200, 3, 0, 1, 12, 4)
 
-	effects := map[EffectType]GraphicEffects{
-		DrawEffect: drawEffect,
+	enemyStaredownimg, _, err := ebitenutil.NewImageFromFile("assets/images/sheriffStaredownAnimationSpriteSheet.png")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	e.effects = effects
+	sheriffStareSpriteSheet := spritesheet.NewSpritesheet(7, 1, 320, 180)
+	enemyStareEffect := NewEffect(enemyStaredownimg, sheriffStareSpriteSheet, 0, 0, 6, 0, 1, 30, 5)
 
+	staredownimg, _, err := ebitenutil.NewImageFromFile("assets/images/staredownAnimationSpriteSheet.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	stareSpriteSheet := spritesheet.NewSpritesheet(4, 1, 320, 180)
+	stareEffect := NewEffect(staredownimg, stareSpriteSheet, 0, 0, 3, 0, 1, 30, 5)
+
+	effects := map[EffectType]GraphicEffects{
+		DrawEffect:       drawEffect,
+		StareEffect:      stareEffect,
+		EnemyStareEffect: enemyStareEffect,
+	}
+	e.effects = effects
 }
 
 func (e *GraphicalEffectSequencer) Draw(screen *ebiten.Image) {

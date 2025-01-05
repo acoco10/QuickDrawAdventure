@@ -92,10 +92,14 @@ func MakeStatusContainer() *widget.Container {
 	return statusContainer
 }
 
-func StatusTextInput() *widget.TextInput {
+func StatusTextInput(textColor string) *widget.TextInput {
 
 	face, err := LoadFont(14)
-
+	white := color.RGBA{R: 232, G: 225, B: 219, A: 255}
+	faceColor := color.RGBA{R: 102, G: 57, B: 48, A: 255}
+	if textColor == "white" {
+		faceColor = white
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,8 +115,9 @@ func StatusTextInput() *widget.TextInput {
 			Disabled: eimage.NewNineSliceColor(color.NRGBA{R: 0, G: 100, B: 100, A: 0}),
 		}),
 		widget.TextInputOpts.Face(face),
+
 		widget.TextInputOpts.Color(&widget.TextInputColor{
-			Idle:          color.RGBA{R: 102, G: 57, B: 48, A: 255},
+			Idle:          faceColor,
 			Disabled:      color.NRGBA{R: 200, G: 200, B: 200, A: 255},
 			Caret:         color.NRGBA{R: 254, G: 255, B: 255, A: 255},
 			DisabledCaret: color.NRGBA{R: 200, G: 200, B: 200, A: 255},
@@ -650,4 +655,36 @@ func GenericStatusEffectButtonEvent(printer *TextPrinter) {
 			printer.NextMessage = true
 		}
 	}
+}
+
+func MinorDialogueContainer() *widget.Container {
+	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/minorDialogue.png")
+	if err != nil {
+	}
+
+	nineSliceImage := eimage.NewNineSlice(img, [3]int{8, 66 - 16, 8}, [3]int{8, 32 - 16, 8})
+	statusContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(nineSliceImage),
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionCenter,
+				HorizontalPosition: widget.AnchorLayoutPositionCenter,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+			}),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(300, 100)),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Spacing(10),
+			widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(30)),
+		),
+		),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return statusContainer
 }

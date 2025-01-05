@@ -31,45 +31,38 @@
 		]
 	},
 	"enemySkillUsed": {
-		"name": "focused_shot",
-		"index": 1,
+		"name": "reload",
+		"index": 3,
 		"effects": [
 			{
-				"type": "buff",
-				"stat": "accuracy",
-				"amount": 3,
-				"duration": 0,
-				"initiativeL": false,
-				"damage": [],
-				"successPer": 100,
-				"nShots": 0,
-				"on": "self"
-			},
-			{
-				"type": "shot",
-				"stat": "",
+				"type": "reload",
+				"stat": "na",
 				"amount": 0,
 				"duration": 0,
 				"initiativeL": false,
 				"damage": [
-					2
+					0,
+					0
 				],
-				"successPer": 70,
-				"nShots": 1,
+				"successPer": 0,
+				"nShots": 0,
 				"on": ""
 			}
 		]
 	},
-	"DamageToPlayer": [
-		0
-	],
+	"PlayerRoll": false,
+	"PlayerSecondaryRoll": false,
+	"EnemyRoll": false,
+	"EnemySecondaryRoll": false,
+	"DamageToPlayer": null,
 	"DamageToEnemy": [
 		2
 	],
 	"EnemyEventTriggered": false,
 	"PlayerEventTriggered": false,
-	"WinningProb": 0,
-	"PlayerStartIndex": 3,
-	"EnemyStartIndex": 1,
-	"EndIndex": 10
+	"WinProbAfterPlayerTurn": 0,
+	"WinProbAfterEnemyTurn": 0,
+	"PlayerStartIndex": 1,
+	"EnemyStartIndex": 3,
+	"EndIndex": 4
 }

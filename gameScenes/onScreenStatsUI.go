@@ -20,7 +20,7 @@ func LoadAmmoEffect() (*AnimatedEffect, error) {
 
 	ammoSpriteSheet := spritesheet.NewSpritesheet(30, 1, 32, 32)
 
-	ammoEffect := NewEffect(ammoImg, ammoSpriteSheet, 100, 100, 29, 0, 1, 12)
+	ammoEffect := NewEffect(ammoImg, ammoSpriteSheet, 100, 100, 29, 0, 1, 12, 4)
 
 	return ammoEffect, nil
 }

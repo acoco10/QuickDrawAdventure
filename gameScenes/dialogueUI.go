@@ -47,7 +47,7 @@ func GenerateDialogueBarButton(d *DialogueUI) (button *widget.Button) {
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			DialogueStatusEffectButtonEvent(d)
 		}), widget.ButtonOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(300, 300),
+			widget.WidgetOpts.MinSize(100, 100),
 			//widget.WidgetOpts.CursorHovered("statusBar"),
 			//widget.WidgetOpts.CursorPressed("statusBar"),
 		),
@@ -81,7 +81,6 @@ func DialogueStatusEffectButtonEvent(d *DialogueUI) {
 			d.TextPrinter.MessageIndex = 0
 			d.TextPrinter.StatusText[0].SetText("")
 			d.TextPrinter.StatusText[1].SetText("")
-			d.TextPrinter.StatusText[2].SetText("")
 			d.TextPrinter.TextInput = []string{}
 			d.TextPrinter.lines = []string{}
 			d.TextPrinter.lineCounter = 0
@@ -129,31 +128,29 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	d.TextPrinter = NewTextPrinter(textInput)
 
 	//container for output menu
-	statusContainer := MakeStatusContainer()
+	statusContainer := MinorDialogueContainer()
 	d.statusBar.Buttons = append(d.statusBar.Buttons, GenerateDialogueBarButton(d))
 
 	d.statusBar.MenuContainer = widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
 			widget.AnchorLayoutOpts.Padding(
 				widget.Insets{
-					Top:    int(0.5 * float32(resolutionHeight)),
-					Left:   int(0.5*float32(resolutionWidth)) - int(0.5*float32(600)),
-					Right:  int(0.5*float32(resolutionWidth)) - int(0.5*float32(600)),
-					Bottom: 400},
+					Top:    int(193 * 4),
+					Left:   int(184 * 4),
+					Right:  918 - (184 * 4),
+					Bottom: 1512 - (184 * 4)},
 			),
 		),
 		),
 	)
 
 	//initialize empty lines for multi line text output
-	statusText := StatusTextInput()
-	statusTextLine2 := StatusTextInput()
-	statusTextLine3 := StatusTextInput()
+	statusText := StatusTextInput("white")
+	statusTextLine2 := StatusTextInput("white")
 
 	//adding to container
 	statusContainer.AddChild(statusText)
 	statusContainer.AddChild(statusTextLine2)
-	statusContainer.AddChild(statusTextLine3)
 	statusContainer.AddChild(d.statusBar.Buttons[0])
 	d.statusBar.MenuContainer.AddChild(statusContainer)
 
@@ -166,7 +163,6 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	d.ui = &gUi
 	d.TextPrinter.StatusText[0] = statusText
 	d.TextPrinter.StatusText[1] = statusTextLine2
-	d.TextPrinter.StatusText[2] = statusTextLine3
 	return d, nil
 }
 

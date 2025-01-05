@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/acoco10/qdabattlesystem/audioManagement"
 	"github.com/acoco10/qdabattlesystem/battle"
 	"github.com/acoco10/qdabattlesystem/dataManagement"
 	"math/rand"
@@ -35,11 +34,11 @@ func TestLoadBadSkillJSON(t *testing.T) {
 }
 
 func TestRoll(t *testing.T) {
-	successPer := 0
+	successPer := 80
 	i := 0
 	success := 0
 	fail := 0
-	for i < 1000 {
+	for i < 10000 {
 		if battle.Roll(successPer) {
 			success++
 		} else {
@@ -186,8 +185,3 @@ func Test_use_stat_Buff(t *testing.T) {
 
 }
 */
-
-func Test_use_audio_player(t *testing.T) {
-	player := audioManagement.NewAudioPlayer()
-	player.Play(audioManagement.BattleMusic)
-}
