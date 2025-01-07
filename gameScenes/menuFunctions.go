@@ -61,7 +61,7 @@ func GenerateSkillButtons(text string, g *BattleScene) (button *widget.Button) {
 }
 
 func MakeStatusContainer() *widget.Container {
-	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuBackground.png")
+	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/menuBackground.png")
 	if err != nil {
 	}
 
@@ -134,7 +134,7 @@ func StatusTextInput(textColor string) *widget.TextInput {
 }
 
 func SkillBoxContainer(headerText string) *widget.Container {
-	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuBackground.png")
+	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/menuBackground.png")
 	if err != nil {
 	}
 
@@ -259,9 +259,10 @@ func LoadDrawButtonImage() *widget.ButtonImage {
 	}*/
 
 	//click imp prints a line through our button to indicate which option was selected
-	clickImg, _, err := ebitenutil.NewImageFromFile("assets/images/drawButtonClicked.png")
+	clickImg, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/drawButtonClicked.png")
 
 	if err != nil {
+		log.Fatal("menuFunctions.go: 265", err)
 	}
 
 	//alpha can be changed for debugging purposes
@@ -283,7 +284,7 @@ func LoadStatusButtonImage() *widget.ButtonImage {
 	if err != nil {
 	}*/
 
-	statusButtonRaw, _, err := ebitenutil.NewImageFromFile("assets/images/statusBarButton.png")
+	statusButtonRaw, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/statusBarButton.png")
 	if err != nil {
 		log.Fatalf("button image file not loading")
 	}
@@ -374,7 +375,7 @@ func GenerateDrawButton(g *BattleScene) (button *widget.Button) {
 }
 
 func CombatSkillBoxContainer(headerText string) *widget.Container {
-	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuBackground.png")
+	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/menuBackground.png")
 	if err != nil {
 	}
 
@@ -519,20 +520,17 @@ func GenerateStatusBarButton(g *BattleScene) (button *widget.Button) {
 
 func DialogueSkillButtonEvent(g *BattleScene, text string) {
 	g.playerBattleSprite.DialogueButtonAnimationTrigger(text)
-	g.TextPrinter.StatusText[0].SetText("")
-	g.TextPrinter.StatusText[1].SetText("")
-	g.TextPrinter.TextInput = g.battle.TakeTurn(g.battle.Player.DialogueSkills[text])
-	g.TextPrinter.NextMessage = true
+	g.TextPrinter.ResetTP()
+	g.battle.TakeTurn(g.battle.Player.DialogueSkills[text])
 	g.changeEvent(HideSkillMenu, 15)
 	g.inMenu = false
 	g.KeepCursorPressed()
-	fmt.Printf("Elyse used Skill: %s", text)
+	fmt.Printf("elyse used Skill: %s", text)
 }
 
 func CombatSkillButtonEvent(g *BattleScene, text string) {
 	g.playerBattleSprite.CombatButtonAnimationTrigger(text)
-	g.TextPrinter.StatusText[0].SetText("")
-	g.TextPrinter.StatusText[1].SetText("")
+	g.TextPrinter.ResetTP()
 	g.TextPrinter.TextInput = g.battle.TakeCombatTurn(g.battle.Player.CombatSkills[text])
 	g.TextPrinter.NextMessage = true
 	g.changeEvent(HideCombatMenu, 15)
@@ -542,9 +540,8 @@ func CombatSkillButtonEvent(g *BattleScene, text string) {
 
 func DrawSkillButtonEvent(g *BattleScene, text string) {
 	g.audioPlayer.Play(audioManagement.DrawButton)
-	g.TextPrinter.StatusText[0].SetText("")
-	g.TextPrinter.StatusText[1].SetText("")
-	g.TextPrinter.TextInput = g.battle.TakeTurn(g.battle.Player.DialogueSkills["draw"])
+	g.TextPrinter.ResetTP()
+	g.battle.TakeTurn(g.battle.Player.DialogueSkills["draw"])
 	g.TextPrinter.NextMessage = true
 	g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
 	g.changeEvent(HideSkillMenu, 15)
@@ -553,7 +550,12 @@ func DrawSkillButtonEvent(g *BattleScene, text string) {
 }
 
 func StatusEffectButtonEvent(g *BattleScene) {
-
+	if len(g.graphicalEffectManager.PlayerEffects.EffectQueue) > 0 {
+		if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].CheckState() == Triggered {
+			println("untriggering static effect", g.TextPrinter.MessageIndex)
+			g.graphicalEffectManager.PlayerEffects.EffectQueue[0].UnTrigger()
+		}
+	}
 	if g.TextPrinter.NextMessage == false {
 		if len(g.TextPrinter.TextInput) == g.TextPrinter.MessageIndex {
 

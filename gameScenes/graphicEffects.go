@@ -18,14 +18,17 @@ type GraphicEffects interface {
 	AccessImage() *ebiten.Image
 	Trigger()
 	CheckState() EffectState
+	UnTrigger()
 }
 
 type StaticEffect struct {
-	img      *ebiten.Image
-	state    EffectState
-	duration int
-	x, y     float64
-	counter  int
+	img        *ebiten.Image
+	state      EffectState
+	duration   int
+	indefinite bool
+	x, y       float64
+	counter    int
+	scale      float64
 }
 
 func (se *StaticEffect) CheckState() EffectState {
@@ -35,22 +38,29 @@ func (se *StaticEffect) CheckState() EffectState {
 func (se *StaticEffect) Trigger() {
 	se.state = Triggered
 }
+func (se *StaticEffect) UnTrigger() {
+	se.state = NotTriggered
+}
 
 func (se *StaticEffect) Draw(screen *ebiten.Image) {
-
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Reset()
-	opts.GeoM.Translate(se.x, se.y)
-	screen.DrawImage(se.img, opts)
+	if se.state == Triggered {
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Reset()
+		opts.GeoM.Translate(se.x, se.y)
+		opts.GeoM.Scale(se.scale, se.scale)
+		screen.DrawImage(se.img, opts)
+	}
 
 }
 
 func (se *StaticEffect) Update() {
 	if se.state == Triggered {
-		se.counter--
-		if se.counter < 0 {
-			se.state = NotTriggered
-			se.counter = se.duration
+		if !se.indefinite {
+			se.counter--
+			if se.counter < 0 {
+				se.state = NotTriggered
+				se.counter = se.duration
+			}
 		}
 	}
 }
@@ -63,15 +73,21 @@ func (se *StaticEffect) AccessImage() *ebiten.Image {
 	return se.img
 }
 
-func NewStaticEffect(img *ebiten.Image, x, y float64) *StaticEffect {
-	return &StaticEffect{
-		img:      img,
-		x:        x,
-		y:        y,
-		counter:  50,
-		duration: 50,
-		state:    NotTriggered,
+func NewStaticEffect(img *ebiten.Image, x, y float64, duration int, scale float64) *StaticEffect {
+	se := StaticEffect{
+		img:        img,
+		x:          x,
+		y:          y,
+		counter:    50,
+		duration:   duration,
+		state:      NotTriggered,
+		scale:      scale,
+		indefinite: false,
 	}
+	if duration == 0 {
+		se.indefinite = true
+	}
+	return &se
 }
 
 type AnimatedEffect struct {
@@ -90,12 +106,18 @@ type AnimatedEffect struct {
 	scale        float64
 }
 
+func (e *AnimatedEffect) UnTrigger() {
+	e.state = NotTriggered
+}
+
 func (e *AnimatedEffect) Draw(screen *ebiten.Image) {
-	img := e.img.SubImage(e.spriteSheet.Rect(e.frame)).(*ebiten.Image)
-	opts := &ebiten.DrawImageOptions{}
-	opts.GeoM.Scale(e.scale, e.scale)
-	opts.GeoM.Translate(e.x, e.y)
-	screen.DrawImage(img, opts)
+	if e.state == Triggered {
+		img := e.img.SubImage(e.spriteSheet.Rect(e.frame)).(*ebiten.Image)
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Scale(e.scale, e.scale)
+		opts.GeoM.Translate(e.x, e.y)
+		screen.DrawImage(img, opts)
+	}
 }
 
 func (e *AnimatedEffect) CheckState() EffectState {
@@ -118,7 +140,7 @@ func (e *AnimatedEffect) Update() {
 			e.frame += e.step
 
 			if e.frame == e.lastFrame {
-				e.frame = e.lastFrame
+				e.frame = e.firstFrame
 
 				e.state = NotTriggered
 			}

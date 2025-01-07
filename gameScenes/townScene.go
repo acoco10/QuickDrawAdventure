@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/animations"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
@@ -24,8 +25,7 @@ type TownScene struct {
 	tilesets           []gameObjects.Tileset
 	cam                *camera.Camera
 	colliders          []image.Rectangle
-	Objects            *gameObjects.Object
-	objectSpriteSheet  *spritesheet.SpriteSheet
+	Objects            []*gameObjects.Object
 	EntranceDoors      map[string]gameObjects.Door
 	ExitDoors          map[string]gameObjects.Door
 	action             bool
@@ -43,10 +43,28 @@ func NewTownScene() *TownScene {
 func (g *TownScene) FirstLoad() {
 	g.loaded = true
 
-	doorimg, _, err := ebitenutil.NewImageFromFile("assets/images/buildings/tavernDoorSpriteSheet.png")
-	doorObject, _ := gameObjects.NewObject(doorimg, 167.18, 158.76)
+	tavernDoorSpriteSheet := spritesheet.NewSpritesheet(2, 2, 20, 21)
 
-	g.Objects = doorObject
+	tavernDoorImg, _, err := ebitenutil.NewImageFromFile("assets/images/buildings/tavernDoorSpriteSheet.png")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	tavernDoorAnimation := animations.NewAnimation(0, 6, 1, 10.0)
+	tavernDoorObject, _ := gameObjects.NewObject(tavernDoorImg, 167.18, 158.76, *tavernDoorSpriteSheet, tavernDoorAnimation, tavernDoorAnimation, "door1")
+
+	sunRiseDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 24, 38)
+	sunriseDoorImg, _, err := ebitenutil.NewImageFromFile("assets/images/buildings/sunriseInn/sunriseInnDoor.png")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sunriseDoorAnimation := animations.NewAnimation(0, 3, 1, 10.0)
+	sunriseDoor, _ := gameObjects.NewObject(sunriseDoorImg, 557, 145, *sunRiseDoorSpriteSheet, sunriseDoorAnimation, sunriseDoorAnimation, "door2")
+
+	g.Objects = append(g.Objects, tavernDoorObject, sunriseDoor)
+
 	tileMapFile, err := os.ReadFile("assets/map/town1Map.json")
 	if err != nil {
 		log.Fatal("tilemap file not loading", err)
@@ -77,11 +95,14 @@ func (g *TownScene) FirstLoad() {
 
 	charSpriteSheet := spritesheet.NewSpritesheet(4, 6, 16, 32)
 
-	playerimg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/elyseSpriteSheet.png")
-	player, _ := gameObjects.NewCharacter(playerimg, 75, 75, *charSpriteSheet, "Elyse")
+	playerimg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/elyse/elyseSpriteSheet.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	player, _ := gameObjects.NewCharacter(playerimg, 75, 75, *charSpriteSheet, "elyse")
 	g.Player = player
 
-	NPCImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/TownPerson1.png")
+	NPCImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/TownPerson1.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,10 +113,6 @@ func (g *TownScene) FirstLoad() {
 	}
 
 	g.NPC = append(g.NPC, npc)
-
-	objectSpriteSheet := spritesheet.NewSpritesheet(2, 2, 20, 21)
-
-	g.objectSpriteSheet = objectSpriteSheet
 
 	g.dialoguei, err = MakeDialogueUI(1512, 918)
 	if err != nil {
@@ -147,13 +164,13 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	gameObjects.CheckCollisionVertical(g.Player.Sprite, g.colliders, g.NPC)
 
-	playerOnEntDoor := false
-	playerOnExDoor := false
+	playerOnEntDoor := make(map[string]bool)
+	playerOnExDoor := make(map[string]bool)
 	if !g.Player.InAnimation {
 		playerOnEntDoor = gameObjects.CheckEntDoor(g.Player, g.EntranceDoors, g.ExitDoors)
 	}
 	if !g.Player.InAnimation {
-		playerOnExDoor = gameObjects.CheckExDoor(g.Player, g.EntranceDoors, g.ExitDoors)
+		playerOnExDoor = gameObjects.CheckEntDoor(g.Player, g.ExitDoors, g.EntranceDoors)
 	}
 
 	/* //for _, enemy := range g.enemies {
@@ -207,14 +224,16 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	)
 
 	//check if Player has entered a door and update door object eventually this will need to be a loop for all object animations
-	if playerOnExDoor && g.Objects.Status == "" {
-		g.Player.InAnimation = true
-		g.Objects.Status = "leaving"
-	}
+	for _, object := range g.Objects {
+		if playerOnExDoor[object.Name] && object.Status == "" {
+			g.Player.InAnimation = true
+			object.Status = "leaving"
+		}
 
-	if playerOnEntDoor && g.Objects.Status == "" {
-		g.Player.InAnimation = true
-		g.Objects.Status = "entering"
+		if playerOnEntDoor[object.Name] && object.Status == "" {
+			g.Player.InAnimation = true
+			object.Status = "entering"
+		}
 	}
 
 	//custom script animation for tavern door (swings forward on entrance)
@@ -231,26 +250,28 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	//loop through the tile map
 	gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen)
 	//draw Player
+	for _, object := range g.Objects {
+		opts.GeoM.Translate(object.X, object.Y)
+		opts.GeoM.Translate(g.cam.X, g.cam.Y)
+		opts.GeoM.Scale(4, 4)
 
-	opts.GeoM.Translate(g.Objects.X, g.Objects.Y)
-	opts.GeoM.Translate(g.cam.X, g.cam.Y)
-	opts.GeoM.Scale(4, 4)
+		objectFrame := 0
+		objectAnimation := object.ActiveAnimation(object.Status)
 
-	objectFrame := 0
-	objectAnimation := g.Objects.ActiveAnimation(g.Objects.Status)
+		if objectAnimation != nil {
+			objectFrame = objectAnimation.Frame()
+		}
 
-	if objectAnimation != nil {
-		objectFrame = objectAnimation.Frame()
+		screen.DrawImage(
+			object.Img.SubImage(
+				object.SpriteSheet.Rect(objectFrame),
+			).(*ebiten.Image),
+			&opts,
+		)
+
+		opts.GeoM.Reset()
 	}
 
-	screen.DrawImage(
-		g.Objects.Img.SubImage(
-			g.objectSpriteSheet.Rect(objectFrame),
-		).(*ebiten.Image),
-		&opts,
-	)
-
-	opts.GeoM.Reset()
 	g.DrawCharacters(screen)
 	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player)
 

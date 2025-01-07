@@ -9,6 +9,15 @@ import (
 	"strings"
 )
 
+type battleTextOutputState uint8
+
+const (
+	PlayerMessage battleTextOutputState = iota
+	EnemyMessage
+	StatusMessage
+	NoMessage
+)
+
 type TextPrinter struct {
 	TextInput         []string
 	lines             []string //slice of segmented strings for line output on eachline
@@ -21,6 +30,7 @@ type TextPrinter struct {
 	NextMessage       bool //if true we should keep printing(after each complete message in status text we set to false then take playerBattleSprite input to keep printing)
 	lineCounter       int
 	countDown         int
+	state             battleTextOutputState
 }
 
 func NewTextPrinter(initialText []string) *TextPrinter {
@@ -33,11 +43,11 @@ func NewTextPrinter(initialText []string) *TextPrinter {
 		NextMessage:       true,
 		MessageIndex:      0,
 		countDown:         0,
+		state:             StatusMessage,
 	}
 }
 
 func (t *TextPrinter) MessageLoop(g *BattleScene) {
-
 	//first run setup
 	if t.MessageIndex == 0 && len(t.lines) == 0 {
 		println("configuring new lines at first check\n")
@@ -48,7 +58,65 @@ func (t *TextPrinter) MessageLoop(g *BattleScene) {
 		}
 	}
 
-	t.StatusText[t.lineCounter].SetText(t.printText())
+	t.StatusText[t.lineCounter].SetText(t.PrintText())
+
+	if t.stringPosition <= len(t.lines[t.lineCounter]) {
+		t.stringPosition++
+	}
+
+	if t.stringPosition == len(t.lines[t.lineCounter])+1 {
+
+		t.stringPosition = 1
+
+		if t.MessageIndex+1 == len(t.TextInput) && t.lineCounter+1 == len(t.lines) {
+			fmt.Printf("resetting text\n")
+			t.TextInput = []string{}
+			t.lines = []string{}
+			t.NextMessage = false
+			t.lineCounter = 0
+			t.MessageIndex = 0
+		}
+
+		t.lineCounter++
+	}
+
+	if t.lineCounter == len(t.lines) {
+		if t.MessageIndex < len(t.TextInput)-1 {
+			t.MessageIndex++
+			t.configureLines()
+			for _, line := range t.lines {
+				fmt.Printf("%s\n", line)
+			}
+		} else {
+			t.state = NoMessage
+			t.MessageIndex = 0
+		}
+
+		t.lineCounter = 0
+		if g.battle.GetPhase() != battle.Shooting {
+			t.NextMessage = false
+		}
+		if g.battle.GetPhase() == battle.Shooting && t.MessageIndex == g.battle.GetTurn().PlayerStartIndex+1 {
+			if t.countDown == 0 {
+				t.delayedTrigger(20)
+			}
+		}
+	}
+}
+
+// function for use in non battle scene
+func (t *TextPrinter) DialogueMessageLoop() {
+	//first run setup
+	if t.MessageIndex == 0 && len(t.lines) == 0 {
+		println("configuring new lines at first check\n")
+		t.configureLines()
+		t.lineCounter = 0
+		for _, line := range t.lines {
+			fmt.Printf("%s\n", line)
+		}
+	}
+
+	t.StatusText[t.lineCounter].SetText(t.PrintText())
 
 	if t.stringPosition <= len(t.lines[t.lineCounter]) {
 		t.stringPosition++
@@ -82,29 +150,19 @@ func (t *TextPrinter) MessageLoop(g *BattleScene) {
 		}
 
 		t.lineCounter = 0
-		if g.battle.GetPhase() != battle.Shooting {
-			t.NextMessage = false
-		}
-		if g.battle.GetPhase() == battle.Shooting && t.MessageIndex == g.battle.GetTurn().PlayerStartIndex+1 {
-			if t.countDown == 0 {
-				t.delayedTrigger(20)
-			}
-		}
+		t.NextMessage = false
 	}
 }
 
-func (t *TextPrinter) DialogueMessageLoop() {
+func (t *TextPrinter) TestDialogueMessageLoop() {
 	//first run setup
 	if t.MessageIndex == 0 && len(t.lines) == 0 {
-		println("configuring new lines at first check\n")
 		t.configureLines()
 		t.lineCounter = 0
-		for _, line := range t.lines {
-			fmt.Printf("%s\n", line)
-		}
+
 	}
 
-	t.StatusText[t.lineCounter].SetText(t.printText())
+	println(t.PrintText())
 
 	if t.stringPosition <= len(t.lines[t.lineCounter]) {
 		t.stringPosition++
@@ -180,7 +238,7 @@ func (t *TextPrinter) MessageWrapperToLines(text string) (output []string) {
 	return output
 }
 
-func (t *TextPrinter) printText() (output string) {
+func (t *TextPrinter) PrintText() (output string) {
 	characters := strings.Split(t.lines[t.lineCounter], "")
 	if t.stringPosition > len(characters) {
 	}

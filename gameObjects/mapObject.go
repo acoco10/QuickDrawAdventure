@@ -20,7 +20,7 @@ type NPCspawn struct {
 }
 
 func NewNPCspawn(json ObjectJSON) NPCspawn {
-	println("loading NPC spawn:", json.Name, "\n")
+	println("loading npc spawn:", json.Name, "\n")
 	npcspawn := new(NPCspawn)
 	npcspawn.Name = json.Name
 	npcspawn.X = json.X

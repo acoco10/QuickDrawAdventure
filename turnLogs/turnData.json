@@ -1,16 +1,18 @@
 {
 	"phase": 0,
 	"PlayerSkillUsed": {
-		"name": "focused_shot",
-		"index": 1,
+		"name": "fan_shot",
+		"index": 2,
 		"effects": [
 			{
 				"type": "buff",
 				"stat": "accuracy",
-				"amount": 3,
+				"amount": -2,
 				"duration": 0,
 				"initiativeL": false,
-				"damage": [],
+				"damage": [
+					0
+				],
 				"successPer": 100,
 				"nShots": 0,
 				"on": "self"
@@ -22,30 +24,31 @@
 				"duration": 0,
 				"initiativeL": false,
 				"damage": [
+					1,
 					2
 				],
-				"successPer": 70,
-				"nShots": 1,
+				"successPer": 50,
+				"nShots": 3,
 				"on": ""
 			}
 		]
 	},
 	"enemySkillUsed": {
-		"name": "reload",
-		"index": 3,
+		"name": "shoot",
+		"index": 0,
 		"effects": [
 			{
-				"type": "reload",
+				"type": "shot",
 				"stat": "na",
 				"amount": 0,
 				"duration": 0,
 				"initiativeL": false,
 				"damage": [
-					0,
-					0
+					1,
+					3
 				],
-				"successPer": 0,
-				"nShots": 0,
+				"successPer": 60,
+				"nShots": 1,
 				"on": ""
 			}
 		]
@@ -54,15 +57,19 @@
 	"PlayerSecondaryRoll": false,
 	"EnemyRoll": false,
 	"EnemySecondaryRoll": false,
-	"DamageToPlayer": null,
+	"DamageToPlayer": [
+		0
+	],
 	"DamageToEnemy": [
-		2
+		1,
+		1,
+		0
 	],
 	"EnemyEventTriggered": false,
 	"PlayerEventTriggered": false,
 	"WinProbAfterPlayerTurn": 0,
 	"WinProbAfterEnemyTurn": 0,
-	"PlayerStartIndex": 1,
-	"EnemyStartIndex": 3,
-	"EndIndex": 4
+	"PlayerStartIndex": 0,
+	"EnemyStartIndex": 6,
+	"EndIndex": 10
 }

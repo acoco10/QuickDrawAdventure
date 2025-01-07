@@ -34,7 +34,6 @@ func (a *SFXAudioPlayer) Update() {
 }
 
 func (a *SFXAudioPlayer) Play(id resource.AudioID) {
-	log.Printf("Playing audio %q", id)
 	sfxPlayer := a.loader.LoadWAV(id).Player
 	a.sfxPlayer = sfxPlayer
 	err := sfxPlayer.Rewind()

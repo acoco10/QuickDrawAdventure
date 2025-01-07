@@ -24,8 +24,8 @@ func NewDoor(obj ObjectJSON) (door Door) {
 	return door
 }
 
-func CheckEntDoor(player *Character, entdoors map[string]Door, exdoors map[string]Door) bool {
-
+func CheckEntDoor(player *Character, entdoors map[string]Door, exdoors map[string]Door) map[string]bool {
+	returnMap := make(map[string]bool)
 	for _, door := range entdoors {
 		if door.Coord.Overlaps(
 			image.Rect(
@@ -35,29 +35,12 @@ func CheckEntDoor(player *Character, entdoors map[string]Door, exdoors map[strin
 				int(player.Y)+31),
 		) {
 			player.EnterShadow()
-			return true
+			returnMap[door.Key] = true
+		} else {
+			returnMap[door.Key] = false
 		}
 	}
-	return false
-}
-
-func CheckExDoor(player *Character, entdoors map[string]Door, exdoors map[string]Door) bool {
-	for _, door := range exdoors {
-		if door.Coord.Overlaps(
-			image.Rect(
-				int(player.X),
-				int(player.Y)+28,
-				int(player.X)+16,
-				int(player.Y)+31),
-		) {
-			//player.X = float64(entdoors[key].Coord.Dx()/2+entdoors[key].Coord.Min.X) - 8
-			//player.Y = float64(entdoors[key].Coord.Min.Y + 20)
-
-			player.ExitShadow()
-			return true
-		}
-	}
-	return false
+	return returnMap
 }
 
 func GetDoorCoord(doors map[string]Door, key string, direction string) (float64, float64) {

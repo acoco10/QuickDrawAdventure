@@ -14,49 +14,49 @@
  "tiles":[
         {
          "id":0,
-         "image":"..\/..\/images\/buildings\/roseColumn.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/roseColumn.png",
          "imageheight":48,
          "imagewidth":16
         }, 
         {
          "id":1,
-         "image":"..\/..\/images\/buildings\/roseInteriorWalls.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/roseInteriorWalls.png",
          "imageheight":38,
          "imagewidth":192
         }, 
         {
          "id":2,
-         "image":"..\/..\/images\/buildings\/rosefurniture.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/rosefurniture.png",
          "imageheight":144,
          "imagewidth":192
         }, 
         {
          "id":3,
-         "image":"..\/..\/images\/buildings\/theroseinterior.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/theroseinterior.png",
          "imageheight":144,
          "imagewidth":192
         }, 
         {
          "id":4,
-         "image":"..\/..\/images\/buildings\/stool.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/stool.png",
          "imageheight":32,
          "imagewidth":16
         }, 
         {
          "id":5,
-         "image":"..\/..\/images\/buildings\/roseRoof.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/roseRoof.png",
          "imageheight":47,
          "imagewidth":128
         }, 
         {
          "id":6,
-         "image":"..\/..\/images\/buildings\/therose.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/therose.png",
          "imageheight":56,
          "imagewidth":128
         }, 
         {
          "id":7,
-         "image":"..\/..\/images\/buildings\/roseColumn2.png",
+         "image":"..\/..\/..\/..\/assets\/images\/buildings\/roseColumn2.png",
          "imageheight":48,
          "imagewidth":16
         }],

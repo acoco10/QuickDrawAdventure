@@ -2,6 +2,7 @@ package gameObjects
 
 import (
 	"github.com/acoco10/QuickDrawAdventure/animations"
+	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,10 +16,12 @@ const (
 
 type Object struct {
 	*Sprite
-	Animation          map[ObjectState]*animations.Animation
-	Animation_active   bool
-	Animation_complete bool
-	Status             string
+	Animation         map[ObjectState]*animations.Animation
+	AnimationActive   bool
+	AnimationComplete bool
+	Status            string
+	SpriteSheet       spritesheet.SpriteSheet
+	Name              string
 }
 
 func (o *Object) ActiveAnimation(door string) *animations.Animation {
@@ -32,15 +35,16 @@ func (o *Object) ActiveAnimation(door string) *animations.Animation {
 }
 
 func (o *Object) PlayAnimation() {
-	o.Animation_active = true
+	o.AnimationActive = true
 }
 
 func (o *Object) StopAnimation() {
-	o.Animation_active = false
+	o.AnimationActive = false
 	o.Status = ""
 }
 
-func NewObject(pImg *ebiten.Image, locationX float64, locationY float64) (*Object, error) {
+func NewObject(pImg *ebiten.Image, locationX float64, locationY float64, sheet spritesheet.SpriteSheet, enteringAnimation *animations.Animation, leavingAnimation *animations.Animation, name string) (*Object, error) {
+
 	object := &Object{
 		Sprite: &Sprite{
 			Img: pImg,
@@ -48,12 +52,14 @@ func NewObject(pImg *ebiten.Image, locationX float64, locationY float64) (*Objec
 			Y:   locationY - 32,
 		},
 		Animation: map[ObjectState]*animations.Animation{
-			Entering: animations.NewAnimation(0, 6, 1, 10.0),
-			Leaving:  animations.NewAnimation(0, 6, 1, 10.0),
+			Entering: enteringAnimation,
+			Leaving:  leavingAnimation,
 		},
-		Animation_active:   false,
-		Animation_complete: false,
-		Status:             "",
+		AnimationActive:   false,
+		AnimationComplete: false,
+		Status:            "",
+		SpriteSheet:       sheet,
+		Name:              name,
 	}
 	return object, nil
 }

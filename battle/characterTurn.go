@@ -2,7 +2,7 @@ package battle
 
 import (
 	"fmt"
-	"github.com/acoco10/QuickDrawAdventure/dataManagement"
+	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
 	"github.com/tidwall/gjson"
 	"log"
 	"math/rand/v2"
@@ -25,7 +25,7 @@ func Roll(successPer int) bool {
 	return rand.IntN(100) < successPer
 }
 
-func EnemyChooseSkill(battle Battle, enemySkills map[string]dataManagement.Skill) (skill dataManagement.Skill, err error) {
+func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStatsDataManagement.Skill) (skill battleStatsDataManagement.Skill, err error) {
 
 	if battle.battlePhase == Dialogue && battle.WinningProb < 40 {
 		return enemySkills["draw"], nil
@@ -57,16 +57,22 @@ func EnemyChooseSkill(battle Battle, enemySkills map[string]dataManagement.Skill
 			skill = eSkill
 		}
 	}
+	if skill.SkillName == "reload" {
+		skill = enemySkills["focusedShot"]
+	}
+	if battle.battlePhase == Dialogue {
+		skill = enemySkills["stare down"]
+	}
 
 	return skill, nil
 }
 
-func Draw(userStats map[dataManagement.Stat]int, oppStats map[dataManagement.Stat]int) bool {
+func Draw(userStats map[battleStatsDataManagement.Stat]int, oppStats map[battleStatsDataManagement.Stat]int) bool {
 
 	initiative := true
 
-	userDS := userStats[dataManagement.DrawSpeed] - userStats[dataManagement.Anger]*10 - userStats[dataManagement.Fear]*10
-	opponentDS := oppStats[dataManagement.DrawSpeed] - oppStats[dataManagement.Anger]*10 - oppStats[dataManagement.Fear]*10
+	userDS := userStats[battleStatsDataManagement.DrawSpeed] - userStats[battleStatsDataManagement.Anger]*10 - userStats[battleStatsDataManagement.Fear]*10
+	opponentDS := oppStats[battleStatsDataManagement.DrawSpeed] - oppStats[battleStatsDataManagement.Anger]*10 - oppStats[battleStatsDataManagement.Fear]*10
 
 	if rand.IntN(101) > 50+userDS-opponentDS {
 		initiative = false
@@ -74,9 +80,9 @@ func Draw(userStats map[dataManagement.Stat]int, oppStats map[dataManagement.Sta
 	return initiative
 }
 
-func DrawProb(userStats map[dataManagement.Stat]int, oppStats map[dataManagement.Stat]int) int {
-	userDS := userStats[dataManagement.DrawSpeed] - userStats[dataManagement.Anger]*10 - userStats[dataManagement.Fear]*10
-	opponentDS := oppStats[dataManagement.DrawSpeed] - oppStats[dataManagement.Anger]*10 - oppStats[dataManagement.Fear]*10
+func DrawProb(userStats map[battleStatsDataManagement.Stat]int, oppStats map[battleStatsDataManagement.Stat]int) int {
+	userDS := userStats[battleStatsDataManagement.DrawSpeed] - userStats[battleStatsDataManagement.Anger]*10 - userStats[battleStatsDataManagement.Fear]*10
+	opponentDS := oppStats[battleStatsDataManagement.DrawSpeed] - oppStats[battleStatsDataManagement.Anger]*10 - oppStats[battleStatsDataManagement.Fear]*10
 	return 50 + userDS - opponentDS
 }
 

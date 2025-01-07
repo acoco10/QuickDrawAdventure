@@ -108,7 +108,7 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 		log.Fatal(err)
 	}
 
-	textInput := []string{"Owner of this Bar knows everyone in town"}
+	textInput := []string{"Owner of this Bar knows everyone in town", "You should try the lemon daquiri"}
 	d := &DialogueUI{}
 	d.face = face
 

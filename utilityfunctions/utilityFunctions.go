@@ -1,7 +1,7 @@
 package utilityfunctions
 
 import (
-	"github.com/acoco10/qdabattlesystem/dataManagement"
+	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
 )
 
 func StringInSlice(testString string, testList []string) bool {
@@ -29,7 +29,7 @@ func MapKeysSI(dict map[string]int) []string {
 }
 
 // return slice of keys for maps with string keys and skill values
-func MapKeysSSk(dict map[string]dataManagement.Skill) []string {
+func MapKeysSSk(dict map[string]battleStatsDataManagement.Skill) []string {
 	i := 0
 
 	keys := make([]string, len(dict))

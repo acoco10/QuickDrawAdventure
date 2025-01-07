@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/acoco10/qdabattlesystem/gameManager"
+	"github.com/acoco10/QuickDrawAdventure/gameManager"
 	"github.com/hajimehoshi/ebiten/v2"
 	"log"
 )

@@ -9,43 +9,45 @@ import (
 )
 
 func (g *TownScene) UpdateDoors() {
-	objectAnimation := g.Objects.ActiveAnimation(g.Objects.Status)
-	if objectAnimation != nil {
-		if g.Objects.Status == "entering" {
-			objectAnimation.Update()
-
-			if objectAnimation.Frame() == objectAnimation.LastF-3 {
-				//remove sprite on last frame before they are shown inside the building
-				g.Player.Visible = false
+	for _, object := range g.Objects {
+		objectAnimation := object.ActiveAnimation(object.Status)
+		if objectAnimation != nil {
+			if object.Status == "entering" {
 				objectAnimation.Update()
+
+				if objectAnimation.Frame() == objectAnimation.LastF-3 {
+					//remove sprite on last frame before they are shown inside the building
+					g.Player.Visible = false
+					objectAnimation.Update()
+				}
+
+				if objectAnimation.Frame() == objectAnimation.LastF {
+					g.Player.Visible = true
+					x, y := gameObjects.GetDoorCoord(g.ExitDoors, object.Name, "up")
+					g.Player.X = x
+					g.Player.Y = y
+					objectAnimation.Update()
+					object.StopAnimation()
+					objectAnimation.Reset()
+					g.Player.InAnimation = false
+				}
 			}
+			if object.Status == "leaving" {
 
-			if objectAnimation.Frame() == objectAnimation.LastF {
-				g.Player.Visible = true
-				x, y := gameObjects.GetDoorCoord(g.ExitDoors, "door1", "up")
-				g.Player.X = x
-				g.Player.Y = y
-				objectAnimation.Update()
-				g.Objects.StopAnimation()
-				objectAnimation.Reset()
-				g.Player.InAnimation = false
-			}
-		}
-		if g.Objects.Status == "leaving" {
+				if objectAnimation.Frame() == objectAnimation.FirstF {
+					x, y := gameObjects.GetDoorCoord(g.EntranceDoors, object.Name, "down")
+					g.Player.X = x
+					g.Player.Y = y
+					g.Player.InAnimation = false
+					objectAnimation.Update()
 
-			if objectAnimation.Frame() == objectAnimation.FirstF {
-				x, y := gameObjects.GetDoorCoord(g.EntranceDoors, "door1", "down")
-				g.Player.X = x
-				g.Player.Y = y
-				g.Player.InAnimation = false
-				objectAnimation.Update()
+				} else if objectAnimation.Frame() == objectAnimation.LastF {
+					object.StopAnimation()
+					objectAnimation.Reset()
 
-			} else if objectAnimation.Frame() == objectAnimation.LastF {
-				g.Objects.StopAnimation()
-				objectAnimation.Reset()
-
-			} else {
-				objectAnimation.Update()
+				} else {
+					objectAnimation.Update()
+				}
 			}
 		}
 	}

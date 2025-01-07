@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	"github.com/acoco10/QuickDrawAdventure/battle"
-	"github.com/acoco10/QuickDrawAdventure/dataManagement"
+	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/input"
@@ -18,7 +18,7 @@ import (
 func (g *BattleScene) FirstLoad() {
 	println("Battle Scene first load executing\n")
 
-	characters, err := dataManagement.LoadCharacters()
+	characters, err := battleStatsDataManagement.LoadCharacters()
 
 	if err != nil {
 		log.Fatal("error loading characters.json error:", err)
@@ -265,23 +265,14 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 		g.changeEvent(NoEvent, 0)
 	}
 
-	if g.statusBar.ButtonVisibility {
-		g.statusBar.Buttons[0].GetWidget().Visibility = widget.Visibility_Show
-	} else {
-		g.statusBar.Buttons[0].GetWidget().Visibility = widget.Visibility_Hide
-	}
-
-	if g.TextPrinter.MessageIndex == turn.EndIndex-1 {
-		g.CheckForWinner()
-	}
-
-	if g.TextPrinter.MessageIndex == turn.PlayerStartIndex && !turn.PlayerEventTriggered {
+	if !turn.PlayerEventTriggered {
 		g.playerTurn(turn)
 	}
 
-	if g.TextPrinter.MessageIndex == g.battle.GetTurn().EnemyStartIndex && !turn.EnemyEventTriggered {
+	if turn.EnemyEventTriggered {
 		g.enemyTurn(turn)
 	}
+
 	err := g.onScreenStatsUI.Update(*turn)
 	if err != nil {
 		log.Fatal(err)
@@ -300,14 +291,14 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 		PrintStatus(g, screen)
 	}
 
-	g.ui.Draw(screen)
 	g.DrawCharOutline(screen, *g.playerBattleSprite)
 	DrawBattleSprite(*g.playerBattleSprite, screen, g.playerBattleSprite.Scale)
 	DrawBattleSprite(*g.enemyBattleSprite, screen, g.playerBattleSprite.Scale)
-
+	g.onScreenStatsUI.Draw(screen)
 	g.graphicalEffectManager.PlayerEffects.Draw(screen)
 	g.graphicalEffectManager.EnemyEffects.Draw(screen)
-	g.onScreenStatsUI.Draw(screen)
+	g.ui.Draw(screen)
+	debugTextPrint(screen, g)
 
 }
 
@@ -322,8 +313,8 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 	enemyAmmo := fmt.Sprintf("Enemy Ammo :%d", g.battle.EnemyAmmo)
 
 	winningProbText := fmt.Sprintf("Probability of Winning Draw:%d", dp)
-	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.Player.DisplayStat(dataManagement.Health))
-	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(dataManagement.Health))
+	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.Player.DisplayStat(battleStatsDataManagement.Health))
+	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(battleStatsDataManagement.Health))
 
 	dopts := text.DrawOptions{}
 	dopts.DrawImageOptions.ColorScale.Scale(1, 0, 0, 255)
@@ -351,4 +342,29 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 	text.Draw(screen, enemyAmmo, face, &dopts)
 	dopts.GeoM.Reset()
 
+}
+
+func debugTextPrint(screen *ebiten.Image, g *BattleScene) {
+	face, err := LoadFont(40)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dopts := text.DrawOptions{}
+
+	var textPrinterState string
+
+	if g.TextPrinter.state == PlayerMessage {
+		textPrinterState = "text printer state = Player Message"
+	}
+	if g.TextPrinter.state == EnemyMessage {
+		textPrinterState = "text printer state = Enemy Message"
+	}
+	if g.TextPrinter.state == StatusMessage {
+		textPrinterState = "text printer state = Status Text"
+	}
+
+	dopts.GeoM.Translate(600, 500)
+	text.Draw(screen, textPrinterState, face, &dopts)
+	dopts.GeoM.Reset()
 }

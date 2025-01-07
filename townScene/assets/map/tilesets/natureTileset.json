@@ -14,13 +14,13 @@
  "tiles":[
         {
          "id":0,
-         "image":"..\/..\/images\/nature\/deadtree1.png",
+         "image":"..\/..\/..\/..\/assets\/images\/nature\/deadtree1.png",
          "imageheight":62,
          "imagewidth":31
         }, 
         {
          "id":1,
-         "image":"..\/..\/images\/nature\/deadishbush 1.png",
+         "image":"..\/..\/..\/..\/assets\/images\/nature\/deadishbush 1.png",
          "imageheight":35,
          "imagewidth":37
         }],

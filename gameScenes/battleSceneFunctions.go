@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	"github.com/acoco10/QuickDrawAdventure/battle"
-	"github.com/acoco10/QuickDrawAdventure/dataManagement"
+	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
@@ -45,6 +45,7 @@ type BattleScene struct {
 	sceneChangeCountdown              int
 	scene                             sceneManager.SceneId
 	onScreenStatsUI                   *OnScreenStatsUI
+	State                             BattleSceneState
 }
 
 type EventName uint8
@@ -59,6 +60,14 @@ const (
 	ShowCombatMenu
 	EffectAnimationTriggered
 	NoEvent
+)
+
+type BattleSceneState uint8
+
+const (
+	PlayerTurn BattleSceneState = iota
+	EnemyTurn
+	NoTurn
 )
 
 func (g *BattleScene) changeEvent(name EventName, timer int) {
@@ -146,7 +155,7 @@ func (g *BattleScene) KeepCursorPressed() {
 
 func LoadPlayerBattleSprite() gameObjects.BattleSprite {
 
-	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/elyseBattleSprite.png")
+	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/elyse/elyseBattleSprite.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -163,7 +172,7 @@ func LoadPlayerBattleSprite() gameObjects.BattleSprite {
 }
 
 func LoadEnemyBattleSprite() gameObjects.BattleSprite {
-	enemyImg, _, err := ebitenutil.NewImageFromFile("assets/images/sheriffBattleSprite.png")
+	enemyImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/sheriffBattleSprite.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -189,6 +198,8 @@ func DrawBattleSprite(sprite gameObjects.BattleSprite, screen *ebiten.Image, sca
 }
 
 func (g *BattleScene) playerTurn(turn *battle.Turn) {
+	g.TextPrinter.TextInput = turn.PlayerMessage
+	turn.PlayerEventTriggered = true
 	if turn.PlayerSkillUsed.SkillName == "reload" {
 		g.audioPlayer.Play(audioManagement.Reload)
 		g.playerBattleSprite.CombatButtonAnimationTrigger("reload")
@@ -196,6 +207,7 @@ func (g *BattleScene) playerTurn(turn *battle.Turn) {
 	}
 
 	if turn.PlayerSkillUsed.SkillName == "draw" && g.battle.GetPhase() == battle.Dialogue {
+		turn.PlayerEventTriggered = true
 		g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
 		g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
 		g.playerBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
@@ -211,7 +223,7 @@ func (g *BattleScene) playerTurn(turn *battle.Turn) {
 	}
 
 	turn.PlayerEventTriggered = true
-	g.audioPlayer.ConfigureAttackResultSoundQueue(g.battle.GetTurn().DamageToEnemy, "NPC")
+	g.audioPlayer.ConfigureAttackResultSoundQueue(g.battle.GetTurn().DamageToEnemy, "npc")
 	g.graphicalEffectManager.PlayerEffects.ProcessPlayerTurnData(turn)
 	g.graphicalEffectManager.PlayerEffects.TriggerEffectQueue()
 
@@ -232,7 +244,7 @@ func (g *BattleScene) playerTurn(turn *battle.Turn) {
 				g.onScreenStatsUI.ammoEffect.state = Triggered
 			}
 		}
-		if g.battle.Enemy.DisplayStat(dataManagement.Health) <= 0 {
+		if g.battle.Enemy.DisplayStat(battleStatsDataManagement.Health) <= 0 {
 			g.battle.BattleWon = true
 		}
 		g.playerBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
@@ -241,14 +253,14 @@ func (g *BattleScene) playerTurn(turn *battle.Turn) {
 }
 
 func (g *BattleScene) enemyTurn(turn *battle.Turn) {
-
+	g.TextPrinter.TextInput = turn.EnemyMessage
 	turn.EnemyEventTriggered = true
-
 	if turn.EnemySkillUsed.SkillName == "reload" {
 		g.audioPlayer.Play(audioManagement.Reload)
 	}
 
 	if turn.EnemySkillUsed.SkillName == "draw" && g.battle.GetPhase() == battle.Dialogue {
+		turn.PlayerEventTriggered = true //trigger player event since drawing will end this turn
 		g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
 		g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
 		g.playerBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
@@ -267,7 +279,7 @@ func (g *BattleScene) enemyTurn(turn *battle.Turn) {
 	g.graphicalEffectManager.EnemyEffects.TriggerEffectQueue()
 
 	if g.battle.GetPhase() == battle.Dialogue && g.battle.Turn > 0 {
-		g.battle.EnactEffects(turn.EnemySkillUsed, g.battle.Player, g.battle.Enemy, turn.EnemyRoll, turn.EnemySecondaryRoll)
+		g.battle.EnactEffects(turn.EnemySkillUsed, g.battle.Enemy, g.battle.Player, turn.EnemyRoll, turn.EnemySecondaryRoll)
 		g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
 		g.enemyBattleSprite.DialogueButtonAnimationTrigger(g.battle.GetTurn().EnemySkillUsed.SkillName)
 		g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
@@ -276,7 +288,7 @@ func (g *BattleScene) enemyTurn(turn *battle.Turn) {
 	if g.battle.GetPhase() == battle.Shooting {
 		g.battle.UpdateEnemyAmmo()
 		g.battle.DamagePlayer()
-		if g.battle.Player.DisplayStat(dataManagement.Health) <= 0 {
+		if g.battle.Player.DisplayStat(battleStatsDataManagement.Health) <= 0 {
 			g.battle.BattleLost = true
 		}
 		g.enemyBattleSprite.CombatButtonAnimationTrigger(g.battle.GetTurn().EnemySkillUsed.SkillName)
@@ -343,5 +355,37 @@ func (g *BattleScene) DrawCharOutline(screen *ebiten.Image, sprite gameObjects.B
 				sprite.SpriteSheet.Rect(31),
 			).(*ebiten.Image),
 			&opts)
+	}
+}
+
+func (g *BattleScene) UpdateTurnOutput(turn *battle.Turn) {
+
+}
+
+func (g *BattleScene) UpdateBattleSceneState(turn *battle.Turn) {
+	if turn.TurnInitiative == battle.Player {
+		if !turn.PlayerEventTriggered {
+			g.playerTurn(turn)
+			g.State = PlayerTurn
+		} else if g.TextPrinter.NextMessage == false && !turn.EnemyEventTriggered && turn.PlayerEventTriggered {
+			g.enemyTurn(turn)
+			g.State = EnemyTurn
+		} else {
+			g.State = NoTurn
+		}
+	}
+	if turn.TurnInitiative == battle.Enemy {
+		if !turn.EnemyEventTriggered {
+			g.enemyTurn(turn)
+			g.State = EnemyTurn
+		}
+
+		if g.TextPrinter.NextMessage == false && !turn.PlayerEventTriggered && turn.EnemyEventTriggered {
+			g.playerTurn(turn)
+			g.State = PlayerTurn
+
+		} else {
+			g.State = NoTurn
+		}
 	}
 }

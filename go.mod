@@ -1,9 +1,8 @@
-module github.com/acoco10/qdabattlesystem
+module github.com/acoco10/QuickDrawAdventure
 
 go 1.23.1
 
 require (
-	github.com/acoco10/QuickDrawAdventure v0.0.0-00010101000000-000000000000
 	github.com/ebitenui/ebitenui v0.6.0
 	github.com/hajimehoshi/ebiten/v2 v2.7.10
 	github.com/quasilyte/ebitengine-resource v0.5.0
