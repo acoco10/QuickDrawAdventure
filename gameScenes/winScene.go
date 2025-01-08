@@ -36,7 +36,7 @@ func (s *WinScene) Draw(screen *ebiten.Image) {
 	DrawBattleSprite(s.playerBattleSprite, screen, 8)
 
 	dopts := text.DrawOptions{}
-	face, err := LoadFont(60)
+	face, err := LoadFont(60, November)
 
 	if err != nil {
 		log.Fatal(err)

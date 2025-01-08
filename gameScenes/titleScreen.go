@@ -37,7 +37,7 @@ func (s *StartScene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(titleScreenImg, &ebiten.DrawImageOptions{})
 
 	dopts := text.DrawOptions{}
-	face, err := LoadFont(60)
+	face, err := LoadFont(60, November)
 	if err != nil {
 		log.Fatal(err)
 	}

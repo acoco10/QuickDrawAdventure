@@ -1,7 +1,6 @@
 package gameScenes
 
 import (
-	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/ebitenui/ebitenui/widget"
 	"log"
@@ -9,53 +8,44 @@ import (
 	"strings"
 )
 
-type battleTextOutputState uint8
-
-const (
-	PlayerMessage battleTextOutputState = iota
-	EnemyMessage
-	StatusMessage
-	NoMessage
-)
-
 type TextPrinter struct {
-	TextInput         []string
+	TextInput         string
 	lines             []string //slice of segmented strings for line output on eachline
 	Counter           int      //TPS counter for printing text at certain intervals in the gameScenes loop
 	CounterOn         bool     //all this does is make letters print every other frame, maybe a better solution
 	stringPosition    int      //letter that has been printed so far in current textinput[lineindex]
-	MessageIndex      int      //current index in text input slice
 	charactersPerLine int      //number of characters per line
 	StatusText        [3]*widget.TextInput
 	NextMessage       bool //if true we should keep printing(after each complete message in status text we set to false then take playerBattleSprite input to keep printing)
 	lineCounter       int
 	countDown         int
-	state             battleTextOutputState
+	state             TPState
 }
 
-func NewTextPrinter(initialText []string) *TextPrinter {
+type TPState uint8
+
+const (
+	Printing TPState = iota
+	NotPrinting
+)
+
+func NewTextPrinter() *TextPrinter {
 	return &TextPrinter{
-		TextInput:         initialText,
+		TextInput:         "",
 		Counter:           0,
 		CounterOn:         false,
 		stringPosition:    1,
 		charactersPerLine: 75,
 		NextMessage:       true,
-		MessageIndex:      0,
 		countDown:         0,
-		state:             StatusMessage,
 	}
 }
 
 func (t *TextPrinter) MessageLoop(g *BattleScene) {
 	//first run setup
-	if t.MessageIndex == 0 && len(t.lines) == 0 {
-		println("configuring new lines at first check\n")
+	if len(t.lines) == 0 {
 		t.configureLines()
 		t.lineCounter = 0
-		for _, line := range t.lines {
-			fmt.Printf("%s\n", line)
-		}
 	}
 
 	t.StatusText[t.lineCounter].SetText(t.PrintText())
@@ -64,39 +54,16 @@ func (t *TextPrinter) MessageLoop(g *BattleScene) {
 		t.stringPosition++
 	}
 
-	if t.stringPosition == len(t.lines[t.lineCounter])+1 {
-
+	if t.stringPosition > len(t.lines[t.lineCounter]) {
 		t.stringPosition = 1
-
-		if t.MessageIndex+1 == len(t.TextInput) && t.lineCounter+1 == len(t.lines) {
-			fmt.Printf("resetting text\n")
-			t.TextInput = []string{}
-			t.lines = []string{}
-			t.NextMessage = false
-			t.lineCounter = 0
-			t.MessageIndex = 0
-		}
-
 		t.lineCounter++
 	}
 
 	if t.lineCounter == len(t.lines) {
-		if t.MessageIndex < len(t.TextInput)-1 {
-			t.MessageIndex++
-			t.configureLines()
-			for _, line := range t.lines {
-				fmt.Printf("%s\n", line)
-			}
-		} else {
-			t.state = NoMessage
-			t.MessageIndex = 0
-		}
-
+		t.NextMessage = false
 		t.lineCounter = 0
-		if g.battle.GetPhase() != battle.Shooting {
-			t.NextMessage = false
-		}
-		if g.battle.GetPhase() == battle.Shooting && t.MessageIndex == g.battle.GetTurn().PlayerStartIndex+1 {
+
+		if g.battle.GetPhase() == battle.Shooting {
 			if t.countDown == 0 {
 				t.delayedTrigger(20)
 			}
@@ -105,103 +72,9 @@ func (t *TextPrinter) MessageLoop(g *BattleScene) {
 }
 
 // function for use in non battle scene
-func (t *TextPrinter) DialogueMessageLoop() {
-	//first run setup
-	if t.MessageIndex == 0 && len(t.lines) == 0 {
-		println("configuring new lines at first check\n")
-		t.configureLines()
-		t.lineCounter = 0
-		for _, line := range t.lines {
-			fmt.Printf("%s\n", line)
-		}
-	}
-
-	t.StatusText[t.lineCounter].SetText(t.PrintText())
-
-	if t.stringPosition <= len(t.lines[t.lineCounter]) {
-		t.stringPosition++
-	}
-
-	if t.stringPosition == len(t.lines[t.lineCounter])+1 {
-
-		t.stringPosition = 1
-
-		if t.MessageIndex+1 == len(t.TextInput) && t.lineCounter+1 == len(t.lines) {
-			fmt.Printf("resetting text\n")
-			t.TextInput = []string{}
-			t.lines = []string{}
-			t.NextMessage = false
-			t.lineCounter = 0
-			t.MessageIndex = 0
-		}
-
-		t.lineCounter++
-	}
-
-	if t.lineCounter == len(t.lines) {
-		if t.MessageIndex < len(t.TextInput)-1 {
-			t.MessageIndex++
-			t.configureLines()
-			for _, line := range t.lines {
-				fmt.Printf("%s\n", line)
-			}
-		} else {
-			t.MessageIndex = 0
-		}
-
-		t.lineCounter = 0
-		t.NextMessage = false
-	}
-}
-
-func (t *TextPrinter) TestDialogueMessageLoop() {
-	//first run setup
-	if t.MessageIndex == 0 && len(t.lines) == 0 {
-		t.configureLines()
-		t.lineCounter = 0
-
-	}
-
-	println(t.PrintText())
-
-	if t.stringPosition <= len(t.lines[t.lineCounter]) {
-		t.stringPosition++
-	}
-
-	if t.stringPosition == len(t.lines[t.lineCounter])+1 {
-
-		t.stringPosition = 1
-
-		if t.MessageIndex+1 == len(t.TextInput) && t.lineCounter+1 == len(t.lines) {
-			fmt.Printf("resetting text\n")
-			t.TextInput = []string{}
-			t.lines = []string{}
-			t.NextMessage = false
-			t.lineCounter = 0
-			t.MessageIndex = 0
-		}
-
-		t.lineCounter++
-	}
-
-	if t.lineCounter == len(t.lines) {
-		if t.MessageIndex < len(t.TextInput)-1 {
-			t.MessageIndex++
-			t.configureLines()
-			for _, line := range t.lines {
-				fmt.Printf("%s\n", line)
-			}
-		} else {
-			t.MessageIndex = 0
-		}
-
-		t.lineCounter = 0
-		t.NextMessage = false
-	}
-}
 
 func (t *TextPrinter) configureLines() {
-	t.lines = t.MessageWrapperToLines(t.TextInput[t.MessageIndex])
+	t.lines = t.MessageWrapperToLines(t.TextInput)
 }
 
 func (t *TextPrinter) textWrapper(text string) string {
@@ -275,23 +148,20 @@ func (t *TextPrinter) countDownUpdate() {
 
 func (t *TextPrinter) ResetTP() {
 	t.stringPosition = 1
-	t.MessageIndex = 0
 	t.StatusText[0].SetText("")
 	t.StatusText[1].SetText("")
 	t.StatusText[2].SetText("")
-	t.TextInput = []string{}
+	t.TextInput = ""
 	t.lines = []string{}
 	t.lineCounter = 0
 }
 
-func (t *TextPrinter) ResetTPMessageTriggerNext() {
-	t.stringPosition = 1
+func (t *TextPrinter) UpdateTPState() {
+	if !t.NextMessage {
+		t.state = NotPrinting
+	}
 
-	t.StatusText[0].SetText("")
-	t.StatusText[1].SetText("")
-	t.StatusText[2].SetText("")
-
-	//if there are more lines of the message trigger the printer again
-
-	t.NextMessage = true
+	if t.NextMessage {
+		t.state = Printing
+	}
 }

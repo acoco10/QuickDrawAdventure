@@ -1,75 +1,82 @@
 {
 	"phase": 0,
 	"PlayerSkillUsed": {
-		"name": "fan_shot",
+		"name": "stare down",
 		"index": 2,
 		"effects": [
 			{
 				"type": "buff",
-				"stat": "accuracy",
-				"amount": -2,
+				"stat": "fear",
+				"amount": 1,
 				"duration": 0,
 				"initiativeL": false,
-				"damage": [
-					0
-				],
-				"successPer": 100,
+				"damage": null,
+				"successPer": 80,
 				"nShots": 0,
-				"on": "self"
+				"on": "enemy"
 			},
 			{
-				"type": "shot",
-				"stat": "",
-				"amount": 0,
+				"type": "buff",
+				"stat": "accuracy",
+				"amount": 1,
 				"duration": 0,
 				"initiativeL": false,
-				"damage": [
-					1,
-					2
-				],
-				"successPer": 50,
-				"nShots": 3,
-				"on": ""
+				"damage": null,
+				"successPer": 80,
+				"nShots": 0,
+				"on": "successfulSelf"
 			}
 		]
 	},
 	"enemySkillUsed": {
-		"name": "shoot",
-		"index": 0,
+		"name": "stare down",
+		"index": 2,
 		"effects": [
 			{
-				"type": "shot",
-				"stat": "na",
-				"amount": 0,
+				"type": "buff",
+				"stat": "fear",
+				"amount": 1,
 				"duration": 0,
 				"initiativeL": false,
-				"damage": [
-					1,
-					3
-				],
-				"successPer": 60,
-				"nShots": 1,
-				"on": ""
+				"damage": null,
+				"successPer": 80,
+				"nShots": 0,
+				"on": "enemy"
+			},
+			{
+				"type": "buff",
+				"stat": "accuracy",
+				"amount": 1,
+				"duration": 0,
+				"initiativeL": false,
+				"damage": null,
+				"successPer": 80,
+				"nShots": 0,
+				"on": "successfulSelf"
 			}
 		]
 	},
-	"PlayerRoll": false,
-	"PlayerSecondaryRoll": false,
-	"EnemyRoll": false,
-	"EnemySecondaryRoll": false,
-	"DamageToPlayer": [
-		0
-	],
-	"DamageToEnemy": [
-		1,
-		1,
-		0
-	],
+	"PlayerRoll": true,
+	"PlayerSecondaryRoll": true,
+	"EnemyRoll": true,
+	"EnemySecondaryRoll": true,
+	"DamageToPlayer": null,
+	"DamageToEnemy": null,
 	"EnemyEventTriggered": false,
 	"PlayerEventTriggered": false,
 	"WinProbAfterPlayerTurn": 0,
 	"WinProbAfterEnemyTurn": 0,
 	"PlayerStartIndex": 0,
-	"EnemyStartIndex": 6,
-	"EndIndex": 10
+	"EnemyStartIndex": 0,
+	"PlayerMessage": [
+		"Elyse uses stare down",
+		"Elyse manages to look super cool and super intimidating at the same time",
+		"Cowardly Cowboy is shaking in his boots!!!",
+		"Stare down is effective",
+		"Cowardly Cowboy's fear increased by 1"
+	],
+	"EnemyMessage": null,
+	"TurnInitiative": 0,
+	"PlayerEffectsTriggered": false,
+	"PlayerIndex": 0
 }

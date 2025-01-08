@@ -73,37 +73,16 @@ func DialogueStatusEffectButtonEvent(d *DialogueUI) {
 		d.nextScene = true
 	}
 	if d.TextPrinter.NextMessage == false {
-		if len(d.TextPrinter.TextInput) == d.TextPrinter.MessageIndex {
 
-			println("resetting printer and moving cursor to Menu")
+		println("resetting printer and moving cursor to Menu")
 
-			d.TextPrinter.stringPosition = 1
-			d.TextPrinter.MessageIndex = 0
-			d.TextPrinter.StatusText[0].SetText("")
-			d.TextPrinter.StatusText[1].SetText("")
-			d.TextPrinter.TextInput = []string{}
-			d.TextPrinter.lines = []string{}
-			d.TextPrinter.lineCounter = 0
-			d.statusBar.DisableButtonVisibility()
-
-		} else {
-			println("triggering printer again, message index = ", d.TextPrinter.MessageIndex, "\n")
-			//clear the last output
-			d.TextPrinter.stringPosition = 1
-
-			d.TextPrinter.StatusText[0].SetText("")
-			d.TextPrinter.StatusText[1].SetText("")
-			d.TextPrinter.StatusText[2].SetText("")
-
-			//if there are more lines of the message trigger the printer again
-
-			d.TextPrinter.NextMessage = true
-		}
+		d.TextPrinter.ResetTP()
+		d.statusBar.DisableButtonVisibility()
 	}
 }
 
 func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, error) {
-	face, err := LoadFont(14)
+	face, err := LoadFont(14, November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -125,8 +104,8 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 
 	//empty menu to initialize dialogue output menu
 	d.statusBar = &ui.Menu{}
-	d.TextPrinter = NewTextPrinter(textInput)
-
+	d.TextPrinter = NewTextPrinter()
+	d.TextPrinter.TextInput = textInput[0]
 	//container for output menu
 	statusContainer := MinorDialogueContainer()
 	d.statusBar.Buttons = append(d.statusBar.Buttons, GenerateDialogueBarButton(d))
@@ -147,6 +126,7 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	//initialize empty lines for multi line text output
 	statusText := StatusTextInput("white")
 	statusTextLine2 := StatusTextInput("white")
+	statusTextLine3 := StatusTextInput("white")
 
 	//adding to container
 	statusContainer.AddChild(statusText)
@@ -163,6 +143,7 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	d.ui = &gUi
 	d.TextPrinter.StatusText[0] = statusText
 	d.TextPrinter.StatusText[1] = statusTextLine2
+	d.TextPrinter.StatusText[2] = statusTextLine3
 	return d, nil
 }
 
@@ -170,7 +151,6 @@ func (d *DialogueUI) UpdateDialogueUI() error {
 	d.ui.Update()
 	if len(d.TextPrinter.TextInput) > 0 && d.TextPrinter.Counter%2 == 0 && d.TextPrinter.NextMessage {
 		d.TextPrinter.CounterOn = true
-		d.TextPrinter.DialogueMessageLoop()
 	}
 
 	if d.TextPrinter.CounterOn {
@@ -187,6 +167,6 @@ func (d *DialogueUI) Draw(screen *ebiten.Image) error {
 	return nil
 }
 
-func (d *DialogueUI) UpdateDialogueUIText(text []string) {
+func (d *DialogueUI) UpdateDialogueUIText(text string) {
 	d.TextPrinter.TextInput = text
 }

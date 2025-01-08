@@ -27,7 +27,7 @@ func DrawDialoguePopup(player gameObjects.Character, npc gameObjects.Character, 
 		opts.GeoM.Translate(npc.X*4+8+camera.X*4, npc.Y*4-64+camera.Y*4)
 
 		txt := "E"
-		face, err := LoadFont(10)
+		face, err := LoadFont(10, November)
 		if err != nil {
 			log.Fatal("err loading font")
 		}

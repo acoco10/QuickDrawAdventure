@@ -67,6 +67,8 @@ type Turn struct {
 	PlayerMessage          []string
 	EnemyMessage           []string
 	TurnInitiative         Initiative
+	PlayerEffectsTriggered bool
+	PlayerIndex            int
 }
 
 func NewBattle(player *battleStatsDataManagement.Character, enemy *battleStatsDataManagement.Character) *Battle {
@@ -82,7 +84,7 @@ func NewBattle(player *battleStatsDataManagement.Character, enemy *battleStatsDa
 	battle.PlayerAmmo = 6
 	battle.EnemyAmmo = 6
 	battle.WinningProb = 50
-	battle.turnInitiative = battle.RandTurnInitiative()
+	battle.turnInitiative = Player
 	battle.State = NotStarted
 	return &battle
 }
@@ -95,6 +97,7 @@ func (b *Battle) UpdateState() {
 	turn := b.GetTurn()
 	if turn.TurnInitiative == Player {
 		if len(turn.PlayerMessage) > 0 {
+			println("player message length:", len(turn.PlayerMessage))
 			b.State = PlayerTurn
 		}
 		if len(turn.PlayerMessage) == 0 {
@@ -104,6 +107,7 @@ func (b *Battle) UpdateState() {
 			b.State = NextTurn
 		}
 	}
+
 	if turn.TurnInitiative == Enemy {
 		if len(turn.EnemyMessage) > 0 {
 			b.State = EnemyTurn
@@ -202,7 +206,7 @@ func (b *Battle) DamageEnemy() {
 	}
 }
 
-func (b *Battle) TakeTurn(playerSkill battleStatsDataManagement.Skill) {
+func (b *Battle) GenerateTurn(playerSkill battleStatsDataManagement.Skill) {
 
 	if b.turnInitiative != b.nextTurnInitiative && b.battlePhase != Dialogue { //no idea how but we were getting into this loop during the shooting phase sometimes
 
@@ -216,6 +220,7 @@ func (b *Battle) TakeTurn(playerSkill battleStatsDataManagement.Skill) {
 
 	turn := b.Turns[b.Turn]
 	turn.PlayerEventTriggered = false
+	turn.PlayerEffectsTriggered = false
 	turn.EnemyEventTriggered = false
 
 	enemySkill, err := EnemyChooseSkill(*b, b.Enemy.DialogueSkills)

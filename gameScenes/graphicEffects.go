@@ -12,6 +12,13 @@ const (
 	NotTriggered
 )
 
+type GraphicEffectType uint8
+
+const (
+	Static GraphicEffectType = iota
+	Animated
+)
+
 type GraphicEffects interface {
 	Draw(screen *ebiten.Image)
 	Update()
@@ -19,6 +26,7 @@ type GraphicEffects interface {
 	Trigger()
 	CheckState() EffectState
 	UnTrigger()
+	Type() GraphicEffectType
 }
 
 type StaticEffect struct {
@@ -72,6 +80,9 @@ func (se *StaticEffect) Frame() int {
 func (se *StaticEffect) AccessImage() *ebiten.Image {
 	return se.img
 }
+func (se *StaticEffect) Type() GraphicEffectType {
+	return Static
+}
 
 func NewStaticEffect(img *ebiten.Image, x, y float64, duration int, scale float64) *StaticEffect {
 	se := StaticEffect{
@@ -104,6 +115,7 @@ type AnimatedEffect struct {
 	cycles       int
 	state        EffectState
 	scale        float64
+	effectType   GraphicEffectType
 }
 
 func (e *AnimatedEffect) UnTrigger() {
@@ -152,6 +164,10 @@ func (e *AnimatedEffect) Image() *ebiten.Image {
 	return e.img
 }
 
+func (e *AnimatedEffect) Type() GraphicEffectType {
+	return Animated
+}
+
 func NewEffect(img *ebiten.Image, sheet *spritesheet.SpriteSheet, x float64, y float64, lastF int, firstF int, step int, speed int, scale float64) *AnimatedEffect {
 	effect := &AnimatedEffect{
 		spriteSheet:  sheet,
@@ -168,6 +184,7 @@ func NewEffect(img *ebiten.Image, sheet *spritesheet.SpriteSheet, x float64, y f
 		cycles:       1,
 		state:        NotTriggered,
 		scale:        scale,
+		effectType:   Static,
 	}
 	return effect
 }

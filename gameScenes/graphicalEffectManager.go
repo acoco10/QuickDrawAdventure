@@ -27,11 +27,13 @@ const (
 	EnemyStareEffect
 	FearEffect
 	BragEffect
+	InsultEffect
 )
 
 type GraphicalEffectSequencer struct {
 	effects     map[EffectType]GraphicEffects
 	EffectQueue []GraphicEffects
+	effectIndex int
 	state       EffectState
 	counter     int
 	configured  bool
@@ -49,10 +51,12 @@ func (e *GraphicalEffectSequencer) Update() {
 		effect := e.EffectQueue[0]
 		effect.Update()
 		if effect.CheckState() == NotTriggered {
+			e.effectIndex++
 			e.EffectQueue = e.EffectQueue[1:]
 			if len(e.EffectQueue) > 0 && e.EffectQueue[0] != nil {
 				e.EffectQueue[0].Trigger()
 			} else {
+				e.effectIndex = 0
 				e.state = NotTriggered
 			}
 		}
@@ -76,10 +80,13 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 				e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
 			}
 		}
+		if turn.PlayerSkillUsed.SkillName == "insult" {
+			e.EffectQueue = append(e.EffectQueue, e.effects[InsultEffect])
+		}
 		playerEffect := turn.PlayerSkillUsed.Effects[0]
 		if playerEffect.EffectType == "buff" && turn.PlayerRoll {
 			if playerEffect.Stat == "fear" {
-				face, err := LoadFont(15)
+				face, err := LoadFont(15, Lady)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -102,7 +109,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 			if result > 0 {
 
 				println("appending damage effect to playerBattleSprite effects\n", "result:", result, "\n")
-				face, err := LoadFont(15)
+				face, err := LoadFont(15, Lady)
 				if err != nil {
 					log.Fatal("graphicalEffectManager.go:102", err)
 				}
@@ -151,7 +158,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 		enemyEffect := turn.PlayerSkillUsed.Effects[0]
 		if enemyEffect.EffectType == "buff" && turn.PlayerRoll {
 			if enemyEffect.Stat == "fear" {
-				face, err := LoadFont(15)
+				face, err := LoadFont(15, Lady)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -173,7 +180,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 		for _, result := range turn.DamageToPlayer {
 			if result > 0 {
 				println("appending damage effect to enemyBattleSprite effects\n", "result:", result)
-				face, err := LoadFont(15)
+				face, err := LoadFont(15, Lady)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -240,6 +247,7 @@ func (e *GraphicalEffectSequencer) loadCharacterEffects() {
 	effects := map[EffectType]GraphicEffects{
 		DrawEffect:       drawEffect,
 		StareEffect:      stareEffect,
+		InsultEffect:     bragEffect,
 		BragEffect:       bragEffect,
 		EnemyStareEffect: enemyStareEffect,
 	}
@@ -248,8 +256,11 @@ func (e *GraphicalEffectSequencer) loadCharacterEffects() {
 
 func (e *GraphicalEffectSequencer) Draw(screen *ebiten.Image) {
 	if e.state == Triggered {
-		effect := e.EffectQueue[0]
-		effect.Draw(screen)
+		if len(e.EffectQueue) > 0 && e.EffectQueue[0] != nil {
+			effect := e.EffectQueue[0]
+			effect.Draw(screen)
+		}
+
 	}
 }
 

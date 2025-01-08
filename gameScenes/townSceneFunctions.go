@@ -32,6 +32,7 @@ func (g *TownScene) UpdateDoors() {
 					g.Player.InAnimation = false
 				}
 			}
+
 			if object.Status == "leaving" {
 
 				if objectAnimation.Frame() == objectAnimation.FirstF {

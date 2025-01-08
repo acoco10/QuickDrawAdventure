@@ -50,3 +50,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return 1512, 982
 }
+
+func NewBattleTestGame() *Game {
+	sceneMap := map[sceneManager.SceneId]sceneManager.Scene{
+		sceneManager.BattleSceneId:   gameScenes.NewBattleScene(),
+		sceneManager.GameOverSceneID: gameScenes.NewGameOverScene(),
+		sceneManager.WinSceneID:      gameScenes.NewWinScene(),
+	}
+	activeSceneId := sceneManager.BattleSceneId
+	sceneMap[activeSceneId].FirstLoad()
+	return &Game{
+		sceneMap,
+		activeSceneId,
+	}
+}

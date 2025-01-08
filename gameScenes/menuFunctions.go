@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
-	"github.com/acoco10/QuickDrawAdventure/battle"
 	eimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,10 +16,17 @@ import (
 	"strings"
 )
 
+type FontType uint8
+
+const (
+	November FontType = iota
+	Lady
+)
+
 func GenerateSkillButtons(text string, g *BattleScene) (button *widget.Button) {
 
 	// load gameScenes font, more fonts will be selectable later when we implement a resource manager
-	face, err := LoadFont(20)
+	face, err := LoadFont(20, November)
 	buttonText := strings.ToUpper(string(text[0])) + text[1:]
 	if err != nil {
 		log.Fatal(err)
@@ -94,7 +100,7 @@ func MakeStatusContainer() *widget.Container {
 
 func StatusTextInput(textColor string) *widget.TextInput {
 
-	face, err := LoadFont(14)
+	face, err := LoadFont(14, November)
 	white := color.RGBA{R: 232, G: 225, B: 219, A: 255}
 	faceColor := color.RGBA{R: 102, G: 57, B: 48, A: 255}
 	if textColor == "white" {
@@ -158,7 +164,7 @@ func SkillBoxContainer(headerText string) *widget.Container {
 		),
 	)
 
-	face, err := LoadFont(24)
+	face, err := LoadFont(24, November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -308,15 +314,21 @@ func LoadStatusButtonImage() *widget.ButtonImage {
 	}
 }
 
-func LoadFont(size float64) (text.Face, error) {
+func LoadFont(size float64, font FontType) (text.Face, error) {
 	//reading tff file
-	font, err := assets.Fonts.ReadFile("fonts/novem.ttf")
+	LoadedFont, err := assets.Fonts.ReadFile("fonts/novem.ttf")
 	if err != nil {
 		return nil, err
 	}
+	if font == Lady {
+		LoadedFont, err = assets.Fonts.ReadFile("font/LADYI3D_.ttf")
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	//extrapolating bytes to new reader object
-	s, err := text.NewGoTextFaceSource(bytes.NewReader(font))
+	s, err := text.NewGoTextFaceSource(bytes.NewReader(LoadedFont))
 
 	if err != nil {
 		log.Fatal(err)
@@ -335,7 +347,7 @@ func GenerateDrawButton(g *BattleScene) (button *widget.Button) {
 	buttonText := "Draw"
 
 	// load gameScenes font, more fonts will be selectable later when we implement a resource manager
-	face, err := LoadFont(22)
+	face, err := LoadFont(22, November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -399,7 +411,7 @@ func CombatSkillBoxContainer(headerText string) *widget.Container {
 		),
 	)
 
-	face, err := LoadFont(24)
+	face, err := LoadFont(24, November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -449,7 +461,7 @@ func CombatSkillBoxContainer(headerText string) *widget.Container {
 func GenerateCombatSkillButtons(text string, g *BattleScene) (button *widget.Button) {
 
 	// load gameScenes font, more fonts will be selectable later when we implement a resource manager
-	face, err := LoadFont(20)
+	face, err := LoadFont(20, November)
 	buttonText := strings.ToUpper(string(text[0])) + text[1:]
 	if err != nil {
 		log.Fatal(err)
@@ -511,7 +523,6 @@ func GenerateStatusBarButton(g *BattleScene) (button *widget.Button) {
 		),
 		),
 		widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) {
-			args.Button.GetWidget().Disabled = false
 		},
 		),
 	)
@@ -521,7 +532,7 @@ func GenerateStatusBarButton(g *BattleScene) (button *widget.Button) {
 func DialogueSkillButtonEvent(g *BattleScene, text string) {
 	g.playerBattleSprite.DialogueButtonAnimationTrigger(text)
 	g.TextPrinter.ResetTP()
-	g.battle.TakeTurn(g.battle.Player.DialogueSkills[text])
+	g.battle.GenerateTurn(g.battle.Player.DialogueSkills[text])
 	g.changeEvent(HideSkillMenu, 15)
 	g.inMenu = false
 	g.KeepCursorPressed()
@@ -531,7 +542,6 @@ func DialogueSkillButtonEvent(g *BattleScene, text string) {
 func CombatSkillButtonEvent(g *BattleScene, text string) {
 	g.playerBattleSprite.CombatButtonAnimationTrigger(text)
 	g.TextPrinter.ResetTP()
-	g.TextPrinter.TextInput = g.battle.TakeCombatTurn(g.battle.Player.CombatSkills[text])
 	g.TextPrinter.NextMessage = true
 	g.changeEvent(HideCombatMenu, 15)
 	g.inMenu = false
@@ -541,7 +551,7 @@ func CombatSkillButtonEvent(g *BattleScene, text string) {
 func DrawSkillButtonEvent(g *BattleScene, text string) {
 	g.audioPlayer.Play(audioManagement.DrawButton)
 	g.TextPrinter.ResetTP()
-	g.battle.TakeTurn(g.battle.Player.DialogueSkills["draw"])
+	g.battle.GenerateTurn(g.battle.Player.DialogueSkills["draw"])
 	g.TextPrinter.NextMessage = true
 	g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
 	g.changeEvent(HideSkillMenu, 15)
@@ -550,49 +560,8 @@ func DrawSkillButtonEvent(g *BattleScene, text string) {
 }
 
 func StatusEffectButtonEvent(g *BattleScene) {
-	if len(g.graphicalEffectManager.PlayerEffects.EffectQueue) > 0 {
-		if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].CheckState() == Triggered {
-			println("untriggering static effect", g.TextPrinter.MessageIndex)
-			g.graphicalEffectManager.PlayerEffects.EffectQueue[0].UnTrigger()
-		}
-	}
-	if g.TextPrinter.NextMessage == false {
-		if len(g.TextPrinter.TextInput) == g.TextPrinter.MessageIndex {
-
-			println("resetting printer and moving cursor to Menu")
-
-			g.TextPrinter.stringPosition = 1
-			g.TextPrinter.MessageIndex = 0
-			g.TextPrinter.StatusText[0].SetText("")
-			g.TextPrinter.StatusText[1].SetText("")
-			g.TextPrinter.StatusText[2].SetText("")
-			g.TextPrinter.TextInput = []string{}
-			g.TextPrinter.lines = []string{}
-			g.TextPrinter.lineCounter = 0
-			g.inMenu = true
-			g.statusBar.DisableButtonVisibility()
-
-			if g.battle.GetPhase() == battle.Dialogue {
-				g.changeEvent(MoveCursorToSkillMenu, 20)
-			}
-
-			if g.battle.GetPhase() == battle.Shooting {
-				g.changeEvent(MoveCursorToCombatMenu, 20)
-			}
-
-		} else {
-			println("triggering printer again, message index = ", g.TextPrinter.MessageIndex, "\n")
-			//clear the last output
-			g.TextPrinter.stringPosition = 1
-
-			g.TextPrinter.StatusText[0].SetText("")
-			g.TextPrinter.StatusText[1].SetText("")
-			g.TextPrinter.StatusText[2].SetText("")
-
-			//if there are more lines of the message trigger the printer again
-
-			g.TextPrinter.NextMessage = true
-		}
+	if g.TextPrinter.state == NotPrinting {
+		g.StatusButtonEvent = true
 	}
 }
 
@@ -630,32 +599,22 @@ func GenerateGenericStatusBarButton(printer *TextPrinter) (button *widget.Button
 func GenericStatusEffectButtonEvent(printer *TextPrinter) {
 
 	if printer.NextMessage == false {
-		if len(printer.TextInput) == printer.MessageIndex {
 
-			println("resetting printer and moving cursor to Menu")
+		println("resetting printer and moving cursor to Menu")
 
-			printer.stringPosition = 1
-			printer.MessageIndex = 0
-			printer.StatusText[0].SetText("")
-			printer.StatusText[1].SetText("")
-			printer.StatusText[2].SetText("")
-			printer.TextInput = []string{}
-			printer.lines = []string{}
-			printer.lineCounter = 0
+		printer.ResetTP()
 
-		} else {
-			println("triggering printer again, message index = ", printer.MessageIndex, "\n")
-			//clear the last output
-			printer.stringPosition = 1
+	} else {
+		//clear the last output
+		printer.stringPosition = 1
 
-			printer.StatusText[0].SetText("")
-			printer.StatusText[1].SetText("")
-			printer.StatusText[2].SetText("")
+		printer.StatusText[0].SetText("")
+		printer.StatusText[1].SetText("")
+		printer.StatusText[2].SetText("")
 
-			//if there are more lines of the message trigger the printer again
+		//if there are more lines of the message trigger the printer again
 
-			printer.NextMessage = true
-		}
+		printer.NextMessage = true
 	}
 }
 
