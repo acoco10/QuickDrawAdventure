@@ -1,12 +1,12 @@
 {"skills":[ 
     {"name": "stare down",
         "index": 2,
+        "tension": 2,
         "effects": [{
             "type": "buff",
             "on" : "enemy",
             "stat": "fear",
             "amount": 1,
-            "tension": 2,
             "successPer": 80
         },
             {"type": "buff",
@@ -19,11 +19,11 @@
     },
     {"name": "brag",
         "index": 0,
+        "tension":1,
         "effects": [
             {
                 "type": "buff",
                 "on": "enemy",
-                "tension":1,
                 "stat": "fear",
                 "amount": 2,
                 "successPer": 75
@@ -40,10 +40,10 @@
 
     {"name": "insult",
         "index": 1,
+        "tension": 2,
     "effects": [
         {
             "type": "buff",
-            "tension": 2,
             "on": "enemy",
             "stat": "anger",
             "amount": 3,

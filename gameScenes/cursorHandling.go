@@ -200,7 +200,7 @@ func loadNormalCursorImage() *ebiten.Image {
 		}
 	}(f)
 	i, _, _ := ebitenutil.NewImageFromReader(f)
-	return ebiten.NewImageFromImage(i.SubImage(image.Rect(64, 0, 87, 16)))
+	return ebiten.NewImageFromImage(i.SubImage(image.Rect(0, 0, 32, 25)))
 	//(64, 0, 87, 16)
 }
 

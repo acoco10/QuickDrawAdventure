@@ -3,7 +3,6 @@ package gameObjects
 import (
 	"github.com/acoco10/QuickDrawAdventure/animations"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -12,54 +11,64 @@ type ObjectState uint8
 const (
 	Entering ObjectState = iota
 	Leaving
+	NotTriggered
+	On
 )
 
-type Object struct {
+type Object interface {
+	Update()
+}
+
+type DoorObject struct {
 	*Sprite
+	Trigger
 	Animation         map[ObjectState]*animations.Animation
 	AnimationActive   bool
 	AnimationComplete bool
-	Status            string
+	Status            ObjectState
 	SpriteSheet       spritesheet.SpriteSheet
-	Name              string
+	DrawAbovePlayer   bool
 }
 
-func (o *Object) ActiveAnimation(door string) *animations.Animation {
-	if door == "entering" {
-		return o.Animation[Entering]
+func (do *DoorObject) ActiveAnimation(objectState ObjectState) *animations.Animation {
+	if do.Type == EntryDoor || do.Type == ExitDoor {
+		return do.Animation[objectState]
 	}
-	if door == "leaving" {
-		return o.Animation[Leaving]
+	if do.Type == ContextualObject {
+		return do.Animation[objectState]
 	}
 	return nil
 }
 
-func (o *Object) PlayAnimation() {
-	o.AnimationActive = true
+func (do *DoorObject) PlayAnimation() {
+	do.AnimationActive = true
 }
 
-func (o *Object) StopAnimation() {
-	o.AnimationActive = false
-	o.Status = ""
+func (do *DoorObject) StopAnimation() {
+	do.AnimationActive = false
+	do.Status = NotTriggered
 }
 
-func NewObject(pImg *ebiten.Image, locationX float64, locationY float64, sheet spritesheet.SpriteSheet, enteringAnimation *animations.Animation, leavingAnimation *animations.Animation, name string) (*Object, error) {
+func NewObject(pImg *ebiten.Image, sheet spritesheet.SpriteSheet, enteringAnimation *animations.Animation, leavingAnimation *animations.Animation, trigger Trigger) (*DoorObject, error) {
+	objHeight := sheet.SpriteHeight
 
-	object := &Object{
+	object := &DoorObject{
 		Sprite: &Sprite{
 			Img: pImg,
-			X:   locationX - 1,
-			Y:   locationY - 32,
+			X:   float64(trigger.Rect.Min.X),
+			Y:   float64(trigger.Rect.Max.Y - objHeight),
 		},
 		Animation: map[ObjectState]*animations.Animation{
 			Entering: enteringAnimation,
 			Leaving:  leavingAnimation,
+			On:       animations.NewAnimation(2, 2, 1, 10),
 		},
 		AnimationActive:   false,
 		AnimationComplete: false,
-		Status:            "",
+		Status:            NotTriggered,
 		SpriteSheet:       sheet,
-		Name:              name,
+		Trigger:           trigger,
+		DrawAbovePlayer:   false,
 	}
 	return object, nil
 }

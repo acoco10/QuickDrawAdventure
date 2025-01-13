@@ -12,53 +12,75 @@ func (g *TownScene) UpdateDoors() {
 	for _, object := range g.Objects {
 		objectAnimation := object.ActiveAnimation(object.Status)
 		if objectAnimation != nil {
-			if object.Status == "entering" {
-				objectAnimation.Update()
-
-				if objectAnimation.Frame() == objectAnimation.LastF-3 {
-					//remove sprite on last frame before they are shown inside the building
-					g.Player.Visible = false
+			if object.Type == gameObjects.EntryDoor || object.Type == gameObjects.ExitDoor {
+				if object.Status == gameObjects.Entering {
+					println("updating door,", object.Name)
 					objectAnimation.Update()
+
+					if objectAnimation.Frame() == objectAnimation.LastF-3 {
+						println("making player not visible for entering building effect")
+						//remove sprite on last frame before they are shown inside the building
+						g.Player.Visible = false
+						objectAnimation.Update()
+					}
+
+					if objectAnimation.Frame() == objectAnimation.LastF {
+						println("changing player location to building interior")
+						g.Player.Visible = true
+						x, y := gameObjects.GetDoorCoord(g.MapData.ExitDoors, object.Name, "up")
+						g.Player.X = x
+						g.Player.Y = y
+						objectAnimation.Update()
+						object.StopAnimation()
+						objectAnimation.Reset()
+						g.Player.InAnimation = false
+					}
 				}
 
-				if objectAnimation.Frame() == objectAnimation.LastF {
-					g.Player.Visible = true
-					x, y := gameObjects.GetDoorCoord(g.ExitDoors, object.Name, "up")
-					g.Player.X = x
-					g.Player.Y = y
-					objectAnimation.Update()
-					object.StopAnimation()
-					objectAnimation.Reset()
-					g.Player.InAnimation = false
+				if object.Status == gameObjects.Leaving {
+
+					if objectAnimation.Frame() == objectAnimation.FirstF {
+						x, y := gameObjects.GetDoorCoord(g.MapData.EntryDoors, object.Name, "down")
+						g.Player.X = x
+						g.Player.Y = y
+						g.Player.InAnimation = false
+						objectAnimation.Update()
+
+					} else if objectAnimation.Frame() == objectAnimation.LastF {
+						object.StopAnimation()
+						objectAnimation.Reset()
+
+					} else {
+
+						objectAnimation.Update()
+					}
 				}
 			}
-
-			if object.Status == "leaving" {
-
-				if objectAnimation.Frame() == objectAnimation.FirstF {
-					x, y := gameObjects.GetDoorCoord(g.EntranceDoors, object.Name, "down")
-					g.Player.X = x
-					g.Player.Y = y
-					g.Player.InAnimation = false
+			if object.Type == gameObjects.ContextualObject {
+				if objectAnimation.Frame() == objectAnimation.LastF {
 					objectAnimation.Update()
-
-				} else if objectAnimation.Frame() == objectAnimation.LastF {
 					object.StopAnimation()
 					objectAnimation.Reset()
-
-				} else {
+				}
+				if object.Status == gameObjects.Entering {
 					objectAnimation.Update()
 				}
+				if object.Status == gameObjects.On {
+					objectAnimation.Update()
+				}
+
 			}
 		}
+
 	}
 }
 
 func (g *TownScene) SortCharacters() []*gameObjects.Character {
-	var characters []*gameObjects.Character
-	characters = make([]*gameObjects.Character, len(g.NPC)+1)
-	characters = append(g.NPC, g.Player)
-
+	characters := make([]*gameObjects.Character, 0)
+	characters = append(characters, g.Player)
+	for _, char := range g.NPC {
+		characters = append(characters, char)
+	}
 	sort.Slice(characters, func(i, j int) bool {
 		return characters[i].Y < characters[j].Y
 	})

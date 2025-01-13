@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
-	"github.com/acoco10/QuickDrawAdventure/gameScenes"
+	"github.com/acoco10/QuickDrawAdventure/dialogueData"
 	"math/rand"
 	"testing"
 )
@@ -134,34 +134,6 @@ func TestBattleState(t *testing.T) {
 		t.Fatalf("test6: incorrect state")
 	}
 
-}
-
-func TestBattleStateWithTextPrinter(t *testing.T) {
-	b := MakeTestBattle()
-	tp := gameScenes.NewTextPrinter([]string{"welcome to the battle"})
-
-	tp.TextInput = b.GetTurn().EnemyMessage[0:1]
-	tp.NextMessage = true
-	statusText := gameScenes.StatusTextInput("b")
-	statusTextLine2 := gameScenes.StatusTextInput("b")
-	statusTextLine3 := gameScenes.StatusTextInput("b")
-
-	tp.StatusText[0] = statusText
-	tp.StatusText[1] = statusTextLine2
-	tp.StatusText[2] = statusTextLine3
-
-	for tp.NextMessage {
-		tp.TestDialogueMessageLoop()
-		if !tp.NextMessage {
-			if len(b.GetTurn().EnemyMessage) > 0 {
-				tp.TextInput = b.GetTurn().EnemyMessage[0:1]
-				b.GetTurn().EnemyMessage = b.GetTurn().EnemyMessage[1:]
-				//if effect
-				//playEffect if Effect is over next message = true
-				tp.NextMessage = true
-			}
-		}
-	}
 }
 
 func TestLoadBadSkillJSON(t *testing.T) {
@@ -329,3 +301,8 @@ func Test_use_stat_Buff(t *testing.T) {
 
 }
 */
+
+func TestDialogueData(t *testing.T) {
+	dialogue := dialogueData.GetPlayerResponse("billyBob", 1, 1)
+	println(dialogue)
+}

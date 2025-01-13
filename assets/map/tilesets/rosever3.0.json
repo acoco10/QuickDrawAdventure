@@ -8,9 +8,9 @@
  "margin":0,
  "name":"rosever3.0",
  "spacing":0,
- "tilecount":8,
+ "tilecount":9,
  "tiledversion":"1.11.0",
- "tileheight":144,
+ "tileheight":187,
  "tiles":[
         {
          "id":0,
@@ -33,7 +33,7 @@
         {
          "id":3,
          "image":"..\/..\/images\/buildings\/theroseinterior.png",
-         "imageheight":144,
+         "imageheight":187,
          "imagewidth":192
         }, 
         {
@@ -59,6 +59,12 @@
          "image":"..\/..\/images\/buildings\/roseColumn2.png",
          "imageheight":48,
          "imagewidth":16
+        }, 
+        {
+         "id":8,
+         "image":"..\/..\/images\/buildings\/roseDoorJam.png",
+         "imageheight":6,
+         "imagewidth":27
         }],
  "tilewidth":192,
  "type":"tileset",

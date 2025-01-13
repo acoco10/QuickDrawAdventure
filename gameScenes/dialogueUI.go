@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/dialogueData"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/ebitenui/ebitenui"
@@ -10,16 +11,44 @@ import (
 	"log"
 )
 
+type DialogUiState uint8
+
+const (
+	PrintingPlayerDialogue DialogUiState = iota
+	PrintingNpcDialogue
+	LastMessage
+	NotInitiated
+)
+
 type DialogueUI struct {
-	ui                *ebitenui.UI
-	TextPrinter       *TextPrinter
-	statusBar         *ui.Menu
-	face              text.Face
-	triggered         bool
-	nextScene         bool
-	triggerScene      sceneManager.SceneId
-	playerPortrait    ebiten.Image
-	characterPortrait ebiten.Image
+	ui                    *ebitenui.UI
+	TextPrinter           *TextPrinter
+	statusBar             *ui.Menu
+	face                  text.Face
+	triggered             bool
+	nextScene             bool
+	triggerScene          sceneManager.SceneId
+	ButtonEvent           bool
+	PlayerDialogueTracker dialogueData.DialogueTracker
+	NpcDialogueTracker    dialogueData.DialogueTracker
+	StoryPoint            int
+	State                 DialogUiState
+	loaded                bool
+}
+
+func (d *DialogueUI) loadDialogueUI(charName string) {
+	playerDialogueTracker := dialogueData.DialogueTracker{
+		charName,
+		1,
+	}
+
+	npcDialogueTracker := dialogueData.DialogueTracker{
+		charName,
+		1,
+	}
+	d.PlayerDialogueTracker = playerDialogueTracker
+	d.NpcDialogueTracker = npcDialogueTracker
+	d.loaded = true
 }
 
 func (d *DialogueUI) Trigger() {
@@ -147,6 +176,25 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	return d, nil
 }
 
+func (d *DialogueUI) UpdateState() {
+	if d.loaded {
+		if dialogueData.GetPlayerResponse(d.NpcDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index) != "" {
+			d.State = PrintingPlayerDialogue
+		} else if dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index) != "" {
+			d.State = PrintingNpcDialogue
+		} else {
+			d.State = NotInitiated
+		}
+	}
+}
+
+func (d *DialogueUI) Update() {
+	d.UpdateState()
+	if d.State == PrintingPlayerDialogue {
+		d.TextPrinter.TextInput = dialogueData.GetPlayerResponse(d.NpcDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
+	}
+}
+
 func (d *DialogueUI) UpdateDialogueUI() error {
 	d.ui.Update()
 	if len(d.TextPrinter.TextInput) > 0 && d.TextPrinter.Counter%2 == 0 && d.TextPrinter.NextMessage {
@@ -168,5 +216,8 @@ func (d *DialogueUI) Draw(screen *ebiten.Image) error {
 }
 
 func (d *DialogueUI) UpdateDialogueUIText(text string) {
-	d.TextPrinter.TextInput = text
+	if d.TextPrinter.TextInput == "" {
+		
+		d.TextPrinter.TextInput = dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
+	}
 }

@@ -27,6 +27,7 @@ const (
 	Anger
 	Fear
 	DrawSpeed
+	TensionThreshold
 )
 
 func (pc *Character) UpdateCharHealth(change int) {
@@ -117,8 +118,11 @@ func NewCharacter(name string, stats map[string]int, combatSkills map[string]Ski
 		if key == "fear" {
 			charStats[Fear] = stat
 		}
-		if key == "DrawSpeed" {
+		if key == "drawSpeed" {
 			charStats[DrawSpeed] = stat
+		}
+		if key == "tensionThreshold" {
+			charStats[TensionThreshold] = stat
 		}
 	}
 	if Weakness == "fear" {
@@ -154,6 +158,9 @@ func StringToStat(s string) (Stat, error) {
 	if s == "DrawSpeed" {
 		return DrawSpeed, nil
 	}
+	if s == "TensionThreshold" {
+		return TensionThreshold, nil
+	}
 	return 0, fmt.Errorf("not a valid stat: %s", s)
 }
 
@@ -172,6 +179,9 @@ func StatToString(s Stat) (string, error) {
 	}
 	if s == DrawSpeed {
 		return "draw speed", nil
+	}
+	if s == TensionThreshold {
+		return "tension threshold", nil
 	}
 	return "", fmt.Errorf("not a valid stat")
 }

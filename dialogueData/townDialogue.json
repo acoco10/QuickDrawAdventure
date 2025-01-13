@@ -1,0 +1,42 @@
+{
+  "characters": [
+    {
+      "name": "jarvis",
+      "dialogue": [
+        {
+          "storyPoint": 1,
+          "dialogues": [
+            {
+              "dialogueId": 1,
+              "dialogueText": "Owner of this bar knows everyone in town."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bethAnne",
+      "dialogues": [
+        {
+          "storyPoint": 1,
+          "dialogue": [
+            {
+              "dialogueId": 1,
+              "dialogueText": "Howdy there, what brings a girl like you to a town like this?"
+            },
+            {
+              "dialogueId": 2,
+              "dialogueText": "Sure I might... you look a little thirsty though."
+            }
+          ]
+        },
+        {
+          "storyPoint": 2,
+          "dialogue": [
+
+          ]
+        }
+      ]
+    }
+  ]
+}

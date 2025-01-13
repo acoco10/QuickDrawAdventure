@@ -46,6 +46,7 @@ type Battle struct {
 	EnemyAmmo          int
 	WinningProb        int
 	State              State
+	Tension            int
 }
 
 type Turn struct {
@@ -62,13 +63,17 @@ type Turn struct {
 	PlayerEventTriggered   bool
 	WinProbAfterPlayerTurn int
 	WinProbAfterEnemyTurn  int
-	PlayerStartIndex       int
-	EnemyStartIndex        int
 	PlayerMessage          []string
 	EnemyMessage           []string
 	TurnInitiative         Initiative
 	PlayerEffectsTriggered bool
+	EnemyEffectsTriggered  bool
 	PlayerIndex            int
+	EnemyIndex             int
+	PlayerTurnCompleted    bool
+	EnemyTurnCompleted     bool
+	EnemyWeakness          bool
+	PlayerWeakness         bool
 }
 
 func NewBattle(player *battleStatsDataManagement.Character, enemy *battleStatsDataManagement.Character) *Battle {
@@ -96,14 +101,13 @@ func (b *Battle) GetTurn() *Turn {
 func (b *Battle) UpdateState() {
 	turn := b.GetTurn()
 	if turn.TurnInitiative == Player {
-		if len(turn.PlayerMessage) > 0 {
-			println("player message length:", len(turn.PlayerMessage))
+		if turn.PlayerIndex < len(turn.PlayerMessage)-1 {
 			b.State = PlayerTurn
 		}
-		if len(turn.PlayerMessage) == 0 {
+		if turn.PlayerTurnCompleted {
 			b.State = EnemyTurn
 		}
-		if len(turn.PlayerMessage) == 0 && len(turn.EnemyMessage) == 0 {
+		if turn.PlayerTurnCompleted && turn.EnemyTurnCompleted {
 			b.State = NextTurn
 		}
 	}
@@ -174,6 +178,7 @@ func CapitalizeWord(word string) string {
 }
 
 func (b *Battle) Buff(usedOn *battleStatsDataManagement.Character, effect battleStatsDataManagement.Effect) {
+	weakness, err := battleStatsDataManagement.StringToStat(effect.Stat)
 	stats := usedOn.DisplayStats()
 	affectedStat, err := battleStatsDataManagement.StringToStat(effect.Stat)
 	if err != nil {
@@ -182,8 +187,13 @@ func (b *Battle) Buff(usedOn *battleStatsDataManagement.Character, effect battle
 	affectedStatValue := stats[affectedStat]
 
 	fmt.Printf("%s %s Stat before buff skils: %d\n", usedOn.Name, effect.Stat, affectedStatValue)
-
-	usedOn.UpdateStat(affectedStat, effect.Amount)
+	if weakness == usedOn.Weakness {
+		println("turn:", b.Turn, "weakness triggered")
+		usedOn.UpdateStat(affectedStat, effect.Amount*2)
+	}
+	if weakness != usedOn.Weakness {
+		usedOn.UpdateStat(affectedStat, effect.Amount)
+	}
 
 	fmt.Printf("%s %s Stat after buff skil: %d\n", usedOn.Name, effect.Stat, usedOn.DisplayStat(affectedStat))
 }
@@ -216,12 +226,18 @@ func (b *Battle) GenerateTurn(playerSkill battleStatsDataManagement.Skill) {
 	}
 
 	b.incrementTurn()
+	println("turn incremented", "turn:", b.Turn)
 	b.Turns[b.Turn] = &Turn{}
 
 	turn := b.Turns[b.Turn]
+
 	turn.PlayerEventTriggered = false
 	turn.PlayerEffectsTriggered = false
 	turn.EnemyEventTriggered = false
+	turn.PlayerTurnCompleted = false
+	turn.EnemyTurnCompleted = false
+	turn.EnemyWeakness = false
+	turn.PlayerWeakness = false
 
 	enemySkill, err := EnemyChooseSkill(*b, b.Enemy.DialogueSkills)
 
@@ -250,7 +266,13 @@ func (b *Battle) GenerateTurn(playerSkill battleStatsDataManagement.Skill) {
 	}
 
 	turn.PlayerSecondaryRoll = playerSecondaryRoll
-
+	playerStataffectedbySkill, err := battleStatsDataManagement.StringToStat(playerSkill.Effects[0].Stat)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if playerRoll && playerStataffectedbySkill == b.Enemy.Weakness {
+		turn.EnemyWeakness = true
+	}
 	var battleInitiative bool
 	var playerSkillDialogue []string
 	var enemySkillDialogue []string
@@ -272,8 +294,12 @@ func (b *Battle) GenerateTurn(playerSkill battleStatsDataManagement.Skill) {
 	if playerSkill.SkillName != "draw" {
 		playerSkillDialogue = append(playerSkillDialogue, b.generateMessageForUsedDialogueSkill(*b.Player, *b.Enemy, playerSkill, playerRoll, playerSecondaryRoll)...)
 	}
+	if enemySkill.SkillName != "draw" {
+		enemySkillDialogue = append(enemySkillDialogue, b.generateMessageForUsedDialogueSkill(*b.Enemy, *b.Player, enemySkill, enemyRoll, enemySecondaryRoll)...)
+	}
 
 	turn.PlayerMessage = playerSkillDialogue
+	turn.EnemyMessage = enemySkillDialogue
 	//apply buffs from enemyBattleSprite based on roll results
 
 }
@@ -291,6 +317,7 @@ func (b *Battle) DrawFunction(user *battleStatsDataManagement.Character, opponen
 }
 
 func (b *Battle) EnactEffects(skill battleStatsDataManagement.Skill, user *battleStatsDataManagement.Character, opponent *battleStatsDataManagement.Character, roll bool, secondaryRoll bool) {
+	b.Tension = b.Tension + skill.Tension
 	SkillEffectOne := skill.Effects[0]
 	var skillEffectTwo battleStatsDataManagement.Effect
 
@@ -353,8 +380,6 @@ func (b *Battle) generateDrawMessage(turnTaker *battleStatsDataManagement.Charac
 }
 
 func (b *Battle) generateMessageForUsedDialogueSkill(turnTaker battleStatsDataManagement.Character, opponent battleStatsDataManagement.Character, skill battleStatsDataManagement.Skill, roll bool, secondaryRoll bool) (message []string) {
-
-	fmt.Printf("entering dialogue loop")
 
 	output := fmt.Sprintf("%s uses %s", turnTaker.Name, skill.SkillName)
 
@@ -536,8 +561,6 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStatsDataManagement.Skill) []s
 	playerMessage := b.GenerateMessageForUsedCombatSkill(b.Player.Name, playerSkill.SkillName, turn.DamageToEnemy)
 
 	if b.turnInitiative == Enemy {
-		b.Turns[b.Turn].EnemyStartIndex = 0
-		b.Turns[b.Turn].PlayerStartIndex = len(enemyMessage) - 1
 		message = append(message, enemyMessage...)
 
 		if b.Player.DisplayStat(battleStatsDataManagement.Health) <= 0 {
@@ -552,8 +575,6 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStatsDataManagement.Skill) []s
 		}
 		return message
 	}
-	b.Turns[b.Turn].PlayerStartIndex = 0
-	b.Turns[b.Turn].EnemyStartIndex = len(playerMessage) - 1
 	message = append(message, playerMessage...)
 
 	if b.Enemy.DisplayStat(battleStatsDataManagement.Health) <= 0 {

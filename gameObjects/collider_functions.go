@@ -4,7 +4,7 @@ import (
 	"image"
 )
 
-func CheckCollisionHorizontal(playerSprite *Sprite, colliders []image.Rectangle, npcSprites []*Character) {
+func CheckCollisionHorizontal(playerSprite *Sprite, colliders []image.Rectangle, npcSprites map[string]*Character) {
 	for _, collider := range colliders {
 		//check if player is colliding with collider
 		if collider.Overlaps(
@@ -48,7 +48,7 @@ func CheckCollisionHorizontal(playerSprite *Sprite, colliders []image.Rectangle,
 	}
 }
 
-func CheckCollisionVertical(playerSprite *Sprite, colliders []image.Rectangle, npcSprites []*Character) {
+func CheckCollisionVertical(playerSprite *Sprite, colliders []image.Rectangle, npcSprites map[string]*Character) {
 	for _, collider := range colliders {
 		//check if player is colliding with collider
 		if collider.Overlaps(

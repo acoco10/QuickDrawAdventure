@@ -28,6 +28,8 @@ const (
 	FearEffect
 	BragEffect
 	InsultEffect
+	EnemyFearEffect
+	PlayerUnsuccessfulEffect
 )
 
 type GraphicalEffectSequencer struct {
@@ -64,6 +66,7 @@ func (e *GraphicalEffectSequencer) Update() {
 }
 
 func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
+	println("Enemy Weakness?", turn.EnemyWeakness)
 	if turn.PlayerSkillUsed.SkillName != "" {
 		e.EffectQueue = make([]GraphicEffects, 0)
 		e.configured = true
@@ -71,18 +74,40 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 			e.EffectQueue = append(e.EffectQueue, e.effects[StareEffect])
 		}
 		if turn.PlayerSkillUsed.SkillName == "brag" {
-			e.EffectQueue = append(e.EffectQueue, e.effects[BragEffect])
+			if turn.PlayerRoll {
+				e.EffectQueue = append(e.EffectQueue, e.effects[BragEffect])
+			}
+			if !turn.PlayerRoll {
+				e.EffectQueue = append(e.EffectQueue, e.effects[PlayerUnsuccessfulEffect])
+			}
 		}
 		if turn.PlayerSkillUsed.SkillName == "draw" {
 			if turn.EnemySkillUsed.SkillName != "draw" {
 				e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
-			} else if turn.PlayerStartIndex == 1 {
+			} else if turn.TurnInitiative == battle.Player {
 				e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
 			}
 		}
 		if turn.PlayerSkillUsed.SkillName == "insult" {
-			e.EffectQueue = append(e.EffectQueue, e.effects[InsultEffect])
+			if turn.PlayerRoll {
+				e.EffectQueue = append(e.EffectQueue, e.effects[InsultEffect])
+			}
+
+			if !turn.PlayerRoll {
+				e.EffectQueue = append(e.EffectQueue, e.effects[PlayerUnsuccessfulEffect])
+			}
 		}
+		if turn.EnemyWeakness {
+			weakImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/weaknessEffect.png")
+			if err != nil {
+				log.Fatal("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
+			}
+
+			weaknessEffect := NewStaticEffect(weakImg, 600, 300, 100, 1)
+			e.EffectQueue = append(e.EffectQueue, weaknessEffect)
+			println("adding weakness effect to player effect queue")
+		}
+
 		playerEffect := turn.PlayerSkillUsed.Effects[0]
 		if playerEffect.EffectType == "buff" && turn.PlayerRoll {
 			if playerEffect.Stat == "fear" {
@@ -104,6 +129,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 				e.EffectQueue = append(e.EffectQueue, damageEffect)
 				println("graphicalEffectManager.go:93 length of effect Queue =", len(e.EffectQueue), "\n")
 			}
+
 		}
 		for _, result := range turn.DamageToEnemy {
 			if result > 0 {
@@ -148,7 +174,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 		if turn.EnemySkillUsed.SkillName == "draw" {
 			if turn.PlayerSkillUsed.SkillName != "draw" {
 				e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
-			} else if turn.EnemyStartIndex == 1 {
+			} else if turn.TurnInitiative == battle.Enemy {
 				e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
 			}
 		}
@@ -244,12 +270,24 @@ func (e *GraphicalEffectSequencer) loadCharacterEffects() {
 
 	bragEffect := NewStaticEffect(bragimg, 0, 0, 0, 5)
 
+	insultSuccessfulimg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/elyse/insultSuccessful.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	insultEffect := NewStaticEffect(insultSuccessfulimg, 0, 0, 0, 5)
+
+	unSuccessfulimg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/elyse/ineffectiveBragInsult.png")
+
+	unSuccessfulEffect := NewStaticEffect(unSuccessfulimg, 0, 0, 0, 5)
+
 	effects := map[EffectType]GraphicEffects{
-		DrawEffect:       drawEffect,
-		StareEffect:      stareEffect,
-		InsultEffect:     bragEffect,
-		BragEffect:       bragEffect,
-		EnemyStareEffect: enemyStareEffect,
+		DrawEffect:               drawEffect,
+		StareEffect:              stareEffect,
+		InsultEffect:             insultEffect,
+		BragEffect:               bragEffect,
+		EnemyStareEffect:         enemyStareEffect,
+		PlayerUnsuccessfulEffect: unSuccessfulEffect,
 	}
 	e.effects = effects
 }

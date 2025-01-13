@@ -25,6 +25,7 @@ type Skill struct {
 	SkillName string   `json:"name"`
 	Index     int      `json:"index"`
 	Effects   []Effect `json:"effects"`
+	Tension   int      `json:"tension"`
 }
 
 func StringInSlice(a string, list []string) bool {

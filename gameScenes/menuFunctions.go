@@ -2,7 +2,6 @@ package gameScenes
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	eimage "github.com/ebitenui/ebitenui/image"
@@ -321,7 +320,7 @@ func LoadFont(size float64, font FontType) (text.Face, error) {
 		return nil, err
 	}
 	if font == Lady {
-		LoadedFont, err = assets.Fonts.ReadFile("font/LADYI3D_.ttf")
+		LoadedFont, err = assets.Fonts.ReadFile("fonts/KOMIKZBA.ttf")
 		if err != nil {
 			return nil, err
 		}
@@ -530,13 +529,10 @@ func GenerateStatusBarButton(g *BattleScene) (button *widget.Button) {
 }
 
 func DialogueSkillButtonEvent(g *BattleScene, text string) {
-	g.playerBattleSprite.DialogueButtonAnimationTrigger(text)
-	g.TextPrinter.ResetTP()
 	g.battle.GenerateTurn(g.battle.Player.DialogueSkills[text])
 	g.changeEvent(HideSkillMenu, 15)
 	g.inMenu = false
 	g.KeepCursorPressed()
-	fmt.Printf("elyse used Skill: %s", text)
 }
 
 func CombatSkillButtonEvent(g *BattleScene, text string) {

@@ -5,6 +5,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
 	"github.com/tidwall/gjson"
 	"log"
+	"math"
 	"math/rand/v2"
 	"os"
 )
@@ -26,19 +27,27 @@ func Roll(successPer int) bool {
 }
 
 func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStatsDataManagement.Skill) (skill battleStatsDataManagement.Skill, err error) {
+	if battle.battlePhase == Dialogue {
+		drawChance := 0
+		if battle.Tension > battle.Enemy.Stats[battleStatsDataManagement.TensionThreshold] {
+			drawChance = int(math.Pow(float64(battle.Tension), 1.9))
+		}
 
-	if battle.battlePhase == Dialogue && battle.WinningProb < 40 {
-		return enemySkills["draw"], nil
+		if rand.IntN(100)+1 < drawChance {
+
+			return enemySkills["draw"], nil
+
+		}
 	}
 
 	if battle.EnemyAmmo == 0 {
-		println("enemy chose skill:reload")
 		return enemySkills["reload"], nil
 	}
 
-	randSkillInt := rand.IntN(len(enemySkills)) //reload is the last index and randn is exclusive
+	randSkillInt := rand.IntN(len(enemySkills) - 1) //reload/draw are the last index and randn is exclusive
 
 	skillIndexes := make([]int, 0)
+
 	for _, skillOption := range enemySkills {
 		skillIndexes = append(skillIndexes, skillOption.Index)
 	}
@@ -71,23 +80,33 @@ func Draw(userStats map[battleStatsDataManagement.Stat]int, oppStats map[battleS
 
 	initiative := true
 
-	userDS := userStats[battleStatsDataManagement.DrawSpeed] - userStats[battleStatsDataManagement.Anger]*10 - userStats[battleStatsDataManagement.Fear]*10
-	opponentDS := oppStats[battleStatsDataManagement.DrawSpeed] - oppStats[battleStatsDataManagement.Anger]*10 - oppStats[battleStatsDataManagement.Fear]*10
+	userDS := (float64(userStats[battleStatsDataManagement.DrawSpeed]) - float64(userStats[battleStatsDataManagement.Anger])/2 - float64(userStats[battleStatsDataManagement.Fear])/2) * 10
+	opponentDS := (float64(oppStats[battleStatsDataManagement.DrawSpeed]) - float64(oppStats[battleStatsDataManagement.Anger])/2 - float64(oppStats[battleStatsDataManagement.Fear])/2) * 10
 
-	if rand.IntN(101) > 50+userDS-opponentDS {
+	fmt.Printf("enemyDS: %d, enemy fear: %d, enemy anger: %d", oppStats[battleStatsDataManagement.DrawSpeed], oppStats[battleStatsDataManagement.Anger], oppStats[battleStatsDataManagement.Fear])
+
+	if float64(rand.IntN(101)) > 50+userDS-opponentDS {
 		initiative = false
 	}
 	return initiative
 }
 
 func DrawProb(userStats map[battleStatsDataManagement.Stat]int, oppStats map[battleStatsDataManagement.Stat]int) int {
-	userDS := userStats[battleStatsDataManagement.DrawSpeed] - userStats[battleStatsDataManagement.Anger]*10 - userStats[battleStatsDataManagement.Fear]*10
-	opponentDS := oppStats[battleStatsDataManagement.DrawSpeed] - oppStats[battleStatsDataManagement.Anger]*10 - oppStats[battleStatsDataManagement.Fear]*10
+
+	userDS := userStats[battleStatsDataManagement.DrawSpeed] - userStats[battleStatsDataManagement.Anger]*5 - userStats[battleStatsDataManagement.Fear]*5
+	opponentDS := oppStats[battleStatsDataManagement.DrawSpeed] - oppStats[battleStatsDataManagement.Anger]*5 - oppStats[battleStatsDataManagement.Fear]*5
+
+	fmt.Printf("enemyDS: %d, enemy fear: %d, enemy anger: %d\n", oppStats[battleStatsDataManagement.DrawSpeed], oppStats[battleStatsDataManagement.Anger], oppStats[battleStatsDataManagement.Fear])
+	fmt.Printf("playerDS: %d, player fear: %d, player anger: %d\n", userStats[battleStatsDataManagement.DrawSpeed], userStats[battleStatsDataManagement.Anger], userStats[battleStatsDataManagement.Fear])
+
+	println("player draw speed(user) =", userDS)
+	println("enemy draw  speed(opponent) =", opponentDS)
+
 	return 50 + userDS - opponentDS
 }
 
 func GetSkillDialogue(charName string, skillName string, status bool) string {
-	data, err := os.ReadFile("battle/dialogue.json")
+	data, err := os.ReadFile("battle/battleDialogue.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -106,7 +125,7 @@ func GetSkillDialogue(charName string, skillName string, status bool) string {
 }
 
 func GetResponse(charName string, skillName string, status bool) string {
-	data, err := os.ReadFile("battle/dialogue.json")
+	data, err := os.ReadFile("battle/battleDialogue.json")
 	if err != nil {
 		log.Fatal(err)
 	}

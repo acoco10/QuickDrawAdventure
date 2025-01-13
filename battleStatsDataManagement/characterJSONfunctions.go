@@ -35,6 +35,7 @@ func LoadCharacter(characterJSON CharacterJSON) (Character, error) {
 	if len(characterJSON.CombatSkills) == 0 {
 		return Character{}, errors.New("no combat skills found")
 	}
+
 	dialogueSkillKeys := make([]string, len(dialogueSkills))
 
 	combatSkillKeys := make([]string, len(combatSkills))

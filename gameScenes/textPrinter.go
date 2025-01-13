@@ -154,6 +154,7 @@ func (t *TextPrinter) ResetTP() {
 	t.TextInput = ""
 	t.lines = []string{}
 	t.lineCounter = 0
+	t.NextMessage = true
 }
 
 func (t *TextPrinter) UpdateTPState() {

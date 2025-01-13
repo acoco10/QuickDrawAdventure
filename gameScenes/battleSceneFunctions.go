@@ -202,60 +202,64 @@ func DrawBattleSprite(sprite gameObjects.BattleSprite, screen *ebiten.Image, sca
 		&opts)
 }
 
+func (g *BattleScene) incrementTextPrinter() {
+	if len(g.statusMessage) > 0 {
+		g.TextPrinter.ResetTP()
+		g.TextPrinter.TextInput = g.statusMessage[0]
+		g.statusMessage = g.statusMessage[1:]
+	}
+}
 func (g *BattleScene) PlayerTurn(turn *battle.Turn) {
 	if g.battle.State == battle.PlayerTurn {
-		if g.graphicalEffectManager.PlayerEffects.effectIndex >= 1 {
-			g.ShowStatusBar()
-		}
-		if !g.battle.GetTurn().PlayerEventTriggered {
+		if turn.PlayerIndex == 0 {
 			g.statusMessage = g.battle.GetTurn().PlayerMessage
 			g.battle.GetTurn().PlayerEventTriggered = true
 			if len(g.statusMessage) > 0 {
-				g.TextPrinter.ResetTP()
-				g.TextPrinter.TextInput = g.statusMessage[0]
-				g.statusMessage = g.statusMessage[1:]
+				g.incrementTextPrinter()
 				g.battle.GetTurn().PlayerIndex++
 				g.TextPrinter.NextMessage = true
 			}
 		}
-		if g.StatusButtonEvent {
-
+		if turn.PlayerIndex == 1 && g.TextPrinter.state == NotPrinting && g.StatusButtonEvent {
 			g.StatusButtonEvent = false
-
-			if !turn.PlayerEffectsTriggered {
-				g.graphicalEffectManager.PlayerEffects.ProcessPlayerTurnData(turn)
-				g.graphicalEffectManager.PlayerEffects.TriggerEffectQueue()
-				if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Animated {
-					g.HideStatusBar()
-				}
-				g.audioPlayer.ConfigureAttackResultSoundQueue(g.battle.GetTurn().DamageToEnemy, "npc")
-				turn.PlayerEffectsTriggered = true
+			g.graphicalEffectManager.PlayerEffects.ProcessPlayerTurnData(turn)
+			g.graphicalEffectManager.PlayerEffects.TriggerEffectQueue()
+			g.audioPlayer.ConfigureAttackResultSoundQueue(g.battle.GetTurn().DamageToEnemy, "npc")
+			turn.PlayerEffectsTriggered = true
+			g.incrementTextPrinter()
+			turn.PlayerIndex++
+			if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Animated {
+				g.HideStatusBar()
 			}
-
-			if len(g.statusMessage) > 0 && g.graphicalEffectManager.PlayerEffects.state == NotTriggered || g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Static {
-				g.ShowStatusBar()
-				g.TextPrinter.ResetTP()
-				g.TextPrinter.TextInput = g.statusMessage[0]
-				g.statusMessage = g.statusMessage[1:]
-				g.battle.GetTurn().PlayerIndex++
+			if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Static {
 				g.TextPrinter.NextMessage = true
 			}
-
-			if g.graphicalEffectManager.PlayerEffects.state == Triggered {
-				if g.battle.GetTurn().PlayerIndex == 3 && g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Static {
+		}
+		if turn.PlayerIndex == 2 {
+			if len(g.graphicalEffectManager.PlayerEffects.EffectQueue) > 0 {
+				if g.StatusButtonEvent && g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Static {
 					g.graphicalEffectManager.PlayerEffects.EffectQueue[0].UnTrigger()
+					g.StatusButtonEvent = false
 				}
 			}
+			if g.graphicalEffectManager.PlayerEffects.state == NotTriggered {
+				g.ShowStatusBar()
+				g.incrementTextPrinter()
+				g.TextPrinter.NextMessage = true
+				turn.PlayerIndex++
+				g.battle.EnactEffects(turn.PlayerSkillUsed, g.battle.Player, g.battle.Enemy, turn.PlayerRoll, turn.PlayerSecondaryRoll)
+				g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
+			}
 
+		}
+		if turn.PlayerIndex > 2 && g.StatusButtonEvent {
+
+			if len(g.statusMessage) > 0 {
+				g.incrementTextPrinter()
+				g.TextPrinter.NextMessage = true
+			}
 			if len(g.statusMessage) <= 0 {
-				g.inMenu = true
-				if g.battle.GetPhase() == battle.Dialogue {
-					g.changeEvent(MoveCursorToSkillMenu, 20)
-				}
-
-				if g.battle.GetPhase() == battle.Shooting {
-					g.changeEvent(MoveCursorToCombatMenu, 20)
-				}
+				turn.PlayerTurnCompleted = true
 				g.TextPrinter.ResetTP()
 			}
 		}
@@ -282,9 +286,6 @@ func (g *BattleScene) PlayerTurn(turn *battle.Turn) {
 			g.playerBattleSprite.UpdateCharEffect(gameObjects.Outline, 150)
 		}*/
 
-		log.Printf("triggering playerBattleSprite effect\n")
-		log.Printf("length of playerBattleSprite effect queue = %d\n", len(g.graphicalEffectManager.PlayerEffects.EffectQueue))
-
 		if g.battle.GetPhase() == battle.Shooting {
 			g.battle.DamageEnemy()
 			g.battle.UpdatePlayerAmmo()
@@ -300,50 +301,101 @@ func (g *BattleScene) PlayerTurn(turn *battle.Turn) {
 
 		}
 	}
-
 }
 
 func (g *BattleScene) enemyTurn(turn *battle.Turn) {
-	turn.EnemyEventTriggered = true
-	if turn.EnemySkillUsed.SkillName == "reload" {
-		g.audioPlayer.Play(audioManagement.Reload)
-	}
-
-	if turn.EnemySkillUsed.SkillName == "draw" && g.battle.GetPhase() == battle.Dialogue {
-		turn.PlayerEventTriggered = true //trigger player event since drawing will end this turn
-		g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
-		g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-		g.playerBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-		g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
-		g.audioPlayer.Play(audioManagement.PistolUnHolster)
-		g.battle.UpdateBattlePhase()
-		g.musicPlayer.Mix(audioManagement.BattleMusic)
-
-	}
-
-	if turn.PlayerSkillUsed.SkillName == "stare down" {
-		g.audioPlayer.Play(audioManagement.StareDownEffect)
-	}
-
-	g.graphicalEffectManager.EnemyEffects.ProcessEnemyTurnData(turn)
-	g.graphicalEffectManager.EnemyEffects.TriggerEffectQueue()
-
-	if g.battle.GetPhase() == battle.Dialogue && g.battle.Turn > 0 {
-		g.battle.EnactEffects(turn.EnemySkillUsed, g.battle.Enemy, g.battle.Player, turn.EnemyRoll, turn.EnemySecondaryRoll)
-		g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
-		g.enemyBattleSprite.DialogueButtonAnimationTrigger(g.battle.GetTurn().EnemySkillUsed.SkillName)
-		g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-	}
-
-	if g.battle.GetPhase() == battle.Shooting {
-		g.battle.UpdateEnemyAmmo()
-		g.battle.DamagePlayer()
-		if g.battle.Player.DisplayStat(battleStatsDataManagement.Health) <= 0 {
-			g.battle.BattleLost = true
+	if g.battle.State == battle.EnemyTurn {
+		if turn.EnemyIndex == 0 {
+			g.statusMessage = g.battle.GetTurn().EnemyMessage
+			g.battle.GetTurn().EnemyEventTriggered = true
+			if len(g.statusMessage) > 0 {
+				g.incrementTextPrinter()
+				g.battle.GetTurn().EnemyIndex++
+				g.TextPrinter.NextMessage = true
+			}
 		}
-		g.enemyBattleSprite.CombatButtonAnimationTrigger(g.battle.GetTurn().EnemySkillUsed.SkillName)
-		g.enemyBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
-		g.audioPlayer.ConfigureAttackResultSoundQueue(g.battle.GetTurn().DamageToPlayer, "Player")
+		if turn.EnemyIndex == 1 && g.TextPrinter.state == NotPrinting && g.StatusButtonEvent {
+			g.StatusButtonEvent = false
+			g.graphicalEffectManager.EnemyEffects.ProcessEnemyTurnData(turn)
+			g.graphicalEffectManager.EnemyEffects.TriggerEffectQueue()
+			g.audioPlayer.ConfigureAttackResultSoundQueue(g.battle.GetTurn().DamageToEnemy, "npc")
+			turn.EnemyEffectsTriggered = true
+			g.incrementTextPrinter()
+			turn.EnemyIndex++
+			if g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == Animated {
+				g.HideStatusBar()
+			}
+			if g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == Static {
+				g.TextPrinter.NextMessage = true
+			}
+		}
+		if turn.EnemyIndex == 2 {
+			g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
+			if len(g.graphicalEffectManager.EnemyEffects.EffectQueue) > 0 {
+				if g.StatusButtonEvent && g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == Static {
+					g.graphicalEffectManager.EnemyEffects.EffectQueue[0].UnTrigger()
+					g.StatusButtonEvent = false
+				}
+			}
+			if g.graphicalEffectManager.EnemyEffects.state == NotTriggered {
+				g.ShowStatusBar()
+				g.incrementTextPrinter()
+				g.TextPrinter.NextMessage = true
+				turn.EnemyIndex++
+				g.battle.EnactEffects(turn.EnemySkillUsed, g.battle.Enemy, g.battle.Player, turn.EnemyRoll, turn.EnemySecondaryRoll)
+				g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
+			}
+		}
+
+		if turn.EnemyIndex > 2 && g.StatusButtonEvent {
+
+			g.StatusButtonEvent = false
+			if len(g.statusMessage) > 0 {
+				g.incrementTextPrinter()
+				g.TextPrinter.NextMessage = true
+			}
+			if len(g.statusMessage) <= 0 {
+				turn.EnemyTurnCompleted = true
+				g.TextPrinter.ResetTP()
+			}
+		}
+
+		/*if turn.EnemySkillUsed.SkillName == "reload" {
+			g.audioEnemy.Play(audioManagement.Reload)
+			g.EnemyBattleSprite.CombatButtonAnimationTrigger("reload")
+			g.EnemyBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
+		}
+
+		if turn.EnemySkillUsed.SkillName == "draw" && g.battle.GetPhase() == battle.Dialogue {
+			turn.EnemyEventTriggered = true
+			g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
+			g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
+			g.EnemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
+			g.EnemyBattleSprite.DialogueButtonAnimationTrigger("draw")
+			g.audioEnemy.Play(audioManagement.PistolUnHolster)
+			g.battle.UpdateBattlePhase()
+			g.musicEnemy.Mix(audioManagement.BattleMusic)
+
+		}
+		if turn.EnemySkillUsed.SkillName == "stare down" {
+			g.audioEnemy.Play(audioManagement.StareDownEffect)
+			g.EnemyBattleSprite.UpdateCharEffect(gameObjects.Outline, 150)
+		}*/
+
+		if g.battle.GetPhase() == battle.Shooting {
+			g.battle.DamageEnemy()
+			g.battle.UpdateEnemyAmmo()
+			for _, effect := range turn.EnemySkillUsed.Effects {
+				if effect.EffectType == "shot" {
+					g.onScreenStatsUI.ammoEffect.state = Triggered
+				}
+			}
+			if g.battle.Enemy.DisplayStat(battleStatsDataManagement.Health) <= 0 {
+				g.battle.BattleWon = true
+			}
+			g.enemyBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
+
+		}
 	}
 }
 
@@ -409,7 +461,18 @@ func (g *BattleScene) DrawCharOutline(screen *ebiten.Image, sprite gameObjects.B
 }
 
 func (g *BattleScene) UpdateOutputDuringNonTurn() {
-	if g.battle.State == battle.NotStarted || g.battle.State == battle.NextTurn {
+	if g.battle.State == battle.NextTurn {
+		if g.battle.GetPhase() == battle.Dialogue && g.inMenu == false {
+			println("next turn check")
+			g.changeEvent(MoveCursorToSkillMenu, 20)
+			g.inMenu = true
+		}
+		if g.battle.GetPhase() == battle.Shooting && g.inMenu == false {
+			g.changeEvent(MoveCursorToCombatMenu, 20)
+		}
+	}
+
+	if g.battle.State == battle.NotStarted {
 		if g.StatusButtonEvent {
 			g.StatusButtonEvent = false
 			if len(g.statusMessage) > 0 {
@@ -418,21 +481,18 @@ func (g *BattleScene) UpdateOutputDuringNonTurn() {
 				g.statusMessage = g.statusMessage[1:]
 				g.TextPrinter.NextMessage = true
 			}
-
-			if len(g.statusMessage) <= 0 {
-				g.inMenu = true
+			if len(g.statusMessage) <= 0 && g.TextPrinter.state == NotPrinting {
 				if g.battle.GetPhase() == battle.Dialogue {
+					g.inMenu = true
 					g.changeEvent(MoveCursorToSkillMenu, 20)
 				}
 
 				if g.battle.GetPhase() == battle.Shooting {
+					g.inMenu = true
 					g.changeEvent(MoveCursorToCombatMenu, 20)
 				}
 				g.TextPrinter.ResetTP()
 			}
 		}
 	}
-
-	g.statusBar.DisableButtonVisibility()
-
 }

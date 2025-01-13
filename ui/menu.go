@@ -38,6 +38,5 @@ func (m *Menu) EnableButtonVisibility() {
 	for _, b := range m.Buttons {
 		b.GetWidget().Visibility = widget.Visibility_Show
 		b.GetWidget().Disabled = false
-		println(b.GetWidget().Disabled)
 	}
 }

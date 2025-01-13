@@ -3,7 +3,7 @@
     "stats": {
         "health":    8,
 		"accuracy":  3,
-		"drawSpeed": 2,
+		"drawSpeed": 80,
 		"fear":      0,
 		"anger":     2
     },
@@ -16,8 +16,9 @@
 
     "health":    7,
     "accuracy":  2,
-    "drawSpeed": 1,
+    "drawSpeed": 85,
     "fear":      2,
+  "tensionThreshold": 6,
     "anger":     0
 },
 "combat_skills": ["shoot", "focused_shot", "reload"],
@@ -25,13 +26,14 @@
   "weakness": "fear"
 },
 
-{"name": "Gunslinger",
+{"name": "Hot Head Gunslinger",
         "stats": {
 
             "health":    6,
             "accuracy":  5,
             "drawSpeed": 3,
             "fear":      0,
+          "tensionThreshold": 4,
             "anger":     2
         },
         "combat_skills": ["shoot", "focused_shot", "reload"],
@@ -45,6 +47,7 @@
       "accuracy":  5,
       "drawSpeed": 3,
       "fear":      2,
+      "tensionThreshold": 7,
       "anger":     0
 
     },

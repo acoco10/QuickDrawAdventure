@@ -27,13 +27,17 @@ func (g *BattleScene) FirstLoad() {
 	elyse := characters[0]
 	enemy := characters[1]
 
+	println("elyse stats after loading=", elyse.DisplayStats()[battleStatsDataManagement.DrawSpeed])
+	println("enemy stats after loading=", enemy.DisplayStats()[battleStatsDataManagement.DrawSpeed])
+
 	var TextInput []string
 
-	TextInput = []string{"Welcome to Quick Draw Adventure!", "you filthy Animal"}
+	TextInput = []string{"you filthy Animal"}
 	g.statusMessage = TextInput
-	g.StatusButtonEvent = true
+	g.StatusButtonEvent = false
 	g.audioPlayer = audioManagement.NewAudioPlayer()
 	g.TextPrinter = NewTextPrinter()
+	g.TextPrinter.TextInput = "Welcome to QuickDraw Adventure!"
 	g.battle = battle.NewBattle(&elyse, &enemy)
 	g.graphicalEffectManager = NewGraphicalEffectManager()
 	g.musicPlayer = audioManagement.NewSongPlayer(audioManagement.DialogueMusic)
@@ -195,10 +199,9 @@ func (g *BattleScene) Layout(outsideWidth int, outsideHeight int) (int, int) {
 
 // Update implements gameScenes.
 func (g *BattleScene) Update() sceneManager.SceneId {
-	g.UpdateOutputDuringNonTurn()
 	g.battle.UpdateState()
 	turn := g.battle.GetTurn()
-
+	g.UpdateOutputDuringNonTurn()
 	g.musicPlayer.Update()
 	g.TextPrinter.countDownUpdate()
 	// update the UI
@@ -217,6 +220,7 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	}
 
 	g.graphicalEffectManager.EnemyEffects.Update()
+
 	g.graphicalEffectManager.PlayerEffects.Update()
 
 	if g.Cursor.countdown > 0 {
@@ -224,6 +228,7 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	}
 
 	if g.eventCountDown > 0 {
+		println("event countdown:", g.eventCountDown)
 		g.eventCountDown--
 	}
 	//have the menu handle its own events
@@ -233,6 +238,7 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	}
 	//
 	g.TextPrinter.UpdateTPState()
+
 	if len(g.TextPrinter.TextInput) > 0 && g.TextPrinter.Counter%2 == 0 && g.TextPrinter.NextMessage {
 
 		g.TextPrinter.CounterOn = true
@@ -252,22 +258,23 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 
 	if g.inMenu && g.battle.GetPhase() == battle.Dialogue {
 		g.dialogueMenu.MenuContainer.GetWidget().Visibility = widget.Visibility_Show
-		g.statusBar.DisableButtonVisibility()
+		//g.statusBar.DisableButtonVisibility()
 	}
 
 	if g.inMenu && g.battle.GetPhase() == battle.Shooting {
 		g.combatMenu.MenuContainer.GetWidget().Visibility = widget.Visibility_Show
 		g.statusBar.DisableButtonVisibility()
 		g.HideSkillMenu()
-		g.DisableSkillButtons()
 	}
 
 	if g.eventCountDown == 1 && g.currentEvent != NoEvent {
 		g.TriggerEvent(g.currentEvent)
+		println("event received:", g.currentEvent, "0= move to dialogue menu, 3 = move to skill menu")
 		g.changeEvent(NoEvent, 0)
 	}
 
 	g.PlayerTurn(turn)
+	g.enemyTurn(turn)
 
 	err := g.onScreenStatsUI.Update(*turn)
 	if err != nil {
@@ -299,18 +306,20 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 }
 
 func PrintStatus(g *BattleScene, screen *ebiten.Image) {
-	face, err := LoadFont(40, Lady)
+	face, err := LoadFont(40, November)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	dp := g.battle.WinningProb
+
 	playerAmmo := fmt.Sprintf("Player Ammo:%d", g.battle.PlayerAmmo)
 	enemyAmmo := fmt.Sprintf("Enemy Ammo :%d", g.battle.EnemyAmmo)
 
 	winningProbText := fmt.Sprintf("Probability of Winning Draw:%d", dp)
 	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.Player.DisplayStat(battleStatsDataManagement.Health))
 	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(battleStatsDataManagement.Health))
+	tensionMeter := fmt.Sprintf("Tension:%d", g.battle.Tension)
 
 	dopts := text.DrawOptions{}
 	dopts.DrawImageOptions.ColorScale.Scale(1, 0, 0, 255)
@@ -318,7 +327,11 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 	text.Draw(screen, winningProbText, face, &dopts)
 	dopts.GeoM.Reset()
 
-	face, err = LoadFont(16, Lady)
+	dopts.DrawImageOptions.ColorScale.Scale(1, 0, 0, 255)
+	dopts.GeoM.Translate(400, 100)
+	text.Draw(screen, tensionMeter, face, &dopts)
+
+	face, err = LoadFont(16, November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -341,7 +354,7 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 }
 
 func debugTextPrint(screen *ebiten.Image, g *BattleScene) {
-	face, err := LoadFont(40, Lady)
+	face, err := LoadFont(40, November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -354,13 +367,13 @@ func debugTextPrint(screen *ebiten.Image, g *BattleScene) {
 		battleState = "battle state = Player Turn"
 	}
 	if g.battle.State == battle.EnemyTurn {
-		battleState = "battle printer state = Enemy Turn"
+		battleState = "battle state = Enemy Turn"
 	}
 	if g.battle.State == battle.NextTurn {
-		battleState = "battle printer state = Status Turn"
+		battleState = "battle state = Next Turn"
 	}
 	if g.battle.State == battle.NotStarted {
-		battleState = "battle printer state = Not Started"
+		battleState = "battle state = Not Started"
 	}
 
 	dopts.GeoM.Translate(600, 500)

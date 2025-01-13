@@ -7,13 +7,20 @@ import (
 
 // go: embed
 type TilemapLayerJSON struct {
-	Data    []int        `json:"data"`
-	Width   int          `json:"width"`
-	Height  int          `json:"height"`
-	Name    string       `json:"name"`
-	Type    string       `json:"type"`
-	Objects []ObjectJSON `json:"objects"`
-	Class   string       `json:"class"`
+	Data       []int            `json:"data"`
+	Width      int              `json:"width"`
+	Height     int              `json:"height"`
+	Name       string           `json:"name"`
+	Type       string           `json:"type"`
+	Objects    []ObjectJSON     `json:"objects"`
+	Class      string           `json:"class"`
+	Properties []PropertiesJSON `json:"properties"`
+}
+
+type PropertiesJSON struct {
+	Name  string `json:"name"`
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }
 
 // all layers in a tilemap

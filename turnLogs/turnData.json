@@ -1,82 +1,80 @@
 {
 	"phase": 0,
 	"PlayerSkillUsed": {
-		"name": "stare down",
-		"index": 2,
+		"name": "brag",
+		"index": 0,
 		"effects": [
 			{
 				"type": "buff",
 				"stat": "fear",
-				"amount": 1,
+				"amount": 2,
 				"duration": 0,
 				"initiativeL": false,
 				"damage": null,
-				"successPer": 80,
+				"successPer": 75,
 				"nShots": 0,
 				"on": "enemy"
 			},
 			{
 				"type": "buff",
-				"stat": "accuracy",
-				"amount": 1,
+				"stat": "fear",
+				"amount": 2,
 				"duration": 0,
 				"initiativeL": false,
 				"damage": null,
-				"successPer": 80,
+				"successPer": 65,
 				"nShots": 0,
-				"on": "successfulSelf"
+				"on": "unsuccessfulSelf"
 			}
-		]
+		],
+		"tension": 1
 	},
 	"enemySkillUsed": {
-		"name": "stare down",
-		"index": 2,
+		"name": "draw",
+		"index": 3,
 		"effects": [
 			{
-				"type": "buff",
-				"stat": "fear",
-				"amount": 1,
+				"type": "draw",
+				"stat": "na",
+				"amount": 0,
 				"duration": 0,
 				"initiativeL": false,
 				"damage": null,
-				"successPer": 80,
+				"successPer": 0,
 				"nShots": 0,
-				"on": "enemy"
-			},
-			{
-				"type": "buff",
-				"stat": "accuracy",
-				"amount": 1,
-				"duration": 0,
-				"initiativeL": false,
-				"damage": null,
-				"successPer": 80,
-				"nShots": 0,
-				"on": "successfulSelf"
+				"on": ""
 			}
-		]
+		],
+		"tension": 0
 	},
 	"PlayerRoll": true,
 	"PlayerSecondaryRoll": true,
-	"EnemyRoll": true,
-	"EnemySecondaryRoll": true,
+	"EnemyRoll": false,
+	"EnemySecondaryRoll": false,
 	"DamageToPlayer": null,
 	"DamageToEnemy": null,
 	"EnemyEventTriggered": false,
 	"PlayerEventTriggered": false,
 	"WinProbAfterPlayerTurn": 0,
 	"WinProbAfterEnemyTurn": 0,
-	"PlayerStartIndex": 0,
-	"EnemyStartIndex": 0,
 	"PlayerMessage": [
-		"Elyse uses stare down",
-		"Elyse manages to look super cool and super intimidating at the same time",
-		"Cowardly Cowboy is shaking in his boots!!!",
-		"Stare down is effective",
-		"Cowardly Cowboy's fear increased by 1"
+		"Elyse uses brag",
+		"Elyse: You aint heard o' me? I go by The Kid, my Posse will be here soon, an' all 12 know their way round a rifle.",
+		"Cowardly Cowboy: Aw jeez The Kid??? I never met a gunslinger with a real-life nickname. You sound p-p-pretty tough.",
+		"Brag is effective",
+		"Cowardly Cowboy's fear increased by 2"
 	],
-	"EnemyMessage": null,
+	"EnemyMessage": [
+		"Cowardly Cowboy reaches for their gun",
+		"He's a second faster!"
+	],
 	"TurnInitiative": 0,
 	"PlayerEffectsTriggered": false,
-	"PlayerIndex": 0
+	"EnemyEffectsTriggered": false,
+	"PlayerIndex": 0,
+	"EnemyIndex": 0,
+	"PlayerTurnCompleted": false,
+	"EnemyTurnCompleted": false,
+	"EnemyWeakness": true,
+	"PlayerWeakness": false
 }

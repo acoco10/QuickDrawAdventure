@@ -10,7 +10,7 @@ func main() {
 	ebiten.SetWindowSize(1512, 982)
 	ebiten.SetWindowTitle("Quick Draw Adventure")
 
-	game := gameManager.NewBattleTestGame()
+	game := gameManager.NewGame()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
