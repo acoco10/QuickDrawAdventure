@@ -1,7 +1,6 @@
 package gameScenes
 
 import (
-	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/ebitenui/ebitenui/widget"
 	"log"
 	"math"
@@ -20,6 +19,7 @@ type TextPrinter struct {
 	lineCounter       int
 	countDown         int
 	state             TPState
+	autoPlayer        bool
 }
 
 type TPState uint8
@@ -38,11 +38,16 @@ func NewTextPrinter() *TextPrinter {
 		charactersPerLine: 75,
 		NextMessage:       true,
 		countDown:         0,
+		autoPlayer:        false,
 	}
 }
 
-func (t *TextPrinter) MessageLoop(g *BattleScene) {
+func (t *TextPrinter) MessageLoop() {
 	//first run setup
+	if len(t.TextInput) <= 0 {
+		t.NextMessage = false
+	}
+
 	if len(t.lines) == 0 {
 		t.configureLines()
 		t.lineCounter = 0
@@ -63,11 +68,6 @@ func (t *TextPrinter) MessageLoop(g *BattleScene) {
 		t.NextMessage = false
 		t.lineCounter = 0
 
-		if g.battle.GetPhase() == battle.Shooting {
-			if t.countDown == 0 {
-				t.delayedTrigger(20)
-			}
-		}
 	}
 }
 

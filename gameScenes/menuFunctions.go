@@ -630,7 +630,7 @@ func MinorDialogueContainer() *widget.Container {
 				StretchVertical:    false,
 			}),
 		),
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(300, 100)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(600, 100)),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
 			widget.RowLayoutOpts.Spacing(10),

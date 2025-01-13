@@ -303,6 +303,6 @@ func Test_use_stat_Buff(t *testing.T) {
 */
 
 func TestDialogueData(t *testing.T) {
-	dialogue := dialogueData.GetPlayerResponse("billyBob", 1, 1)
+	dialogue := dialogueData.GetResponse("bethAnne", 1)
 	println(dialogue)
 }

@@ -27,6 +27,10 @@
             {
               "dialogueId": 2,
               "dialogueText": "Sure I might... you look a little thirsty though."
+            },
+            {
+              "dialogueId": 3,
+              "dialogueText": "Hmmm I did hear about a farmer up north who was having trouble with a local gang throwing their weight around"
             }
           ]
         },

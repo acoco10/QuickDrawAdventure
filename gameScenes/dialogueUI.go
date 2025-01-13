@@ -16,8 +16,7 @@ type DialogUiState uint8
 const (
 	PrintingPlayerDialogue DialogUiState = iota
 	PrintingNpcDialogue
-	LastMessage
-	NotInitiated
+	Completed
 )
 
 type DialogueUI struct {
@@ -36,36 +35,6 @@ type DialogueUI struct {
 	loaded                bool
 }
 
-func (d *DialogueUI) loadDialogueUI(charName string) {
-	playerDialogueTracker := dialogueData.DialogueTracker{
-		charName,
-		1,
-	}
-
-	npcDialogueTracker := dialogueData.DialogueTracker{
-		charName,
-		1,
-	}
-	d.PlayerDialogueTracker = playerDialogueTracker
-	d.NpcDialogueTracker = npcDialogueTracker
-	d.loaded = true
-}
-
-func (d *DialogueUI) Trigger() {
-	d.triggered = true
-}
-
-func (d *DialogueUI) TriggerScene() sceneManager.SceneId {
-	if d.nextScene {
-		return d.triggerScene
-	}
-	return sceneManager.TownSceneID
-}
-
-func (d *DialogueUI) UpdateTriggerScene(sceneId sceneManager.SceneId) {
-	d.triggerScene = sceneId
-}
-
 func GenerateDialogueBarButton(d *DialogueUI) (button *widget.Button) {
 
 	buttonImage := LoadStatusButtonImage()
@@ -74,7 +43,7 @@ func GenerateDialogueBarButton(d *DialogueUI) (button *widget.Button) {
 		widget.ButtonOpts.Image(buttonImage),
 		// add a handler that reacts to clicking the button
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			DialogueStatusEffectButtonEvent(d)
+			d.ButtonEvent = true
 		}), widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(100, 100),
 			//widget.WidgetOpts.CursorHovered("statusBar"),
@@ -97,28 +66,15 @@ func GenerateDialogueBarButton(d *DialogueUI) (button *widget.Button) {
 	return statusButton
 }
 
-func DialogueStatusEffectButtonEvent(d *DialogueUI) {
-	if len(d.TextPrinter.TextInput) == 0 {
-		d.nextScene = true
-	}
-	if d.TextPrinter.NextMessage == false {
-
-		println("resetting printer and moving cursor to Menu")
-
-		d.TextPrinter.ResetTP()
-		d.statusBar.DisableButtonVisibility()
-	}
-}
-
 func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, error) {
 	face, err := LoadFont(14, November)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	textInput := []string{"Owner of this Bar knows everyone in town", "You should try the lemon daquiri"}
 	d := &DialogueUI{}
 	d.face = face
+	d.StoryPoint = 1
 
 	//npc dialogue
 
@@ -134,7 +90,7 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	//empty menu to initialize dialogue output menu
 	d.statusBar = &ui.Menu{}
 	d.TextPrinter = NewTextPrinter()
-	d.TextPrinter.TextInput = textInput[0]
+	d.TextPrinter.TextInput = ""
 	//container for output menu
 	statusContainer := MinorDialogueContainer()
 	d.statusBar.Buttons = append(d.statusBar.Buttons, GenerateDialogueBarButton(d))
@@ -150,6 +106,7 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 			),
 		),
 		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(610, 200)),
 	)
 
 	//initialize empty lines for multi line text output
@@ -176,36 +133,102 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	return d, nil
 }
 
-func (d *DialogueUI) UpdateState() {
-	if d.loaded {
-		if dialogueData.GetPlayerResponse(d.NpcDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index) != "" {
-			d.State = PrintingPlayerDialogue
-		} else if dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index) != "" {
-			d.State = PrintingNpcDialogue
-		} else {
-			d.State = NotInitiated
-		}
+func (d *DialogueUI) LoadDialogueUI(charName string) {
+	playerDialogueTracker := dialogueData.DialogueTracker{
+		CharName: charName,
+		Index:    0,
 	}
+
+	npcDialogueTracker := dialogueData.DialogueTracker{
+		CharName: charName,
+		Index:    1,
+	}
+	d.triggered = true
+	d.PlayerDialogueTracker = playerDialogueTracker
+	d.NpcDialogueTracker = npcDialogueTracker
+	d.TextPrinter.TextInput = dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
+	d.TextPrinter.NextMessage = true
+	d.State = PrintingNpcDialogue
+	d.loaded = true
+}
+
+func (d *DialogueUI) TriggerScene() sceneManager.SceneId {
+	if d.nextScene {
+		return d.triggerScene
+	}
+	return sceneManager.TownSceneID
+}
+
+func (d *DialogueUI) UpdateTriggerScene(sceneId sceneManager.SceneId) {
+	d.triggerScene = sceneId
+}
+func (d *DialogueUI) UpdateState() {
+	playerResponse := dialogueData.GetPlayerResponse(d.PlayerDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
+	npcResponse := dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
+	if playerResponse == "" && npcResponse == "" {
+		println("completed dialogue")
+		d.State = Completed
+	}
+	switch d.State {
+	case PrintingNpcDialogue:
+		d.State = PrintingPlayerDialogue
+	case PrintingPlayerDialogue:
+		d.State = PrintingNpcDialogue
+	}
+
+}
+
+func (d *DialogueUI) Reset() {
+	d.loaded = false
+	d.triggered = false
 }
 
 func (d *DialogueUI) Update() {
-	d.UpdateState()
-	if d.State == PrintingPlayerDialogue {
-		d.TextPrinter.TextInput = dialogueData.GetPlayerResponse(d.NpcDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
-	}
-}
+	if d.triggered {
+		d.ui.Update()
+		textInput := d.TextPrinter.TextInput
 
-func (d *DialogueUI) UpdateDialogueUI() error {
-	d.ui.Update()
-	if len(d.TextPrinter.TextInput) > 0 && d.TextPrinter.Counter%2 == 0 && d.TextPrinter.NextMessage {
-		d.TextPrinter.CounterOn = true
-	}
+		if len(textInput) > 0 && d.TextPrinter.Counter%2 == 0 && d.TextPrinter.NextMessage {
+			d.TextPrinter.CounterOn = true
+			d.TextPrinter.MessageLoop()
+		}
 
-	if d.TextPrinter.CounterOn {
-		d.TextPrinter.UpdateCounter()
-	}
+		if !d.TextPrinter.NextMessage && d.ButtonEvent {
+			d.UpdateState()
+			d.ButtonEvent = false
+			d.TextPrinter.ResetTP()
+			if d.State == PrintingNpcDialogue {
+				d.NpcDialogueTracker.Index++
+				println("entering npc dialogue")
+				npcResponse := dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
+				println(npcResponse == "")
+				if npcResponse != "" {
+					d.TextPrinter.TextInput = npcResponse
+					d.TextPrinter.NextMessage = true
+				} else {
+					d.UpdateState()
+				}
 
-	return nil
+			}
+			if d.State == PrintingPlayerDialogue {
+				println("entering player dialogue")
+				d.PlayerDialogueTracker.Index++
+				playerResponse := dialogueData.GetPlayerResponse(d.PlayerDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
+				println(playerResponse == "")
+				if playerResponse != "" {
+					d.TextPrinter.TextInput = playerResponse
+					d.TextPrinter.NextMessage = true
+				} else {
+					d.UpdateState()
+				}
+			}
+
+			if d.State == Completed {
+				d.Reset()
+			}
+
+		}
+	}
 }
 
 func (d *DialogueUI) Draw(screen *ebiten.Image) error {
@@ -213,11 +236,4 @@ func (d *DialogueUI) Draw(screen *ebiten.Image) error {
 		d.ui.Draw(screen)
 	}
 	return nil
-}
-
-func (d *DialogueUI) UpdateDialogueUIText(text string) {
-	if d.TextPrinter.TextInput == "" {
-		
-		d.TextPrinter.TextInput = dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
-	}
 }

@@ -29,6 +29,7 @@ type TownScene struct {
 	dialogueUi         *DialogueUI
 	loaded             bool
 	cursor             BattleMenuCursorUpdater
+	npcInProximity     gameObjects.Character
 }
 
 func NewTownScene() *TownScene {
@@ -59,6 +60,7 @@ func (g *TownScene) FirstLoad() {
 
 	g.MapData, err = gameObjects.LoadMapObjectData(*tilemapJSON)
 	g.Objects, err = gameObjects.LoadMapObjects(g.MapData)
+	g.npcInProximity = gameObjects.Character{}
 
 	if err != nil {
 		log.Fatal(err)
@@ -117,12 +119,12 @@ func (g *TownScene) FirstLoad() {
 }
 
 func (g *TownScene) Update() sceneManager.SceneId {
-	err := g.dialogueUi.UpdateDialogueUI()
-	if err != nil {
-		log.Fatal(err)
-	}
+	g.dialogueUi.Update()
+
 	g.Player.Dx = 0
+
 	g.Player.Dy = 0
+
 	//react to key presses by adding directional velocity
 	if !g.Player.InAnimation {
 		if ebiten.IsKeyPressed(ebiten.KeyRight) {
@@ -144,8 +146,8 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyE) {
-		g.dialogueUi.Trigger()
+	if ebiten.IsKeyPressed(ebiten.KeyE) && g.npcInProximity.Name != "" {
+		g.dialogueUi.LoadDialogueUI(g.npcInProximity.Name)
 		//LockCursorForDialogue()
 	}
 
@@ -211,7 +213,6 @@ func (g *TownScene) Update() sceneManager.SceneId {
 			g.Player.InAnimation = true
 			object.Status = gameObjects.Leaving
 		}
-
 		if playerOnEntDoor[object.Name] && object.Status == gameObjects.NotTriggered {
 			println("playerOnEntDoor:", object.Name)
 			g.Player.InAnimation = true
@@ -223,8 +224,9 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	}
 
 	//custom script animation for tavern door (swings forward on entrance)
-
+	g.npcInProximity = CheckDialoguePopup(*g.Player, g.NPC)
 	return g.dialogueUi.TriggerScene()
+
 }
 
 // Draw screen + sprites
@@ -238,7 +240,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, g.MapData.StairTriggers)
 	//draw Player
 	for _, object := range g.Objects {
-		println("drawing object:", object.Name)
 		opts.GeoM.Translate(object.X, object.Y)
 		opts.GeoM.Translate(g.cam.X, g.cam.Y)
 		opts.GeoM.Scale(4, 4)
@@ -249,7 +250,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 		if objectAnimation != nil {
 			objectFrame = objectAnimation.Frame()
 		}
-		println("objectFrame:", objectFrame)
 		screen.DrawImage(
 			object.Img.SubImage(
 				object.SpriteSheet.Rect(objectFrame),
@@ -263,7 +263,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	g.DrawCharacters(screen)
 	for _, object := range g.Objects {
 		if object.DrawAbovePlayer {
-			println("drawing object:", object.Name)
 			opts.GeoM.Translate(object.X, object.Y)
 			opts.GeoM.Translate(g.cam.X, g.cam.Y)
 			opts.GeoM.Scale(4, 4)
@@ -274,7 +273,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 			if objectAnimation != nil {
 				objectFrame = objectAnimation.Frame()
 			}
-			println("objectFrame:", objectFrame)
 			screen.DrawImage(
 				object.Img.SubImage(
 					object.SpriteSheet.Rect(objectFrame),
@@ -284,6 +282,7 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 
 			opts.GeoM.Reset()
 		}
+
 	}
 	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.StairTriggers)
 
@@ -315,13 +314,13 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 				false,
 			)
 		}*/
-
+	if g.npcInProximity.Name != "" {
+		DrawDialoguePopUp(screen, g.npcInProximity, g.cam)
+	}
 	err := g.dialogueUi.Draw(screen)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	DrawDialoguePopup(*g.Player, g.NPC, screen, *g.cam)
 
 }
 

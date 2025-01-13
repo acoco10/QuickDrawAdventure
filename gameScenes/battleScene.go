@@ -242,7 +242,7 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	if len(g.TextPrinter.TextInput) > 0 && g.TextPrinter.Counter%2 == 0 && g.TextPrinter.NextMessage {
 
 		g.TextPrinter.CounterOn = true
-		g.TextPrinter.MessageLoop(g)
+		g.TextPrinter.MessageLoop()
 		if g.TextPrinter.Counter%4 == 0 {
 			g.audioPlayer.Play(audioManagement.TextOutput)
 

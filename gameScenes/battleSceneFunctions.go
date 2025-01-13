@@ -220,6 +220,7 @@ func (g *BattleScene) PlayerTurn(turn *battle.Turn) {
 				g.TextPrinter.NextMessage = true
 			}
 		}
+
 		if turn.PlayerIndex == 1 && g.TextPrinter.state == NotPrinting && g.StatusButtonEvent {
 			g.StatusButtonEvent = false
 			g.graphicalEffectManager.PlayerEffects.ProcessPlayerTurnData(turn)
