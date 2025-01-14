@@ -67,7 +67,7 @@ func GenerateDialogueBarButton(d *DialogueUI) (button *widget.Button) {
 }
 
 func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, error) {
-	face, err := LoadFont(14, November)
+	face, err := LoadFont(14, NovemberOutline)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -163,8 +163,8 @@ func (d *DialogueUI) UpdateTriggerScene(sceneId sceneManager.SceneId) {
 	d.triggerScene = sceneId
 }
 func (d *DialogueUI) UpdateState() {
-	playerResponse := dialogueData.GetPlayerResponse(d.PlayerDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
-	npcResponse := dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
+	playerResponse := dialogueData.GetPlayerResponse(d.PlayerDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index+1)
+	npcResponse := dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index+1)
 	if playerResponse == "" && npcResponse == "" {
 		println("completed dialogue")
 		d.State = Completed
@@ -174,6 +174,8 @@ func (d *DialogueUI) UpdateState() {
 		d.State = PrintingPlayerDialogue
 	case PrintingPlayerDialogue:
 		d.State = PrintingNpcDialogue
+	default:
+		d.State = Completed
 	}
 
 }
@@ -194,18 +196,19 @@ func (d *DialogueUI) Update() {
 		}
 
 		if !d.TextPrinter.NextMessage && d.ButtonEvent {
-			d.UpdateState()
 			d.ButtonEvent = false
+			d.UpdateState()
 			d.TextPrinter.ResetTP()
+
 			if d.State == PrintingNpcDialogue {
-				d.NpcDialogueTracker.Index++
 				println("entering npc dialogue")
+				d.NpcDialogueTracker.Index++
 				npcResponse := dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
-				println(npcResponse == "")
 				if npcResponse != "" {
 					d.TextPrinter.TextInput = npcResponse
 					d.TextPrinter.NextMessage = true
 				} else {
+					println("no response from npc dialogue request")
 					d.UpdateState()
 				}
 
@@ -214,17 +217,18 @@ func (d *DialogueUI) Update() {
 				println("entering player dialogue")
 				d.PlayerDialogueTracker.Index++
 				playerResponse := dialogueData.GetPlayerResponse(d.PlayerDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
-				println(playerResponse == "")
 				if playerResponse != "" {
 					d.TextPrinter.TextInput = playerResponse
 					d.TextPrinter.NextMessage = true
 				} else {
+					println("no response from player dialogue request")
 					d.UpdateState()
 				}
 			}
 
 			if d.State == Completed {
 				d.Reset()
+				d.ButtonEvent = false
 			}
 
 		}

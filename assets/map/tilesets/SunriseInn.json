@@ -8,7 +8,7 @@
  "margin":0,
  "name":"SunriseInn",
  "spacing":0,
- "tilecount":6,
+ "tilecount":7,
  "tiledversion":"1.11.0",
  "tileheight":225,
  "tiles":[
@@ -45,8 +45,14 @@
         {
          "id":5,
          "image":"..\/..\/images\/buildings\/sunriseInn\/columns.png",
-         "imageheight":25,
+         "imageheight":32,
          "imagewidth":24
+        }, 
+        {
+         "id":6,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/gunCabinet.png",
+         "imageheight":16,
+         "imagewidth":42
         }],
  "tilewidth":337,
  "type":"tileset",

@@ -1,9 +1,11 @@
 package gameObjects
 
 import (
+	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/animations"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"image"
 	"log"
@@ -29,7 +31,7 @@ const (
 	NpcSpawnObject
 )
 
-type NpcSpawn struct {
+type Spawn struct {
 	Name string
 	X, Y float64
 }
@@ -50,6 +52,12 @@ func NewTrigger(json ObjectJSON) Trigger {
 	return *newTrigger
 }
 
+type Item struct {
+	Name string
+	X, Y float64
+	Img  *ebiten.Image
+}
+
 type MapObjectData struct {
 	EntryDoors        map[string]Trigger
 	ExitDoors         map[string]Trigger
@@ -57,6 +65,7 @@ type MapObjectData struct {
 	Colliders         []image.Rectangle
 	StairTriggers     map[string]*Trigger //pointer because has on/ off setting eg for balcony, not trigger switch
 	ContextualObjects map[string]*Trigger
+	Items             map[string]*Item
 }
 
 func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
@@ -67,6 +76,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	npcSpawns := make(map[string]Trigger)
 	stairTriggers := make(map[string]*Trigger)
 	contextualObjects := make(map[string]*Trigger)
+	items := make(map[string]*Item)
 
 	for _, layer := range tilemapJSON.Layers {
 		if layer.Type == "objectgroup" {
@@ -109,6 +119,22 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					contextualObject.Rect.Min.Y = contextualObject.Rect.Min.Y - 32
 					contextualObject.Rect.Max.Y = contextualObject.Rect.Max.Y - 32
 					contextualObjects[object.Name] = &contextualObject
+				case "itemSpawn":
+					imgPath := fmt.Sprintf("images/items/%s.png", object.Name)
+					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
+
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					item := Item{
+						Name: object.Name,
+						X:    object.X,
+						Y:    object.Y,
+						Img:  img,
+					}
+
+					items[object.Name] = &item
 
 				}
 			}
@@ -122,6 +148,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	mapObjects.StairTriggers = stairTriggers
 	mapObjects.Colliders = colliders
 	mapObjects.ContextualObjects = contextualObjects
+	mapObjects.Items = items
 
 	return mapObjects, nil
 }

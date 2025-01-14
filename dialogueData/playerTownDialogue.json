@@ -8,11 +8,11 @@
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "I'm looking for someone, a Sheriff Briggs. Do you know him?"
+              "dialogueText": "I'm looking for a Sheriff Briggs. Heard of him?"
             },
             {
               "dialogueId": 2,
-              "dialogueText": "I am parched, but I'm pretty broke ma'am. Is there any work in this town for someone who knows their way around a pistol?"
+              "dialogueText": "I am parched, but I'm dead broke ma'am. Used my last dollar getting here. Any work in this town for someone who knows their way around a pistol?"
             },
             {
               "dialogueId": 3,

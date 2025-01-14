@@ -20,7 +20,6 @@ func CheckDialogueTrigger(player gameObjects.Character, npc gameObjects.Characte
 func CheckDialoguePopup(player gameObjects.Character, npc map[string]*gameObjects.Character) gameObjects.Character {
 	for _, char := range npc {
 		if CheckDialogueTrigger(player, *char) {
-			println("player near character:", char.Name)
 			return *char
 		}
 	}

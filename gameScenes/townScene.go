@@ -30,6 +30,7 @@ type TownScene struct {
 	loaded             bool
 	cursor             BattleMenuCursorUpdater
 	npcInProximity     gameObjects.Character
+	dustEffect         *ebiten.Image
 }
 
 func NewTownScene() *TownScene {
@@ -49,6 +50,7 @@ func (g *TownScene) FirstLoad() {
 		//handle error
 		log.Fatal(err)
 	}
+
 	tilesets, err := tilemapJSON.GenTileSets()
 
 	if err != nil {
@@ -239,6 +241,14 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 
 	gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, g.MapData.StairTriggers)
 	//draw Player
+
+	for _, item := range g.MapData.Items {
+		opts.GeoM.Reset()
+		opts.GeoM.Translate(item.X*4, item.Y*4-137)
+		opts.GeoM.Translate(g.cam.X*4, g.cam.Y*4)
+		screen.DrawImage(item.Img, &opts)
+		opts.GeoM.Reset()
+	}
 	for _, object := range g.Objects {
 		opts.GeoM.Translate(object.X, object.Y)
 		opts.GeoM.Translate(g.cam.X, g.cam.Y)
@@ -280,7 +290,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 				&opts,
 			)
 
-			opts.GeoM.Reset()
 		}
 
 	}

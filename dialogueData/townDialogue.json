@@ -2,13 +2,13 @@
   "characters": [
     {
       "name": "jarvis",
-      "dialogue": [
+      "dialogues": [
         {
           "storyPoint": 1,
-          "dialogues": [
+          "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "Owner of this bar knows everyone in town."
+              "dialogueText": "Owner of this bar, Beth Anne knows everyone in town."
             }
           ]
         }
@@ -22,7 +22,7 @@
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "Howdy there, what brings a girl like you to a town like this?"
+              "dialogueText": "Howdy there! what brings a girl like you to a town like this?"
             },
             {
               "dialogueId": 2,
@@ -30,7 +30,7 @@
             },
             {
               "dialogueId": 3,
-              "dialogueText": "Hmmm I did hear about a farmer up north who was having trouble with a local gang throwing their weight around"
+              "dialogueText": "Hmmm I heard about a farmer who was having some trouble with a local gang throwing their weight around. He lives north of here"
             }
           ]
         },

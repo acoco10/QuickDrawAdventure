@@ -12,6 +12,7 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ type FontType uint8
 const (
 	November FontType = iota
 	Lady
+	NovemberOutline
 )
 
 func GenerateSkillButtons(text string, g *BattleScene) (button *widget.Button) {
@@ -321,6 +323,12 @@ func LoadFont(size float64, font FontType) (text.Face, error) {
 	}
 	if font == Lady {
 		LoadedFont, err = assets.Fonts.ReadFile("fonts/KOMIKZBA.ttf")
+		if err != nil {
+			return nil, err
+		}
+	}
+	if font == NovemberOutline {
+		LoadedFont, err = os.ReadFile("november/novemmOutline.ttf")
 		if err != nil {
 			return nil, err
 		}

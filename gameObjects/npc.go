@@ -28,7 +28,7 @@ func (e *NPC) ActiveAnimation(dX, dY int) *animations.Animation {
 	return nil
 }
 
-func NewNPC(eImg *ebiten.Image, npcSpawn NpcSpawn) (*NPC, error) {
+func NewNPC(eImg *ebiten.Image, npcSpawn Spawn) (*NPC, error) {
 	npc := &NPC{
 		Name: npcSpawn.Name,
 		Sprite: &Sprite{

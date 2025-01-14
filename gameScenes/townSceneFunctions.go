@@ -1,10 +1,13 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/ebitenui/ebitenui/input"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"log"
 	"sort"
 )
 
@@ -14,7 +17,6 @@ func (g *TownScene) UpdateDoors() {
 		if objectAnimation != nil {
 			if object.Type == gameObjects.EntryDoor || object.Type == gameObjects.ExitDoor {
 				if object.Status == gameObjects.Entering {
-					println("updating door,", object.Name)
 					objectAnimation.Update()
 
 					if objectAnimation.Frame() == objectAnimation.LastF-3 {
@@ -89,13 +91,31 @@ func (g *TownScene) SortCharacters() []*gameObjects.Character {
 }
 
 func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam camera.Camera) {
+	lDustEffect, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/walkingLeftDust.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rDustEffect, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/walkingRightDust.png")
 
 	opts := &ebiten.DrawImageOptions{}
 
 	opts.GeoM.Translate(character.X, character.Y)
 	opts.GeoM.Translate(cam.X, cam.Y)
 	opts.GeoM.Scale(4, 4)
+	if character.Dx > 0 {
+		opts.GeoM.Translate(-34, 70)
+		screen.DrawImage(lDustEffect, opts)
 
+	}
+	if character.Dy < 0 {
+		opts.GeoM.Translate(0, 85)
+		screen.DrawImage(rDustEffect, opts)
+	}
+
+	opts.GeoM.Reset()
+	opts.GeoM.Translate(character.X, character.Y)
+	opts.GeoM.Translate(cam.X, cam.Y)
+	opts.GeoM.Scale(4, 4)
 	characterFrame := 0
 	characterActiveAnimation := character.ActiveAnimation(int(character.Dx), int(character.Dy))
 	if characterActiveAnimation != nil {
@@ -126,6 +146,7 @@ func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam c
 			opts,
 		)
 	}
+
 	opts.GeoM.Reset()
 }
 
