@@ -248,7 +248,7 @@ func (e *GraphicalEffectSequencer) loadCharacterEffects() {
 	drawEffectSpriteSheet := spritesheet.NewSpritesheet(1, 4, 199, 125)
 	drawEffect := NewEffect(drawImg, drawEffectSpriteSheet, 450, 200, 3, 0, 1, 12, 4)
 
-	enemyStaredownimg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/sheriffStaredownAnimationSpriteSheet.png")
+	enemyStaredownimg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/battleSprites/sheriffStaredownAnimationSpriteSheet.png")
 	if err != nil {
 		log.Fatal(err)
 	}

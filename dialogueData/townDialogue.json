@@ -41,6 +41,20 @@
           ]
         }
       ]
+    },
+    {
+    "name": "zeph",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "..."
+          }
+        ]
+      }
+    ]
     }
   ]
 }

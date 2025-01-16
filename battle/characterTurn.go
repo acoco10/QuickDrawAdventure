@@ -27,7 +27,7 @@ func Roll(successPer int) bool {
 }
 
 func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStatsDataManagement.Skill) (skill battleStatsDataManagement.Skill, err error) {
-	if battle.battlePhase == Dialogue {
+	if battle.BattlePhase == Dialogue {
 		drawChance := 0
 		if battle.Tension > battle.Enemy.Stats[battleStatsDataManagement.TensionThreshold] {
 			drawChance = int(math.Pow(float64(battle.Tension), 1.9))
@@ -69,7 +69,7 @@ func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStatsDataManag
 	if skill.SkillName == "reload" {
 		skill = enemySkills["focusedShot"]
 	}
-	if battle.battlePhase == Dialogue {
+	if battle.BattlePhase == Dialogue {
 		skill = enemySkills["stare down"]
 	}
 

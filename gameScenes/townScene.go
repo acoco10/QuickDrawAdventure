@@ -16,21 +16,23 @@ import (
 type TownScene struct {
 
 	//gameScenes elements
-	Player             *gameObjects.Character
-	NPC                map[string]*gameObjects.Character
-	tilemapJSON        *gameObjects.TilemapJSON
-	tilesets           []gameObjects.Tileset
-	cam                *camera.Camera
-	colliders          []image.Rectangle
-	MapData            gameObjects.MapObjectData
-	Objects            []*gameObjects.DoorObject
-	action             bool
-	debugCollisionMode bool
-	dialogueUi         *DialogueUI
-	loaded             bool
-	cursor             BattleMenuCursorUpdater
-	npcInProximity     gameObjects.Character
-	dustEffect         *ebiten.Image
+	Player              *gameObjects.Character
+	NPC                 map[string]*gameObjects.Character
+	tilemapJSON         *gameObjects.TilemapJSON
+	tilesets            []gameObjects.Tileset
+	cam                 *camera.Camera
+	colliders           []image.Rectangle
+	MapData             gameObjects.MapObjectData
+	Objects             []*gameObjects.DoorObject
+	action              bool
+	debugCollisionMode  bool
+	dialogueUi          *DialogueUI
+	loaded              bool
+	cursor              BattleMenuCursorUpdater
+	npcInProximity      gameObjects.Character
+	interactInProximity gameObjects.Item
+	triggerInteraction  bool
+	dustEffect          *ebiten.Image
 }
 
 func NewTownScene() *TownScene {
@@ -79,12 +81,17 @@ func (g *TownScene) FirstLoad() {
 		log.Fatal(err)
 	}
 
-	bethAnneImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/bethAnne.png")
+	bethAnneImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/townFolk/bethAnne.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	jarvisImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/TownPerson1.png")
+	jarvisImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/townFolk/jarvis.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	zephImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/townFolk/zeph.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,10 +103,6 @@ func (g *TownScene) FirstLoad() {
 		log.Fatal(err)
 	}
 
-	player, _ := gameObjects.NewCharacter(playerImg, npcSpawn["player"], *charSpriteSheet, gameObjects.Player)
-
-	g.Player = player
-
 	bethSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 25)
 
 	bethAnne, err := gameObjects.NewCharacter(bethAnneImg, npcSpawn["bethAnne"], *bethSpriteSheet, gameObjects.NonPlayer)
@@ -107,10 +110,22 @@ func (g *TownScene) FirstLoad() {
 		log.Fatal(err)
 	}
 
+	zephSpriteSheet := spritesheet.NewSpritesheet(3, 1, 15, 29)
+
+	zeph, err := gameObjects.NewCharacter(zephImg, npcSpawn["zeph"], *zephSpriteSheet, gameObjects.NonPlayer)
+
+	player, err := gameObjects.NewCharacter(playerImg, npcSpawn["player"], *charSpriteSheet, gameObjects.Player)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	g.Player = player
+
 	g.NPC = map[string]*gameObjects.Character{}
 
 	g.NPC["bethAnne"] = bethAnne
 	g.NPC["jarvis"] = jarvis
+	g.NPC["zeph"] = zeph
 
 	g.dialogueUi, err = MakeDialogueUI(1512, 918)
 	if err != nil {
@@ -150,7 +165,11 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.npcInProximity.Name != "" {
 		g.dialogueUi.LoadDialogueUI(g.npcInProximity.Name)
-		//LockCursorForDialogue()
+		LockCursorForDialogue()
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
+		g.Player.Visible = false
+		g.triggerInteraction = true
 	}
 
 	//increase players position by their velocity every update
@@ -165,6 +184,7 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	playerOnEntDoor := make(map[string]bool)
 	playerOnExDoor := make(map[string]bool)
 	playerOnContextTrigger := make(map[string]gameObjects.ObjectState)
+
 	if !g.Player.InAnimation {
 		playerOnEntDoor = gameObjects.CheckDoor(g.Player, g.MapData.EntryDoors)
 	}
@@ -227,6 +247,7 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	//custom script animation for tavern door (swings forward on entrance)
 	g.npcInProximity = CheckDialoguePopup(*g.Player, g.NPC)
+	g.interactInProximity = CheckInteractPopup(*g.Player, g.MapData.InteractPoints)
 	return g.dialogueUi.TriggerScene()
 
 }
@@ -324,8 +345,22 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 			)
 		}*/
 	if g.npcInProximity.Name != "" {
-		DrawDialoguePopUp(screen, g.npcInProximity, g.cam)
+		DrawPopUp(screen, g.npcInProximity.X, g.npcInProximity.Y, float64(g.npcInProximity.SpriteSheet.SpriteWidth), g.cam)
 	}
+
+	if g.interactInProximity.Name != "" && !g.triggerInteraction {
+		width := float64(g.interactInProximity.Img.Bounds().Max.X - g.interactInProximity.Img.Bounds().Min.X)
+		DrawPopUp(screen, g.interactInProximity.X, g.interactInProximity.Y, width, g.cam)
+	}
+
+	if g.triggerInteraction {
+		opts.GeoM.Translate(g.cam.X, g.cam.Y)
+		opts.GeoM.Translate(g.interactInProximity.X, g.interactInProximity.Y)
+		opts.GeoM.Scale(4, 4)
+		screen.DrawImage(g.interactInProximity.Img, &opts)
+		g.Player.InAnimation = true
+	}
+
 	err := g.dialogueUi.Draw(screen)
 	if err != nil {
 		log.Fatal(err)

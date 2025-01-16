@@ -19,6 +19,11 @@ const (
 	Completed
 )
 
+const (
+	screenWidth  = 1512
+	screenHeight = 918
+)
+
 type DialogueUI struct {
 	ui                    *ebitenui.UI
 	TextPrinter           *TextPrinter
@@ -76,12 +81,6 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	d.face = face
 	d.StoryPoint = 1
 
-	//npc dialogue
-
-	//clickable Player text options
-
-	//initialDialogue button option
-
 	//root container for ui
 	rootContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewStackedLayout()),
@@ -99,10 +98,10 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
 			widget.AnchorLayoutOpts.Padding(
 				widget.Insets{
-					Top:    int(193 * 4),
-					Left:   int(184 * 4),
-					Right:  918 - (184 * 4),
-					Bottom: 1512 - (184 * 4)},
+					Top:    screenHeight / 4,
+					Left:   screenWidth / 2,
+					Right:  screenWidth / 2,
+					Bottom: screenHeight - screenHeight/4},
 			),
 		),
 		),

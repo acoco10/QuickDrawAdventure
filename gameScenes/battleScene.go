@@ -273,8 +273,9 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 		g.changeEvent(NoEvent, 0)
 	}
 
-	g.PlayerTurn(turn)
-	g.enemyTurn(turn)
+	g.PlayerDialogueTurn(turn)
+	g.EnemyDialogueTurn(turn)
+	g.PlayerShootingTurn(turn)
 
 	err := g.onScreenStatsUI.Update(*turn)
 	if err != nil {

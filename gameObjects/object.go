@@ -16,7 +16,9 @@ const (
 )
 
 type Object interface {
-	Update()
+	ActiveAnimation() *animations.Animation
+	PlayAnimation()
+	StopAnimation()
 }
 
 type DoorObject struct {

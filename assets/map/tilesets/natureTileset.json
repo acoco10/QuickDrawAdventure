@@ -8,9 +8,9 @@
  "margin":0,
  "name":"natureTileset",
  "spacing":0,
- "tilecount":6,
+ "tilecount":7,
  "tiledversion":"1.11.0",
- "tileheight":62,
+ "tileheight":64,
  "tiles":[
         {
          "id":0,
@@ -47,8 +47,14 @@
          "image":"..\/..\/images\/nature\/dryGrass3.png",
          "imageheight":15,
          "imagewidth":16
+        }, 
+        {
+         "id":6,
+         "image":"..\/..\/images\/nature\/twiggyTree.png",
+         "imageheight":64,
+         "imagewidth":64
         }],
- "tilewidth":37,
+ "tilewidth":64,
  "type":"tileset",
  "version":"1.10"
 }

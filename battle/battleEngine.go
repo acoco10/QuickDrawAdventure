@@ -37,7 +37,7 @@ type Battle struct {
 	Enemy              *battleStatsDataManagement.Character
 	turnInitiative     Initiative
 	nextTurnInitiative Initiative
-	battlePhase        Phase
+	BattlePhase        Phase
 	Turns              map[int]*Turn
 	Turn               int
 	BattleLost         bool
@@ -50,9 +50,9 @@ type Battle struct {
 }
 
 type Turn struct {
-	Phase                  Phase                           `json:"phase"`
-	PlayerSkillUsed        battleStatsDataManagement.Skill `json:"PlayerSkillUsed"`
-	EnemySkillUsed         battleStatsDataManagement.Skill `json:"enemySkillUsed"`
+	Phase                  Phase
+	PlayerSkillUsed        battleStatsDataManagement.Skill
+	EnemySkillUsed         battleStatsDataManagement.Skill
 	PlayerRoll             bool
 	PlayerSecondaryRoll    bool
 	EnemyRoll              bool
@@ -78,11 +78,10 @@ type Turn struct {
 
 func NewBattle(player *battleStatsDataManagement.Character, enemy *battleStatsDataManagement.Character) *Battle {
 	battle := Battle{}
-
 	battle.EnemyTurn = false
 	battle.Player = player
 	battle.Enemy = enemy
-	battle.battlePhase = Dialogue
+	battle.BattlePhase = Dialogue
 	battle.Turns = make(map[int]*Turn)
 	battle.Turn = 0
 	battle.Turns[0] = &Turn{}
@@ -101,13 +100,11 @@ func (b *Battle) GetTurn() *Turn {
 func (b *Battle) UpdateState() {
 	turn := b.GetTurn()
 	if turn.TurnInitiative == Player {
-		if turn.PlayerIndex < len(turn.PlayerMessage)-1 {
+		if turn.PlayerIndex < len(turn.PlayerMessage)-2 {
 			b.State = PlayerTurn
-		}
-		if turn.PlayerTurnCompleted {
+		} else if turn.EnemyIndex < len(turn.EnemyMessage)-2 {
 			b.State = EnemyTurn
-		}
-		if turn.PlayerTurnCompleted && turn.EnemyTurnCompleted {
+		} else if turn.PlayerIndex >= len(turn.PlayerMessage)-2 && turn.EnemyIndex >= len(turn.EnemyMessage)-2 {
 			b.State = NextTurn
 		}
 	}
@@ -159,14 +156,14 @@ func (b *Battle) RandTurnInitiative() Initiative {
 }
 
 func (b *Battle) GetPhase() Phase {
-	return b.battlePhase
+	return b.BattlePhase
 }
 func (b *Battle) incrementTurn() {
 	b.Turn++
 }
 
 func (b *Battle) UpdateBattlePhase() {
-	b.battlePhase = Shooting
+	b.BattlePhase = Shooting
 }
 
 func (b *Battle) UpdateInitiative(initiative Initiative) {
@@ -218,7 +215,7 @@ func (b *Battle) DamageEnemy() {
 
 func (b *Battle) GenerateTurn(playerSkill battleStatsDataManagement.Skill) {
 
-	if b.turnInitiative != b.nextTurnInitiative && b.battlePhase != Dialogue { //no idea how but we were getting into this loop during the shooting phase sometimes
+	if b.turnInitiative != b.nextTurnInitiative && b.BattlePhase != Dialogue { //no idea how but we were getting into this loop during the shooting phase sometimes
 
 		fmt.Printf("battle.go:81: changing turn initiative from:%d to:%d", b.turnInitiative, b.nextTurnInitiative)
 
@@ -266,11 +263,14 @@ func (b *Battle) GenerateTurn(playerSkill battleStatsDataManagement.Skill) {
 	}
 
 	turn.PlayerSecondaryRoll = playerSecondaryRoll
-	playerStataffectedbySkill, err := battleStatsDataManagement.StringToStat(playerSkill.Effects[0].Stat)
-	if err != nil {
-		log.Fatal(err)
+	var playerStatAffectedBySkill battleStatsDataManagement.Stat
+	if playerSkill.SkillName != "draw" {
+		playerStatAffectedBySkill, err = battleStatsDataManagement.StringToStat(playerSkill.Effects[0].Stat)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	if playerRoll && playerStataffectedbySkill == b.Enemy.Weakness {
+	if playerRoll && playerStatAffectedBySkill == b.Enemy.Weakness {
 		turn.EnemyWeakness = true
 	}
 	var battleInitiative bool
@@ -297,9 +297,28 @@ func (b *Battle) GenerateTurn(playerSkill battleStatsDataManagement.Skill) {
 	if enemySkill.SkillName != "draw" {
 		enemySkillDialogue = append(enemySkillDialogue, b.generateMessageForUsedDialogueSkill(*b.Enemy, *b.Player, enemySkill, enemyRoll, enemySecondaryRoll)...)
 	}
+	if turn.TurnInitiative == Player {
+		switch turn.PlayerSkillUsed.SkillName {
+		case "draw":
+			turn.PlayerMessage = playerSkillDialogue
+			turn.EnemyMessage = []string{}
+		default:
+			turn.PlayerMessage = playerSkillDialogue
+			turn.EnemyMessage = enemySkillDialogue
+		}
+	}
 
-	turn.PlayerMessage = playerSkillDialogue
-	turn.EnemyMessage = enemySkillDialogue
+	if turn.TurnInitiative == Enemy {
+		switch turn.EnemySkillUsed.SkillName {
+		case "draw":
+			turn.EnemyMessage = enemySkillDialogue
+			turn.PlayerMessage = []string{}
+		default:
+			turn.PlayerMessage = playerSkillDialogue
+			turn.EnemyMessage = enemySkillDialogue
+		}
+	}
+
 	//apply buffs from enemyBattleSprite based on roll results
 
 }

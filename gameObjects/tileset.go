@@ -86,11 +86,11 @@ func (d *DynTileset) Img(id int) *ebiten.Image {
 }
 
 func NewTileSet(path string, gid int) (Tileset, error) {
-	//read file contents
+	//interactions file contents
 	contents, err := os.ReadFile(path)
 	fmt.Println(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file %s: %w", path, err)
+		return nil, fmt.Errorf("failed to interactions file %s: %w", path, err)
 	}
 
 	var dynTilesetJSON DynTilesetJSON

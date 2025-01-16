@@ -91,11 +91,11 @@ func (g *TownScene) SortCharacters() []*gameObjects.Character {
 }
 
 func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam camera.Camera) {
-	lDustEffect, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/walkingLeftDust.png")
+	lDustEffect, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/nonBattleCharacterAffects/walkingLeftDust.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	rDustEffect, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/walkingRightDust.png")
+	rDustEffect, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/nonBattleCharacterAffects/walkingRightDust.png")
 
 	opts := &ebiten.DrawImageOptions{}
 
@@ -159,6 +159,10 @@ func (g *TownScene) DrawCharacters(screen *ebiten.Image) {
 
 func LockCursorForDialogue() {
 	updater := CreateCursorUpdater()
-	updater.MoveToLockedSpecificPosition(995, 710)
+	updater.MoveToLockedSpecificPosition(1002, 306)
 	input.SetCursorUpdater(updater)
+}
+
+func unlockCursor() {
+	input.SetCursorUpdater(nil)
 }

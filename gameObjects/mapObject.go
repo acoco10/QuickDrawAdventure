@@ -66,6 +66,7 @@ type MapObjectData struct {
 	StairTriggers     map[string]*Trigger //pointer because has on/ off setting eg for balcony, not trigger switch
 	ContextualObjects map[string]*Trigger
 	Items             map[string]*Item
+	InteractPoints    map[string]Item
 }
 
 func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
@@ -77,6 +78,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	stairTriggers := make(map[string]*Trigger)
 	contextualObjects := make(map[string]*Trigger)
 	items := make(map[string]*Item)
+	interactPoints := make(map[string]Item)
 
 	for _, layer := range tilemapJSON.Layers {
 		if layer.Type == "objectgroup" {
@@ -122,7 +124,6 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 				case "itemSpawn":
 					imgPath := fmt.Sprintf("images/items/%s.png", object.Name)
 					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
-
 					if err != nil {
 						log.Fatal(err)
 					}
@@ -136,6 +137,20 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 
 					items[object.Name] = &item
 
+				case "interactPoint":
+					println("loading interactPoint:", object.Name)
+					imgPath := fmt.Sprintf("images/characters/elyse/interactions/%s.png", object.Name)
+					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
+					if err != nil {
+						log.Fatal(err)
+					}
+					item := Item{
+						Name: object.Name,
+						X:    object.X,
+						Y:    object.Y - 32,
+						Img:  img,
+					}
+					interactPoints[object.Name] = item
 				}
 			}
 		}
@@ -149,6 +164,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	mapObjects.Colliders = colliders
 	mapObjects.ContextualObjects = contextualObjects
 	mapObjects.Items = items
+	mapObjects.InteractPoints = interactPoints
 
 	return mapObjects, nil
 }
