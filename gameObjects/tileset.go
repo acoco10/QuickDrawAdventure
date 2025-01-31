@@ -14,27 +14,40 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-// every tileset must be able to give an image given an id
+// Tileset every tileset must be able to give an image given an id
 type Tileset interface {
 	Img(id int) *ebiten.Image
 	Gid() int
+	Name() string
+	Dimensions() (int, int)
 }
 
-// the tileset data deserialized from a standard, single-image tileset
+// UniformTilesetJSON the tileset data deserialized from a standard, single-image tileset
 type UniformTilesetJSON struct {
 	Path  string `json:"image"`
 	Width int    `json:"columns"`
+	Name  string `json:"name"`
 }
 
-// struct for storing uniform tile sets ie 16 x 16 ground tiles
+// UniformTileset struct for storing uniform tile sets ie 16 x 16 ground tiles
 type UniformTileset struct {
 	img          *ebiten.Image
 	tilesetWidth int
 	gid          int
+	name         string
 }
 
 func (u *UniformTileset) Gid() int {
 	return u.gid
+}
+
+func (u *UniformTileset) Dimensions() (int, int) {
+	//need to figure out this calc for height
+	return 0, 0
+}
+
+func (u *UniformTileset) Name() string {
+	return u.name
 }
 
 func (u *UniformTileset) Img(id int) *ebiten.Image {
@@ -58,20 +71,35 @@ type TileJSON struct {
 	Path   string `json:"image"`
 	Width  int    `json:"imagewidth"`
 	Height int    `json:"imageheight"`
+	Name   string `json:"name"`
 }
 
 type DynTilesetJSON struct {
-	Tiles []*TileJSON `json:"tiles"`
+	Tiles      []*TileJSON `json:"tiles"`
+	Name       string      `json:"name"`
+	TileHeight int         `json:"tileheight"`
+	TileWidth  int         `json:"tilewidth"`
 }
 
-// struct for tiles or objects of different sizes like buildings or fauna
+// DynTileset struct for tiles or objects of different sizes like buildings or fauna
 type DynTileset struct {
-	imgs []*ebiten.Image
-	gid  int
+	imgs   []*ebiten.Image
+	gid    int
+	name   string
+	width  int
+	height int
+}
+
+func (d *DynTileset) Dimensions() (int, int) {
+	return d.width, d.height
 }
 
 func (d *DynTileset) Gid() int {
 	return d.gid
+}
+
+func (d *DynTileset) Name() string {
+	return d.name
 }
 
 func (d *DynTileset) Img(id int) *ebiten.Image {
@@ -93,47 +121,51 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 		return nil, fmt.Errorf("failed to interactions file %s: %w", path, err)
 	}
 
-	var dynTilesetJSON DynTilesetJSON
-	err = json.Unmarshal(contents, &dynTilesetJSON)
+	var checkDynTileSetJSON DynTilesetJSON
+	err = json.Unmarshal(contents, &checkDynTileSetJSON)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal dyn tileset JSON: %w", err)
 	}
 
-	if len(dynTilesetJSON.Tiles) > 0 {
+	if len(checkDynTileSetJSON.Tiles) > 0 {
 		//return dyn tileset
-		var dynTilesetJSON DynTilesetJSON
-		err = json.Unmarshal(contents, &dynTilesetJSON)
+		var dynTileSetJSON DynTilesetJSON
+		err = json.Unmarshal(contents, &dynTileSetJSON)
 		if err != nil {
+
 			return nil, fmt.Errorf("failed to unmarshal dyn tileset JSON: %w", err)
 		}
 
 		//create the tileset
 		dynTileset := DynTileset{}
 		dynTileset.gid = gid
-		dynTileset.imgs = make([]*ebiten.Image, 0) //change back to ebiten image
+		dynTileset.imgs = make([]*ebiten.Image, 0)
+		//change back to ebiten image
 		//loop over tile data and load image for each
-		for _, tileJSON := range dynTilesetJSON.Tiles {
+		for _, tileJSON := range dynTileSetJSON.Tiles {
 
 			// clean and convert tileset relative path to root relative path
-			tileJSONpath := tileJSON.Path
-			tileJSONpath = filepath.Clean(tileJSONpath)
-			tileJSONpath = strings.ReplaceAll(tileJSONpath, "\\", "/")
-			tileJSONpath = strings.TrimPrefix(tileJSONpath, "../")
-			tileJSONpath = strings.TrimPrefix(tileJSONpath, "../")
-			tileJSONpath = filepath.Clean(tileJSONpath)
-			tileJSONpath = filepath.Join("assets", tileJSONpath)
+			tileJsonPath := tileJSON.Path
+			tileJsonPath = filepath.Clean(tileJsonPath)
+			tileJsonPath = strings.ReplaceAll(tileJsonPath, "\\", "/")
+			tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
+			tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
+			tileJsonPath = filepath.Clean(tileJsonPath)
+			tileJsonPath = filepath.Join("assets", tileJsonPath)
 
-			fmt.Printf("Loading dyn tileset image from: %s\n", tileJSONpath)
+			fmt.Printf("Loading dyn tileset image from: %s\n", tileJsonPath)
 
-			img, _, err := ebitenutil.NewImageFromFile(tileJSONpath)
+			img, _, err := ebitenutil.NewImageFromFile(tileJsonPath)
 
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to load dyntileset image from %s: %w", tileJsonPath, err)
 			}
 
 			dynTileset.imgs = append(dynTileset.imgs, img)
 
 		}
+		dynTileset.width = dynTileSetJSON.TileWidth
+		dynTileset.height = dynTileSetJSON.TileHeight
 		return &dynTileset, nil
 	}
 	var uniformTilesetJSON UniformTilesetJSON
@@ -146,23 +178,24 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 	uniformTileset := UniformTileset{}
 
 	//clean and convert tileset relative path to root relative path
-	tileJSONpath := uniformTilesetJSON.Path
-	tileJSONpath = filepath.Clean(tileJSONpath)
-	tileJSONpath = strings.ReplaceAll(tileJSONpath, "\\", "/")
-	tileJSONpath = strings.TrimPrefix(tileJSONpath, "../")
-	tileJSONpath = strings.TrimPrefix(tileJSONpath, "../")
-	tileJSONpath = filepath.Clean(tileJSONpath)
-	tileJSONpath = filepath.Join("assets", tileJSONpath)
+	tileJsonPath := uniformTilesetJSON.Path
+	tileJsonPath = filepath.Clean(tileJsonPath)
+	tileJsonPath = strings.ReplaceAll(tileJsonPath, "\\", "/")
+	tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
+	tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
+	tileJsonPath = filepath.Clean(tileJsonPath)
+	tileJsonPath = filepath.Join("assets", tileJsonPath)
 
-	fmt.Printf("Loading uniform tileset image from: %s %d\n", tileJSONpath, gid)
+	fmt.Printf("Loading uniform tileset image from: %s %d\n", tileJsonPath, gid)
 
-	img, _, err := ebitenutil.NewImageFromFile(tileJSONpath)
+	img, _, err := ebitenutil.NewImageFromFile(tileJsonPath)
 
 	if err != nil {
 		return nil, err
 	}
 	uniformTileset.img = img
 	uniformTileset.gid = gid
+	uniformTileset.name = uniformTilesetJSON.Name
 	uniformTileset.tilesetWidth = uniformTilesetJSON.Width
 
 	return &uniformTileset, nil

@@ -7,7 +7,6 @@ import (
 
 func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.Camera, screen *ebiten.Image, stairTriggers map[string]*Trigger) {
 	opts := ebiten.DrawImageOptions{}
-
 	for _, layer := range tileMapJson.Layers {
 		if layer.Type == "objectgroup" {
 			continue
@@ -18,7 +17,6 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 			gids[i] = tilesets[i].Gid()
 		}
 		tileindex := DetermineTileSet(layer.Data, gids)
-
 		for index, id := range layer.Data {
 
 			if id == 0 {
@@ -35,7 +33,7 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 			y *= 16
 
 			img := tilesets[tileindex].Img(id)
-		
+
 			opts.GeoM.Translate(float64(x), float64(y))
 
 			opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
@@ -49,6 +47,7 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 
 		}
 	}
+
 }
 
 func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.Camera, screen *ebiten.Image, player Character, stairTriggers map[string]*Trigger) {
@@ -68,6 +67,7 @@ func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.
 		for i := range gids {
 			gids[i] = tilesets[i].Gid()
 		}
+
 		tileIndex := DetermineTileSet(layer.Data, gids)
 
 		for index, id := range layer.Data {

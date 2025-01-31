@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
@@ -8,6 +9,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image"
 	"log"
 	"os"
@@ -73,6 +75,7 @@ func (g *TownScene) FirstLoad() {
 	g.loaded = true
 
 	g.cam = camera.NewCamera(0.0, 0.0)
+	g.cam.UpdateState(camera.Outside)
 
 	charSpriteSheet := spritesheet.NewSpritesheet(4, 6, 16, 32)
 
@@ -131,6 +134,7 @@ func (g *TownScene) FirstLoad() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	g.dialogueUi.UpdateTriggerScene(sceneManager.BattleSceneId)
 
 }
@@ -145,26 +149,26 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	//react to key presses by adding directional velocity
 	if !g.Player.InAnimation {
 		if ebiten.IsKeyPressed(ebiten.KeyRight) {
-			g.Player.Dx = 1.8
+			g.Player.Dx = 1.5
 			g.Player.Direction = "L"
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-			g.Player.Dx = -1.8
+			g.Player.Dx = -1.5
 			g.Player.Direction = "R"
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyDown) {
-			g.Player.Dy = 1.8
+			g.Player.Dy = 1.5
 			g.Player.Direction = "U"
 		}
 		if ebiten.IsKeyPressed(ebiten.KeyUp) {
-			g.Player.Dy = -1.8
+			g.Player.Dy = -1.5
 			g.Player.Direction = "D"
 		}
 
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.npcInProximity.Name != "" {
-		g.dialogueUi.LoadDialogueUI(g.npcInProximity.Name)
+		g.dialogueUi.LoadUI(g.npcInProximity.Name)
 		LockCursorForDialogue()
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
@@ -214,7 +218,7 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	g.UpdateDoors()
 
 	//updating camera to Player position
-	g.cam.FollowTarget(g.Player.X+16, g.Player.Y+16, 320, 240)
+	g.cam.FollowTarget(g.Player.X-16, g.Player.Y, 320, 180)
 
 	//when Player hits the edge of the map the camera does not follow
 	//need to update this logic for interiors, new map?
@@ -261,6 +265,7 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	//loop through the tile map
 
 	gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, g.MapData.StairTriggers)
+
 	//draw Player
 
 	for _, item := range g.MapData.Items {
@@ -293,7 +298,7 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 
 	g.DrawCharacters(screen)
 	for _, object := range g.Objects {
-		if object.DrawAbovePlayer {
+		if object.DrawAbovePlayer && g.Player.Y+6 < object.Y {
 			opts.GeoM.Translate(object.X, object.Y)
 			opts.GeoM.Translate(g.cam.X, g.cam.Y)
 			opts.GeoM.Scale(4, 4)
@@ -313,11 +318,18 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 
 		}
 
+		opts.GeoM.Reset()
 	}
-	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.StairTriggers)
 
-	opts.GeoM.Scale(4, 4)
-	opts.GeoM.Translate(g.cam.X, g.cam.Y)
+	if g.triggerInteraction {
+		opts.GeoM.Translate(g.cam.X, g.cam.Y)
+		opts.GeoM.Translate(g.interactInProximity.X, g.interactInProximity.Y)
+		opts.GeoM.Scale(4, 4)
+		screen.DrawImage(g.interactInProximity.Img, &opts)
+		g.Player.InAnimation = true
+	}
+
+	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.StairTriggers)
 
 	/*	for _, door := range g.MapData.EntryDoors {
 			vector.StrokeRect(
@@ -353,14 +365,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 		DrawPopUp(screen, g.interactInProximity.X, g.interactInProximity.Y, width, g.cam)
 	}
 
-	if g.triggerInteraction {
-		opts.GeoM.Translate(g.cam.X, g.cam.Y)
-		opts.GeoM.Translate(g.interactInProximity.X, g.interactInProximity.Y)
-		opts.GeoM.Scale(4, 4)
-		screen.DrawImage(g.interactInProximity.Img, &opts)
-		g.Player.InAnimation = true
-	}
-
 	err := g.dialogueUi.Draw(screen)
 	if err != nil {
 		log.Fatal(err)
@@ -380,5 +384,21 @@ func (g *TownScene) OnExit() {
 }
 func (g *TownScene) IsLoaded() bool {
 	return g.loaded
+
+}
+
+func DebugCamera(cam camera.Camera, player gameObjects.Character, screen *ebiten.Image) {
+	face, err := LoadFont(40, November)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cameraDebugText := fmt.Sprintf("X:%f Y:%f", cam.X, cam.Y)
+	playerPosition := fmt.Sprintf("player X:%f player Y:%f", player.X, player.Y)
+	dopts := text.DrawOptions{}
+	dopts.DrawImageOptions.ColorScale.Scale(1, 0, 0, 255)
+	dopts.GeoM.Translate(player.X*4+cam.X*4, player.Y*4+cam.Y*4)
+	text.Draw(screen, cameraDebugText, face, &dopts)
+	dopts.GeoM.Translate(0, 50)
+	text.Draw(screen, playerPosition, face, &dopts)
 
 }

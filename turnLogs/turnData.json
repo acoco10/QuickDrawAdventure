@@ -1,30 +1,19 @@
 {
 	"Phase": 0,
 	"PlayerSkillUsed": {
-		"name": "stare down",
-		"index": 2,
+		"name": "insult",
+		"index": 1,
 		"effects": [
 			{
 				"type": "buff",
-				"stat": "fear",
-				"amount": 1,
+				"stat": "anger",
+				"amount": 3,
 				"duration": 0,
 				"initiativeL": false,
 				"damage": null,
-				"successPer": 80,
+				"successPer": 60,
 				"nShots": 0,
 				"on": "enemy"
-			},
-			{
-				"type": "buff",
-				"stat": "accuracy",
-				"amount": 1,
-				"duration": 0,
-				"initiativeL": false,
-				"damage": null,
-				"successPer": 80,
-				"nShots": 0,
-				"on": "successfulSelf"
 			}
 		],
 		"tension": 2
@@ -59,9 +48,9 @@
 		"tension": 2
 	},
 	"PlayerRoll": true,
-	"PlayerSecondaryRoll": true,
+	"PlayerSecondaryRoll": false,
 	"EnemyRoll": true,
-	"EnemySecondaryRoll": false,
+	"EnemySecondaryRoll": true,
 	"DamageToPlayer": null,
 	"DamageToEnemy": null,
 	"EnemyEventTriggered": false,
@@ -69,11 +58,11 @@
 	"WinProbAfterPlayerTurn": 0,
 	"WinProbAfterEnemyTurn": 0,
 	"PlayerMessage": [
-		"Elyse uses stare down",
-		"Elyse manages to look super cool and super intimidating at the same time",
-		"Cowardly Cowboy is shaking in his boots!!!",
-		"Stare down is effective",
-		"Cowardly Cowboy's fear increased by 1"
+		"Elyse uses insult",
+		"Elyse: What's the matter, hun? Never looked a lady in her eye before?",
+		"Cowardly Cowboy: You're not very nice, are you.",
+		"Insult is effective",
+		"Cowardly Cowboy's anger increased by 3"
 	],
 	"EnemyMessage": [
 		"Cowardly Cowboy uses stare down",
@@ -89,6 +78,6 @@
 	"EnemyIndex": 0,
 	"PlayerTurnCompleted": false,
 	"EnemyTurnCompleted": false,
-	"EnemyWeakness": true,
+	"EnemyWeakness": false,
 	"PlayerWeakness": false
 }

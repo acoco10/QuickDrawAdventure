@@ -11,6 +11,9 @@ import (
 	"log"
 )
 
+type TextPopup interface {
+	TriggerButton()
+}
 type DialogUiState uint8
 
 const (
@@ -40,7 +43,7 @@ type DialogueUI struct {
 	loaded                bool
 }
 
-func GenerateDialogueBarButton(d *DialogueUI) (button *widget.Button) {
+func GenerateMenuButton(popup TextPopup) (button *widget.Button) {
 
 	buttonImage := LoadStatusButtonImage()
 
@@ -48,7 +51,7 @@ func GenerateDialogueBarButton(d *DialogueUI) (button *widget.Button) {
 		widget.ButtonOpts.Image(buttonImage),
 		// add a handler that reacts to clicking the button
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			d.ButtonEvent = true
+			popup.TriggerButton()
 		}), widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(100, 100),
 			//widget.WidgetOpts.CursorHovered("statusBar"),
@@ -92,7 +95,7 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	d.TextPrinter.TextInput = ""
 	//container for output menu
 	statusContainer := MinorDialogueContainer()
-	d.statusBar.Buttons = append(d.statusBar.Buttons, GenerateDialogueBarButton(d))
+	d.statusBar.Buttons = append(d.statusBar.Buttons, GenerateMenuButton(d))
 
 	d.statusBar.MenuContainer = widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
@@ -131,8 +134,10 @@ func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, err
 	d.TextPrinter.StatusText[2] = statusTextLine3
 	return d, nil
 }
-
-func (d *DialogueUI) LoadDialogueUI(charName string) {
+func (d *DialogueUI) TriggerButton() {
+	d.ButtonEvent = true
+}
+func (d *DialogueUI) LoadUI(charName string) {
 	playerDialogueTracker := dialogueData.DialogueTracker{
 		CharName: charName,
 		Index:    0,

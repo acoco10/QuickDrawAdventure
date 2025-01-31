@@ -20,6 +20,7 @@ type ObjectJSON struct {
 	Class  string  `json:"class"`
 	Type   string  `json:"type"`
 }
+
 type ObjectType uint8
 
 const (
@@ -67,6 +68,8 @@ type MapObjectData struct {
 	ContextualObjects map[string]*Trigger
 	Items             map[string]*Item
 	InteractPoints    map[string]Item
+	CameraPoints      map[string]Trigger
+	ObjectSpawns      map[string]Spawn
 }
 
 func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
@@ -79,6 +82,8 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	contextualObjects := make(map[string]*Trigger)
 	items := make(map[string]*Item)
 	interactPoints := make(map[string]Item)
+	cameraPoints := make(map[string]Trigger)
+	objectSpawns := make(map[string]Spawn)
 
 	for _, layer := range tilemapJSON.Layers {
 		if layer.Type == "objectgroup" {
@@ -114,6 +119,11 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					stair.Type = StairTrigger
 					stairTriggers[object.Name] = &stair
 
+				case "objectSpawn":
+					println("loading objectSpawn:", object.Name)
+					objSpawn := Spawn{object.Name, object.X, object.Y - 32}
+					objectSpawns[object.Name] = objSpawn
+
 				case "contextualObject":
 					println("loading contextualObject:", object.Name)
 					contextualObject := NewTrigger(object)
@@ -121,20 +131,19 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					contextualObject.Rect.Min.Y = contextualObject.Rect.Min.Y - 32
 					contextualObject.Rect.Max.Y = contextualObject.Rect.Max.Y - 32
 					contextualObjects[object.Name] = &contextualObject
+
 				case "itemSpawn":
 					imgPath := fmt.Sprintf("images/items/%s.png", object.Name)
 					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
 					if err != nil {
 						log.Fatal(err)
 					}
-
 					item := Item{
 						Name: object.Name,
 						X:    object.X,
 						Y:    object.Y,
 						Img:  img,
 					}
-
 					items[object.Name] = &item
 
 				case "interactPoint":
@@ -151,6 +160,12 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 						Img:  img,
 					}
 					interactPoints[object.Name] = item
+				case "cameraPoint":
+					println("loading camera point:", object.Name)
+					camPoint := NewTrigger(object)
+					camPoint.Rect.Min.Y = camPoint.Rect.Min.Y - 32
+					camPoint.Rect.Max.Y = camPoint.Rect.Max.Y - 32
+					cameraPoints[object.Name] = camPoint
 				}
 			}
 		}
@@ -165,6 +180,8 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	mapObjects.ContextualObjects = contextualObjects
 	mapObjects.Items = items
 	mapObjects.InteractPoints = interactPoints
+	mapObjects.CameraPoints = cameraPoints
+	mapObjects.ObjectSpawns = objectSpawns
 
 	return mapObjects, nil
 }
@@ -185,7 +202,7 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 		*tavernDoorSpriteSheet,
 		tavernDoorAnimation,
 		tavernDoorAnimation,
-		mapObjectData.EntryDoors["door1"],
+		mapObjectData.EntryDoors["rose"],
 	)
 
 	sunRiseDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 24, 38)
@@ -200,8 +217,9 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 		*sunRiseDoorSpriteSheet,
 		standardDoorAnimation,
 		standardDoorAnimation,
-		mapObjectData.EntryDoors["door2"],
+		mapObjectData.EntryDoors["sunRise"],
 	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -218,6 +236,7 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 		standardDoorAnimation,
 		mapObjectData.EntryDoors["door3"],
 	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -237,6 +256,10 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 		beadedCurtainAnimation,
 		*mapObjectData.ContextualObjects["beadedCurtain1"],
 	)
+
+	beadedCurtain.X = mapObjectData.ObjectSpawns["beadedCurtain"].X
+	beadedCurtain.Y = mapObjectData.ObjectSpawns["beadedCurtain"].Y
+
 	beadedCurtain.DrawAbovePlayer = true
 	if err != nil {
 		log.Fatal(err)

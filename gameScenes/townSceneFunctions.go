@@ -27,6 +27,8 @@ func (g *TownScene) UpdateDoors() {
 					}
 
 					if objectAnimation.Frame() == objectAnimation.LastF {
+						g.cam.UpdateState(camera.Inside)
+						g.cam.SetIndoorCameraBounds(g.MapData.CameraPoints[object.Name].Rect)
 						println("changing player location to building interior")
 						g.Player.Visible = true
 						x, y := gameObjects.GetDoorCoord(g.MapData.ExitDoors, object.Name, "up")
@@ -42,6 +44,7 @@ func (g *TownScene) UpdateDoors() {
 				if object.Status == gameObjects.Leaving {
 
 					if objectAnimation.Frame() == objectAnimation.FirstF {
+						g.cam.UpdateState(camera.Outside)
 						x, y := gameObjects.GetDoorCoord(g.MapData.EntryDoors, object.Name, "down")
 						g.Player.X = x
 						g.Player.Y = y
@@ -58,6 +61,7 @@ func (g *TownScene) UpdateDoors() {
 					}
 				}
 			}
+
 			if object.Type == gameObjects.ContextualObject {
 				if objectAnimation.Frame() == objectAnimation.LastF {
 					objectAnimation.Update()

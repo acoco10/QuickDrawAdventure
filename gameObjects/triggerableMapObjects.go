@@ -46,7 +46,7 @@ func CheckDoor(player *Character, entDoors map[string]Trigger) map[string]bool {
 func CheckContextualTriggers(player *Character, contextTriggers map[string]*Trigger) map[string]ObjectState {
 	playerRect := image.Rect(
 		int(player.X),
-		int(player.Y),
+		int(player.Y)+20,
 		int(player.X)+16,
 		int(player.Y)+31)
 	returnMap := make(map[string]ObjectState)
