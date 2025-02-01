@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	"github.com/acoco10/QuickDrawAdventure/battle"
-	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/input"
@@ -15,20 +15,19 @@ import (
 	"log"
 )
 
-func (g *BattleScene) FirstLoad() {
+func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	println("Battle Scene first load executing\n")
 
-	characters, err := battleStatsDataManagement.LoadCharacters()
-
+	characters, err := battleStats.LoadCharacters()
 	if err != nil {
 		log.Fatal("error loading characters.json error:", err)
 	}
 
-	elyse := characters[0]
-	enemy := characters[1]
+	elyse := characters[battleStats.Elyse]
+	enemy := characters[gameLog.EnemyEncountered]
 
-	println("elyse stats after loading=", elyse.DisplayStats()[battleStatsDataManagement.DrawSpeed])
-	println("enemy stats after loading=", enemy.DisplayStats()[battleStatsDataManagement.DrawSpeed])
+	println("elyse stats after loading=", elyse.DisplayStats()[battleStats.DrawSpeed])
+	println("enemy stats after loading=", enemy.DisplayStats()[battleStats.DrawSpeed])
 
 	var TextInput []string
 
@@ -46,7 +45,7 @@ func (g *BattleScene) FirstLoad() {
 	playerBS := LoadPlayerBattleSprite()
 	g.playerBattleSprite = &playerBS
 
-	enemyBS := LoadEnemyBattleSprite()
+	enemyBS := LoadEnemyBattleSprite(enemy)
 	g.enemyBattleSprite = &enemyBS
 
 	aEffect, err := LoadAmmoEffect()
@@ -187,7 +186,9 @@ func (g *BattleScene) OnEnter() {
 }
 
 func (g *BattleScene) OnExit() {
-	g.characterReset()
+	if g.battle.BattleLost {
+		g.characterReset()
+	}
 	g.loaded = false
 	g.musicPlayer.Stop()
 }
@@ -276,6 +277,7 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	g.PlayerDialogueTurn(turn)
 	g.EnemyDialogueTurn(turn)
 	g.PlayerShootingTurn(turn)
+	g.EnemyShootingTurn(turn)
 
 	err := g.onScreenStatsUI.Update(*turn)
 	if err != nil {
@@ -318,8 +320,8 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 	enemyAmmo := fmt.Sprintf("Enemy Ammo :%d", g.battle.EnemyAmmo)
 
 	winningProbText := fmt.Sprintf("Probability of Winning Draw:%d", dp)
-	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.Player.DisplayStat(battleStatsDataManagement.Health))
-	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(battleStatsDataManagement.Health))
+	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.Player.DisplayStat(battleStats.Health))
+	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(battleStats.Health))
 	tensionMeter := fmt.Sprintf("Tension:%d", g.battle.Tension)
 
 	dopts := text.DrawOptions{}

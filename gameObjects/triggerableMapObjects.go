@@ -1,7 +1,9 @@
 package gameObjects
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"image"
+	"math/rand/v2"
 )
 
 type Door struct {
@@ -60,6 +62,23 @@ func CheckContextualTriggers(player *Character, contextTriggers map[string]*Trig
 		}
 	}
 	return returnMap
+}
+
+func CheckEnemyTrigger(player *Character, enemySpawn map[string]Trigger) battleStats.CharacterName {
+	playerRect := image.Rect(
+		int(player.X),
+		int(player.Y)+20,
+		int(player.X)+16,
+		int(player.Y)+31)
+
+	for _, trig := range enemySpawn {
+		if trig.Rect.Overlaps(playerRect) {
+			if rand.IntN(500) <= 2 {
+				return battleStats.Wolf
+			}
+		}
+	}
+	return battleStats.None
 }
 
 func GetDoorCoord(doors map[string]Trigger, key string, direction string) (float64, float64) {

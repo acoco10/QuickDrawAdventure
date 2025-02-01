@@ -46,7 +46,7 @@ func (s *StartScene) Draw(screen *ebiten.Image) {
 
 }
 
-func (s *StartScene) FirstLoad() {
+func (s *StartScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	s.loaded = true
 }
 

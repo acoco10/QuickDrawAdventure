@@ -544,9 +544,7 @@ func DialogueSkillButtonEvent(g *BattleScene, text string) {
 }
 
 func CombatSkillButtonEvent(g *BattleScene, text string) {
-	g.playerBattleSprite.CombatButtonAnimationTrigger(text)
-	g.TextPrinter.ResetTP()
-	g.TextPrinter.NextMessage = true
+	g.battle.TakeCombatTurn(g.battle.Player.CombatSkills[text])
 	g.changeEvent(HideCombatMenu, 15)
 	g.inMenu = false
 	g.KeepCursorPressed()

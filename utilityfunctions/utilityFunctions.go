@@ -1,8 +1,6 @@
 package utilityfunctions
 
-import (
-	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
-)
+import ()
 
 func StringInSlice(testString string, testList []string) bool {
 	for _, b := range testList {
@@ -29,7 +27,7 @@ func MapKeysSI(dict map[string]int) []string {
 }
 
 // return slice of keys for maps with string keys and skill values
-func MapKeysSSk(dict map[string]battleStatsDataManagement.Skill) []string {
+func MapKeysSSk(dict map[string]battleStats.Skill) []string {
 	i := 0
 
 	keys := make([]string, len(dict))

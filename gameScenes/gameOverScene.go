@@ -42,7 +42,7 @@ func (s *GameOverScene) Draw(screen *ebiten.Image) {
 	text.Draw(screen, "Press Enter to Continue", face, &dopts)
 }
 
-func (s *GameOverScene) FirstLoad() {
+func (s *GameOverScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	s.loaded = true
 }
 
@@ -61,7 +61,7 @@ func (s *GameOverScene) Update() sceneManager.SceneId {
 		return sceneManager.StartSceneId
 	}
 
-	return sceneManager.StartSceneId
+	return sceneManager.GameOverSceneID
 }
 
 var _ sceneManager.Scene = (*GameOverScene)(nil)

@@ -1,6 +1,7 @@
 package gameManager
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/gameScenes"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,6 +10,7 @@ import (
 type Game struct {
 	sceneMap      map[sceneManager.SceneId]sceneManager.Scene
 	activeSceneId sceneManager.SceneId
+	gameLog       *sceneManager.GameLog
 }
 
 func NewGame() *Game {
@@ -20,22 +22,26 @@ func NewGame() *Game {
 		sceneManager.TownSceneID:     gameScenes.NewTownScene(),
 	}
 	activeSceneId := sceneManager.StartSceneId
-	sceneMap[activeSceneId].FirstLoad()
-	return &Game{
+
+	game := &Game{
 		sceneMap,
 		activeSceneId,
+		&sceneManager.GameLog{},
 	}
+	sceneMap[activeSceneId].FirstLoad(game.gameLog)
+	return game
 }
 
 func (g *Game) Update() error {
 	nextSceneId := g.sceneMap[g.activeSceneId].Update()
 	// switched scenes
 	if nextSceneId != g.activeSceneId {
+		g.gameLog.PreviousScene = g.activeSceneId
 		g.sceneMap[g.activeSceneId].OnExit()
 		nextScene := g.sceneMap[nextSceneId]
 		// if not loaded? then load in
 		if !nextScene.IsLoaded() {
-			nextScene.FirstLoad()
+			nextScene.FirstLoad(g.gameLog)
 		}
 		nextScene.OnEnter()
 	}
@@ -56,11 +62,15 @@ func NewBattleTestGame() *Game {
 		sceneManager.BattleSceneId:   gameScenes.NewBattleScene(),
 		sceneManager.GameOverSceneID: gameScenes.NewGameOverScene(),
 		sceneManager.WinSceneID:      gameScenes.NewWinScene(),
+		sceneManager.StartSceneId:    gameScenes.NewStartScene(),
 	}
 	activeSceneId := sceneManager.BattleSceneId
-	sceneMap[activeSceneId].FirstLoad()
-	return &Game{
+	glog := &sceneManager.GameLog{EnemyEncountered: battleStats.Sheriff}
+	game := Game{
 		sceneMap,
 		activeSceneId,
+		glog,
 	}
+	sceneMap[activeSceneId].FirstLoad(game.gameLog)
+	return &game
 }

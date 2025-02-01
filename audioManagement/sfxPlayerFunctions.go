@@ -48,6 +48,7 @@ func (a *SFXAudioPlayer) QueueSound(id resource.AudioID) {
 }
 
 func (a *SFXAudioPlayer) ConfigureAttackResultSoundQueue(damage []int, target string) {
+	log.Printf("Formatting attack sound queue")
 	var soundList []resource.AudioID
 	for _, result := range damage {
 		if result > 0 {

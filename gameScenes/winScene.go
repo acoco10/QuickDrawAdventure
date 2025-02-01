@@ -50,7 +50,7 @@ func (s *WinScene) Draw(screen *ebiten.Image) {
 
 }
 
-func (s *WinScene) FirstLoad() {
+func (s *WinScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	s.loaded = true
 	s.playerBattleSprite = LoadPlayerBattleSprite()
 	s.playerBattleSprite.CombatButtonAnimationTrigger("win")
@@ -70,7 +70,7 @@ func (s *WinScene) OnExit() {
 
 func (s *WinScene) Update() sceneManager.SceneId {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		return sceneManager.StartSceneId
+		return sceneManager.TownSceneID
 	}
 
 	s.playerBattleSprite.Update()

@@ -3,6 +3,7 @@ package gameScenes
 import (
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/assets"
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
@@ -35,6 +36,8 @@ type TownScene struct {
 	interactInProximity gameObjects.Item
 	triggerInteraction  bool
 	dustEffect          *ebiten.Image
+	scene               sceneManager.SceneId
+	gameLog             *sceneManager.GameLog
 }
 
 func NewTownScene() *TownScene {
@@ -42,7 +45,7 @@ func NewTownScene() *TownScene {
 	return &ts
 }
 
-func (g *TownScene) FirstLoad() {
+func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	tileMapFile, err := os.ReadFile("assets/map/town1Map.json")
 	if err != nil {
@@ -60,14 +63,14 @@ func (g *TownScene) FirstLoad() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	g.gameLog = gameLog
 	g.tilemapJSON = tilemapJSON
 	g.tilesets = tilesets
 
 	g.MapData, err = gameObjects.LoadMapObjectData(*tilemapJSON)
 	g.Objects, err = gameObjects.LoadMapObjects(g.MapData)
 	g.npcInProximity = gameObjects.Character{}
-
+	g.scene = sceneManager.TownSceneID
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,6 +143,7 @@ func (g *TownScene) FirstLoad() {
 }
 
 func (g *TownScene) Update() sceneManager.SceneId {
+
 	g.dialogueUi.Update()
 
 	g.Player.Dx = 0
@@ -252,7 +256,17 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	//custom script animation for tavern door (swings forward on entrance)
 	g.npcInProximity = CheckDialoguePopup(*g.Player, g.NPC)
 	g.interactInProximity = CheckInteractPopup(*g.Player, g.MapData.InteractPoints)
-	return g.dialogueUi.TriggerScene()
+	enemyEncounter := battleStats.None
+	if g.Player.Dx > 0 || g.Player.Dy > 0 {
+		enemyEncounter = gameObjects.CheckEnemyTrigger(g.Player, g.MapData.EnemySpawns)
+	}
+
+	if enemyEncounter != battleStats.None {
+		g.gameLog.EnemyEncountered = enemyEncounter
+		enemyEncounter = battleStats.None
+		g.scene = sceneManager.BattleSceneId
+	}
+	return g.scene
 
 }
 
@@ -377,9 +391,12 @@ func (g *TownScene) Layout(outsideWidth, outsideHeight int) (screenWidth, screen
 }
 
 func (g *TownScene) OnEnter() {
-
+	if g.gameLog.PreviousScene == sceneManager.StartSceneId {
+		g.FirstLoad(g.gameLog)
+	}
 }
 func (g *TownScene) OnExit() {
+	g.scene = sceneManager.TownSceneID
 
 }
 func (g *TownScene) IsLoaded() bool {

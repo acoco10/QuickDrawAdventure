@@ -70,6 +70,7 @@ type MapObjectData struct {
 	InteractPoints    map[string]Item
 	CameraPoints      map[string]Trigger
 	ObjectSpawns      map[string]Spawn
+	EnemySpawns       map[string]Trigger
 }
 
 func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
@@ -84,6 +85,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	interactPoints := make(map[string]Item)
 	cameraPoints := make(map[string]Trigger)
 	objectSpawns := make(map[string]Spawn)
+	enemies := make(map[string]Trigger)
 
 	for _, layer := range tilemapJSON.Layers {
 		if layer.Type == "objectgroup" {
@@ -166,6 +168,10 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					camPoint.Rect.Min.Y = camPoint.Rect.Min.Y - 32
 					camPoint.Rect.Max.Y = camPoint.Rect.Max.Y - 32
 					cameraPoints[object.Name] = camPoint
+				case "enemySpawn":
+					println("loading enemy spawn:", object.Name)
+					enemySpawn := NewTrigger(object)
+					enemies[object.Name] = enemySpawn
 				}
 			}
 		}
@@ -182,6 +188,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	mapObjects.InteractPoints = interactPoints
 	mapObjects.CameraPoints = cameraPoints
 	mapObjects.ObjectSpawns = objectSpawns
+	mapObjects.EnemySpawns = enemies
 
 	return mapObjects, nil
 }

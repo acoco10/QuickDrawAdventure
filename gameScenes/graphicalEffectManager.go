@@ -103,7 +103,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 				log.Fatal("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 			}
 
-			weaknessEffect := NewStaticEffect(weakImg, 600, 300, 100, 1)
+			weaknessEffect := NewStaticEffect(weakImg, 600, 250, 100, 1)
 			e.EffectQueue = append(e.EffectQueue, weaknessEffect)
 			println("adding weakness effect to player effect queue")
 		}
@@ -154,8 +154,9 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 
 				println("graphicalEffectManager.go:116 length of effect Queue =", len(e.EffectQueue), "\n")
 			}
+
 			if result == 0 {
-				missImage, _, err := ebitenutil.NewImageFromFile("assets/images/miss.png")
+				missImage, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/miss.png")
 				if err != nil {
 					log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}
@@ -181,8 +182,11 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 		if turn.EnemySkillUsed.SkillName == "stare down" {
 			e.EffectQueue = append(e.EffectQueue, e.effects[EnemyStareEffect])
 		}
-		enemyEffect := turn.PlayerSkillUsed.Effects[0]
-		if enemyEffect.EffectType == "buff" && turn.PlayerRoll {
+		if len(turn.EnemySkillUsed.Effects) == 0 {
+			log.Fatalf("Skill used = %s, has no effects or proccessing turn data with no enemy skill", turn.EnemySkillUsed.SkillName)
+		}
+		enemyEffect := turn.EnemySkillUsed.Effects[0]
+		if enemyEffect.EffectType == "buff" && turn.EnemyRoll {
 			if enemyEffect.Stat == "fear" {
 				face, err := LoadFont(15, Lady)
 				if err != nil {
@@ -223,7 +227,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 				e.EffectQueue = append(e.EffectQueue, damageEffect)
 			}
 			if result == 0 {
-				missImage, _, err := ebitenutil.NewImageFromFile("assets/images/miss.png")
+				missImage, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/miss.png")
 				if err != nil {
 					log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}

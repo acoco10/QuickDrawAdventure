@@ -1,4 +1,4 @@
-package battleStatsDataManagement
+package battleStats
 
 import (
 	"encoding/json"
@@ -109,11 +109,11 @@ func LoadSkillsFromPath(path string) (map[string]Skill, error) {
 }
 
 func LoadSkills() (combatSkills map[string]Skill, dialogueSkills map[string]Skill, err error) {
-	combatSkills, err = LoadSkillsFromPath("battleStatsDataManagement/data/combatSkills.JSON")
+	combatSkills, err = LoadSkillsFromPath("battleStats/data/combatSkills.JSON")
 	if err != nil {
 		return combatSkills, dialogueSkills, err
 	}
-	dialogueSkills, err = LoadSkillsFromPath("battleStatsDataManagement/data/dialogueSkills.JSON")
+	dialogueSkills, err = LoadSkillsFromPath("battleStats/data/dialogueSkills.JSON")
 	if err != nil {
 		return combatSkills, dialogueSkills, err
 	}

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/battle"
-	"github.com/acoco10/QuickDrawAdventure/battleStatsDataManagement"
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/dialogueData"
 	"math/rand"
 	"testing"
@@ -24,8 +24,8 @@ func MakeTestBattle() *battle.Battle {
 		"fear":      0,
 	}
 
-	elyse := battleStatsDataManagement.NewCharacter("elyse", stats, map[string]battleStatsDataManagement.Skill{}, map[string]battleStatsDataManagement.Skill{}, "anger")
-	george := battleStatsDataManagement.NewCharacter("elyse", stats, map[string]battleStatsDataManagement.Skill{}, map[string]battleStatsDataManagement.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
+	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
 
 	b := battle.NewBattle(&elyse, &george)
 
@@ -61,8 +61,8 @@ func TestBattleState(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStatsDataManagement.NewCharacter("elyse", stats, map[string]battleStatsDataManagement.Skill{}, map[string]battleStatsDataManagement.Skill{}, "anger")
-	george := battleStatsDataManagement.NewCharacter("elyse", stats, map[string]battleStatsDataManagement.Skill{}, map[string]battleStatsDataManagement.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
+	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
 
 	b := battle.NewBattle(&elyse, &george)
 
@@ -137,7 +137,7 @@ func TestBattleState(t *testing.T) {
 }
 
 func TestLoadBadSkillJSON(t *testing.T) {
-	badSkills, err := battleStatsDataManagement.LoadSkillsFromPath("badSkills.json")
+	badSkills, err := battleStats.LoadSkillsFromPath("badSkills.json")
 
 	if err != nil {
 		t.Fatalf(`LoadSkillsFromPath("combatSkills.json") did not load due to %s`, err)
@@ -166,7 +166,7 @@ func TestRoll(t *testing.T) {
 }
 
 func TestLoadGoodSkillsJSON(t *testing.T) {
-	combatSkills, _, _ := battleStatsDataManagement.LoadSkills()
+	combatSkills, _, _ := battleStats.LoadSkills()
 	dSkillsLength := len(combatSkills)
 	dialogueSkillNames := make([]string, dSkillsLength)
 	for _, skill := range combatSkills {
@@ -199,7 +199,7 @@ func TestDialogueLoading(t *testing.T) {
 }
 
 func TestLoadCharacter(t *testing.T) {
-	chars, _ := battleStatsDataManagement.LoadCharacters()
+	chars, _ := battleStats.LoadCharacters()
 	for skill := range chars[0].DialogueSkills {
 		println(skill)
 	}
@@ -218,27 +218,27 @@ func TestCharacterMethods(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStatsDataManagement.NewCharacter("elyse", stats, map[string]battleStatsDataManagement.Skill{}, map[string]battleStatsDataManagement.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
 
-	if elyse.DisplayStat(battleStatsDataManagement.Health) != 4 {
+	if elyse.DisplayStat(battleStats.Health) != 4 {
 		t.Fatalf(`method displayCharHealth did not work`)
 	}
 
 	elyse.UpdateCharAccuracy(-1)
 
-	if elyse.DisplayStat(battleStatsDataManagement.Accuracy) != 1 {
+	if elyse.DisplayStat(battleStats.Accuracy) != 1 {
 		t.Fatalf(`method updateCharAccuracy did not work`)
 	}
 
 	elyse.UpdateCharHealth(-1)
 
-	if elyse.DisplayStat(battleStatsDataManagement.Health) != 3 {
-		t.Fatalf(`method updateCharhealthdid not work health value:%d expected value 3`, elyse.DisplayStat(battleStatsDataManagement.Health))
+	if elyse.DisplayStat(battleStats.Health) != 3 {
+		t.Fatalf(`method updateCharhealthdid not work health value:%d expected value 3`, elyse.DisplayStat(battleStats.Health))
 	}
 
 	elyse.UpdateCharHealth(-0)
-	if elyse.DisplayStat(battleStatsDataManagement.Health) != 4 {
-		t.Fatalf(`method updateCharhealth did not work value inserted %d above its maximum: 4 `, elyse.DisplayStat(battleStatsDataManagement.Health))
+	if elyse.DisplayStat(battleStats.Health) != 4 {
+		t.Fatalf(`method updateCharhealth did not work value inserted %d above its maximum: 4 `, elyse.DisplayStat(battleStats.Health))
 	}
 
 }
@@ -252,18 +252,18 @@ func Test_use_stat_Buff(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStatsDataManagement.NewCharacter("elyse", stats, map[string]battleStatsDataManagement.Skill{}, map[string]battleStatsDataManagement.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
 
-	elyse.UpdateStat(battleStatsDataManagement.Anger, 1)
+	elyse.UpdateStat(battleStats.Anger, 1)
 
-	if elyse.DisplayStat(battleStatsDataManagement.Anger) != 1 {
-		t.Fatalf(`method ResetStatusStats() failed to update correctly %d`, elyse.Stats[battleStatsDataManagement.Anger])
+	if elyse.DisplayStat(battleStats.Anger) != 1 {
+		t.Fatalf(`method ResetStatusStats() failed to update correctly %d`, elyse.Stats[battleStats.Anger])
 	}
 
 	elyse.ResetStatusStats()
 
-	if elyse.DisplayStat(battleStatsDataManagement.Anger) != 0 {
-		t.Fatalf(`method ResetStatusStats() failed to update correctly %d`, elyse.Stats[battleStatsDataManagement.Anger])
+	if elyse.DisplayStat(battleStats.Anger) != 0 {
+		t.Fatalf(`method ResetStatusStats() failed to update correctly %d`, elyse.Stats[battleStats.Anger])
 	}
 
 }

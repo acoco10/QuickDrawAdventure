@@ -1,8 +1,16 @@
 package sceneManager
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+type GameLog struct {
+	PlayerLocation   string
+	PlayerStats      battleStats.Character
+	EnemyEncountered battleStats.CharacterName
+	PreviousScene    SceneId
+}
 
 type SceneId uint
 
@@ -17,7 +25,7 @@ const (
 type Scene interface {
 	Update() SceneId
 	Draw(screen *ebiten.Image)
-	FirstLoad()
+	FirstLoad(log *GameLog)
 	OnEnter()
 	OnExit()
 	IsLoaded() bool

@@ -19,9 +19,9 @@ const (
 type CAnimation uint8
 
 const (
-	FanShot CAnimation = iota
-	Shot
-	FocusedShot
+	AttackOne CAnimation = iota
+	AttackTwo
+	AttackThree
 	NoCombatSkill
 	Win
 	Reload
@@ -32,7 +32,7 @@ type DAnimation uint8
 const (
 	Insult DAnimation = iota
 	Brag
-	StareDown
+	Intimidate
 	NoDialogueSkill
 	Draw
 )
@@ -187,14 +187,14 @@ func (bs *BattleSprite) Update() {
 
 func (bs *BattleSprite) CombatButtonAnimationTrigger(text string) {
 
-	if text == "shoot" {
-		bs.CurrentCombatAnimation = Shot
+	if text == "shoot" || text == "bite" {
+		bs.CurrentCombatAnimation = AttackOne
 	}
 	if text == "focused_shot" {
-		bs.CurrentCombatAnimation = FocusedShot
+		bs.CurrentCombatAnimation = AttackThree
 	}
 	if text == "fan_shot" {
-		bs.CurrentCombatAnimation = FanShot
+		bs.CurrentCombatAnimation = AttackTwo
 	}
 	if text == "win" {
 		bs.CurrentCombatAnimation = Win
@@ -214,7 +214,7 @@ func (bs *BattleSprite) DialogueButtonAnimationTrigger(text string) {
 		bs.CurrentDialogueAnimation = Insult
 	}
 	if text == "stare down" {
-		bs.CurrentDialogueAnimation = StareDown
+		bs.CurrentDialogueAnimation = Intimidate
 	}
 	if text == "draw" {
 		bs.CurrentDialogueAnimation = Draw
@@ -232,7 +232,7 @@ func (bs *BattleSprite) UpdateCharEffect(effect CharEffect, countDown int) {
 	bs.CountDownEvent = TurnOffOutline
 }
 
-func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x float64, y float64, scale float64) (*BattleSprite, error) {
+func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x float64, y float64, scale float64, canimations map[CAnimation]*animations.CyclicAnimation) (*BattleSprite, error) {
 	bSprite := &BattleSprite{
 		Scale:       scale,
 		SpriteSheet: spriteSheet,
@@ -242,19 +242,12 @@ func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x
 			Y:       y,
 			Visible: true,
 		},
-		CombatAnimations: map[CAnimation]*animations.CyclicAnimation{
-			Shot:        animations.NewCyclicAnimation(5, 25, 10, 15, 1),
-			FocusedShot: animations.NewCyclicAnimation(4, 34, 10, 15, 1),
-			FanShot:     animations.NewCyclicAnimation(3, 23, 10, 15, 3),
-			Win:         animations.NewCyclicAnimation(8, 68, 10, 15, 5),
-			Reload:      animations.NewCyclicAnimation(9, 39, 10, 15, 1),
-		},
-
+		CombatAnimations: canimations,
 		DialogueAnimations: map[DAnimation]*animations.CyclicAnimation{
-			Insult:    animations.NewCyclicAnimation(1, 21, 10, 12, 3),
-			Brag:      animations.NewCyclicAnimation(1, 21, 10, 12, 3),
-			StareDown: animations.NewCyclicAnimation(1, 21, 10, 12, 3),
-			Draw:      animations.NewCyclicAnimation(2, 22, 10, 7, 1),
+			Insult:     animations.NewCyclicAnimation(1, 21, 10, 12, 3),
+			Brag:       animations.NewCyclicAnimation(1, 21, 10, 12, 3),
+			Intimidate: animations.NewCyclicAnimation(1, 21, 10, 12, 3),
+			Draw:       animations.NewCyclicAnimation(2, 22, 10, 7, 1),
 		},
 
 		IdleAnimation:            animations.NewAnimation(0, 0, 0, 10),

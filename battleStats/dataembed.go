@@ -1,4 +1,4 @@
-package battleStatsDataManagement
+package battleStats
 
 import "embed"
 

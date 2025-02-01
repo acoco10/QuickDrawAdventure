@@ -166,7 +166,3 @@ func LockCursorForDialogue() {
 	updater.MoveToLockedSpecificPosition(1002, 306)
 	input.SetCursorUpdater(updater)
 }
-
-func unlockCursor() {
-	input.SetCursorUpdater(nil)
-}

@@ -26,7 +26,7 @@
   "weakness": "fear"
 },
 
-{"name": "Hot Head Gunslinger",
+{"name": "Gunslinger",
         "stats": {
 
             "health":    6,
@@ -45,7 +45,7 @@
 
       "health":    6,
       "accuracy":  5,
-      "drawSpeed": 3,
+      "drawSpeed": 105,
       "fear":      2,
       "tensionThreshold": 7,
       "anger":     0
@@ -53,6 +53,21 @@
     },
     "combat_skills": ["shoot", "focused_shot", "fan_shot","reload"],
     "dialogue_skills": ["stare down", "draw", "insult", "brag"],
+    "weakness": "anger"
+  },
+  {"name": "Wolf",
+    "stats": {
+
+      "health":    6,
+      "accuracy":  0,
+      "drawSpeed": 0,
+      "fear":      2,
+      "tensionThreshold": 0,
+      "anger":     0
+
+    },
+    "combat_skills": ["bite"],
+    "dialogue_skills": [],
     "weakness": "anger"
   }
 ]

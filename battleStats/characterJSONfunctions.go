@@ -1,4 +1,4 @@
-package battleStatsDataManagement
+package battleStats
 
 import (
 	"encoding/json"
@@ -6,6 +6,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+)
+
+type CharacterName uint8
+
+const (
+	Elyse CharacterName = iota
+	Wolf
+	CowardlyCowboy
+	Sheriff
+	GunSlinger
+	None
 )
 
 type CharacterJSON struct {
@@ -84,9 +95,9 @@ func LoadCharacter(characterJSON CharacterJSON) (Character, error) {
 
 }
 
-func LoadCharacters() ([]Character, error) {
+func LoadCharacters() (map[CharacterName]Character, error) {
 
-	contents, err := os.ReadFile("battleStatsDataManagement/data/characters.json")
+	contents, err := os.ReadFile("battleStats/data/characters.json")
 
 	if err != nil {
 		log.Fatal(err)
@@ -100,7 +111,7 @@ func LoadCharacters() ([]Character, error) {
 		log.Fatal(contents, err)
 	}
 
-	var characters []Character
+	characters := make(map[CharacterName]Character)
 
 	for _, characterJSON := range charactersJSON.Characters {
 		fmt.Printf("loading character %s\n", characterJSON.Name)
@@ -108,7 +119,19 @@ func LoadCharacters() ([]Character, error) {
 		if err != nil {
 			log.Fatal(char, err)
 		}
-		characters = append(characters, char)
+		if char.Name == "Elyse" {
+			characters[Elyse] = char
+		}
+		if char.Name == "Wolf" {
+			characters[Wolf] = char
+		}
+		if char.Name == "Sheriff" {
+			characters[Sheriff] = char
+		}
+		if char.Name == "Gunslinger" {
+			characters[GunSlinger] = char
+		}
+
 	}
 
 	return characters, nil
