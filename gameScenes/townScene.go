@@ -82,7 +82,7 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	charSpriteSheet := spritesheet.NewSpritesheet(4, 6, 16, 32)
 
-	playerImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/elyse/elyseSpriteSheet.png")
+	playerImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/elyse/elyseSpriteSheet.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,12 +92,12 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 		log.Fatal(err)
 	}
 
-	jarvisImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/townFolk/jarvis.png")
+	jarvisImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/townFolk/jarvis.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	zephImg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/townFolk/zeph.png")
+	zephImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/townFolk/zeph.png")
 	if err != nil {
 		log.Fatal(err)
 	}

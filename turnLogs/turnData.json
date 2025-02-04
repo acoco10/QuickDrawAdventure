@@ -1,85 +1,93 @@
 {
 	"Phase": 0,
 	"PlayerSkillUsed": {
-		"name": "brag",
-		"index": 0,
-		"effects": [
-			{
-				"type": "buff",
-				"stat": "fear",
-				"amount": 2,
-				"duration": 0,
-				"initiativeL": false,
-				"damage": null,
-				"successPer": 75,
-				"nShots": 0,
-				"on": "enemy"
-			},
-			{
-				"type": "buff",
-				"stat": "fear",
-				"amount": 2,
-				"duration": 0,
-				"initiativeL": false,
-				"damage": null,
-				"successPer": 65,
-				"nShots": 0,
-				"on": "unsuccessfulSelf"
-			}
-		],
-		"tension": 1
-	},
-	"EnemySkillUsed": {
-		"name": "stare down",
+		"name": "fanShot",
 		"index": 2,
 		"effects": [
 			{
 				"type": "buff",
-				"stat": "fear",
-				"amount": 1,
+				"stat": "accuracy",
+				"amount": -2,
 				"duration": 0,
 				"initiativeL": false,
-				"damage": null,
-				"successPer": 80,
+				"damage": [
+					0
+				],
+				"successPer": 100,
 				"nShots": 0,
-				"on": "enemy"
+				"on": "self"
 			},
+			{
+				"type": "shot",
+				"stat": "",
+				"amount": 0,
+				"duration": 0,
+				"initiativeL": false,
+				"damage": [
+					1,
+					2
+				],
+				"successPer": 50,
+				"nShots": 3,
+				"on": ""
+			}
+		],
+		"tension": 0
+	},
+	"EnemySkillUsed": {
+		"name": "focusedShot",
+		"index": 1,
+		"effects": [
 			{
 				"type": "buff",
 				"stat": "accuracy",
-				"amount": 1,
+				"amount": 3,
 				"duration": 0,
 				"initiativeL": false,
-				"damage": null,
-				"successPer": 80,
+				"damage": [],
+				"successPer": 100,
 				"nShots": 0,
-				"on": "successfulSelf"
+				"on": "self"
+			},
+			{
+				"type": "shot",
+				"stat": "",
+				"amount": 0,
+				"duration": 0,
+				"initiativeL": false,
+				"damage": [
+					2
+				],
+				"successPer": 70,
+				"nShots": 1,
+				"on": ""
 			}
 		],
-		"tension": 2
+		"tension": 0
 	},
 	"PlayerRoll": false,
 	"PlayerSecondaryRoll": false,
-	"EnemyRoll": true,
+	"EnemyRoll": false,
 	"EnemySecondaryRoll": false,
-	"DamageToPlayer": null,
-	"DamageToEnemy": null,
+	"DamageToPlayer": [
+		0
+	],
+	"DamageToEnemy": [
+		0,
+		2,
+		-1
+	],
 	"EnemyEventTriggered": false,
 	"PlayerEventTriggered": false,
 	"WinProbAfterPlayerTurn": 0,
 	"WinProbAfterEnemyTurn": 0,
 	"PlayerMessage": [
-		"Elyse uses brag",
-		"You best walk away, my Posse will be here soon, 500 strong, all killers.",
-		"",
-		"Brag is ineffective"
+		"elyse uses fanShot",
+		"It does 2 total damage!,"
 	],
 	"EnemyMessage": [
-		"Sheriff uses stare down",
-		"",
-		"Elyse is shaking in her boots!!!",
-		"Stare down is effective",
-		"Elyse's fear increased by 1"
+		"sheriff uses focusedShot",
+		"It does 0 total damage!,"
 	],
 	"TurnInitiative": 0,
 	"PlayerEffectsTriggered": false,

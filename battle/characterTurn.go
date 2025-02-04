@@ -69,11 +69,9 @@ func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStats.Skill) (
 			skill = eSkill
 		}
 	}
+	fmt.Printf("Choosing skill for enemy:%s\n", skill.SkillName)
 	if skill.SkillName == "reload" {
 		skill = enemySkills["focusedShot"]
-	}
-	if battle.BattlePhase == Dialogue {
-		skill = enemySkills["stare down"]
 	}
 
 	return skill, nil

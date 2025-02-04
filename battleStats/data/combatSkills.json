@@ -1,5 +1,5 @@
 {"skills":[
-            {"name": "focused_shot",
+            {"name": "focusedShot",
                 "index": 1,
             "effects": [
                 {
@@ -23,7 +23,7 @@
                 }
             ]
         },
-            {"name": "fan_shot",
+            {"name": "fanShot",
                 "index": 2,
             "effects": [{
                 "type": "buff",

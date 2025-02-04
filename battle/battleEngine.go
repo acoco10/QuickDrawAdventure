@@ -104,7 +104,7 @@ func (b *Battle) GetTurn() *Turn {
 
 func (b *Battle) UpdateState() {
 	turn := b.GetTurn()
-	if turn.TurnInitiative == Player && len(turn.PlayerMessage) > 0 {
+	if b.turnInitiative == Player && len(turn.PlayerMessage) > 0 {
 		if !turn.PlayerTurnCompleted {
 			b.State = PlayerTurn
 		} else if !turn.EnemyTurnCompleted {
@@ -113,7 +113,7 @@ func (b *Battle) UpdateState() {
 			b.State = NextTurn
 		}
 	}
-	if turn.TurnInitiative == Enemy {
+	if b.turnInitiative == Enemy && len(turn.PlayerMessage) > 0 {
 		if !turn.EnemyTurnCompleted {
 			b.State = EnemyTurn
 		} else if !turn.PlayerTurnCompleted {
@@ -137,16 +137,22 @@ func (b *Battle) UpdatePlayerAmmo() {
 		}
 	}
 	b.PlayerAmmo -= playerAmmoUsed
+	if b.PlayerAmmo < 0 {
+		b.PlayerAmmo = 0
+	}
 }
 func (b *Battle) UpdateEnemyAmmo() {
 	turn := b.GetTurn()
 	enemyAmmoUsed := 0
 	for _, effect := range turn.EnemySkillUsed.Effects {
 		if effect.EffectType == "shot" {
-			b.EnemyAmmo += effect.NShots
+			enemyAmmoUsed += effect.NShots
 		}
 	}
 	b.EnemyAmmo -= enemyAmmoUsed
+	if b.EnemyAmmo < 0 {
+		b.EnemyAmmo = 0
+	}
 }
 
 func (b *Battle) RandTurnInitiative() Initiative {
@@ -282,6 +288,11 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 	if enemySkill.SkillName == "draw" || playerSkill.SkillName == "draw" {
 
 		battleInitiative = Draw(b.Player.DisplayStats(), b.Enemy.DisplayStats())
+		if battleInitiative {
+			b.nextTurnInitiative = Player
+		} else {
+			b.nextTurnInitiative = Enemy
+		}
 
 		if playerSkill.SkillName == "draw" {
 			playerSkillDialogue = append(playerSkillDialogue, b.DrawFunction(b.Player, b.Enemy, battleInitiative)...)
@@ -296,9 +307,11 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 	if playerSkill.SkillName != "draw" {
 		playerSkillDialogue = append(playerSkillDialogue, b.generateMessageForUsedDialogueSkill(*b.Player, *b.Enemy, playerSkill, playerRoll, playerSecondaryRoll)...)
 	}
+
 	if enemySkill.SkillName != "draw" {
 		enemySkillDialogue = append(enemySkillDialogue, b.generateMessageForUsedDialogueSkill(*b.Enemy, *b.Player, enemySkill, enemyRoll, enemySecondaryRoll)...)
 	}
+
 	if turn.TurnInitiative == Player {
 		switch turn.PlayerSkillUsed.SkillName {
 		case "draw":
@@ -474,7 +487,7 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
 	turn.EnemyWeakness = false
 	turn.PlayerWeakness = false
 
-	if playerSkill.SkillName == "focused_shot" {
+	if playerSkill.SkillName == "focusedShot" {
 		b.nextTurnInitiative = Enemy
 	}
 
@@ -487,7 +500,7 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
 	turn.EnemySkillUsed = enemySkill
 	turn.PlayerSkillUsed = playerSkill
 
-	if enemySkill.SkillName == "focused_shot" {
+	if enemySkill.SkillName == "focusedShot" {
 		b.nextTurnInitiative = Player
 	}
 
@@ -559,10 +572,12 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
 					damage := Shoot(b.Player.DisplayStat(battleStats.Accuracy), b.Player.DisplayStat(battleStats.Fear), b.Player.DisplayStat(battleStats.Anger), effect.SuccessPer, effect.DamageRange)
 					turn.DamageToEnemy = append(turn.DamageToEnemy, damage)
 				} else {
+					println("out of ammo")
 					turn.DamageToEnemy = append(turn.DamageToEnemy, -1)
 				}
 			}
 		}
+
 		if effect.EffectType == "reload" {
 			b.PlayerAmmo = 6
 		}

@@ -119,16 +119,16 @@ func LoadCharacters() (map[CharacterName]Character, error) {
 		if err != nil {
 			log.Fatal(char, err)
 		}
-		if char.Name == "Elyse" {
+		if char.Name == "elyse" {
 			characters[Elyse] = char
 		}
-		if char.Name == "Wolf" {
+		if char.Name == "wolf" {
 			characters[Wolf] = char
 		}
-		if char.Name == "Sheriff" {
+		if char.Name == "sheriff" {
 			characters[Sheriff] = char
 		}
-		if char.Name == "Gunslinger" {
+		if char.Name == "gunSlinger" {
 			characters[GunSlinger] = char
 		}
 

@@ -1,5 +1,5 @@
 {"characters":[
-    {"name": "Elyse",
+    {"name": "elyse",
     "stats": {
         "health":    8,
 		"accuracy":  3,
@@ -7,26 +7,26 @@
 		"fear":      0,
 		"anger":     2
     },
-    "combat_skills": ["shoot", "focused_shot", "fan_shot", "reload"],
-    "dialogue_skills": ["stare down", "draw", "insult", "brag"]
+    "combat_skills": ["shoot", "focusedShot", "fanShot", "reload"],
+    "dialogue_skills": ["stareDown", "draw", "insult", "brag"]
 },
 
-{"name": "Cowardly Cowboy",
+{"name": "cowardlyCowboy",
 "stats": {
 
-    "health":    7,
-    "accuracy":  2,
+    "health":    12,
+    "accuracy":  0,
     "drawSpeed": 85,
     "fear":      2,
   "tensionThreshold": 6,
     "anger":     0
 },
-"combat_skills": ["shoot", "focused_shot", "reload"],
-"dialogue_skills": ["stare down", "draw", "insult", "brag"],
+"combat_skills": ["shoot", "focusedShot", "reload"],
+"dialogue_skills": ["stareDown", "draw", "insult", "brag"],
   "weakness": "fear"
 },
 
-{"name": "Gunslinger",
+{"name": "gunSlinger",
         "stats": {
 
             "health":    6,
@@ -36,26 +36,26 @@
           "tensionThreshold": 4,
             "anger":     2
         },
-        "combat_skills": ["shoot", "focused_shot", "reload"],
-        "dialogue_skills": ["stare down", "draw", "insult", "brag"],
+        "combat_skills": ["shoot", "focusedShot", "reload"],
+        "dialogue_skills": ["stareDown", "draw", "insult", "brag"],
         "weakness": "anger"
 },
-  {"name": "Sheriff",
+  {"name": "sheriff",
     "stats": {
 
-      "health":    6,
+      "health":    10,
       "accuracy":  5,
       "drawSpeed": 105,
       "fear":      2,
-      "tensionThreshold": 7,
+      "tensionThreshold": 5,
       "anger":     0
 
     },
-    "combat_skills": ["shoot", "focused_shot", "fan_shot","reload"],
-    "dialogue_skills": ["stare down", "draw", "insult", "brag"],
+    "combat_skills": ["shoot", "focusedShot", "fanShot","reload"],
+    "dialogue_skills": ["stareDown", "draw", "insult", "brag"],
     "weakness": "anger"
   },
-  {"name": "Wolf",
+  {"name": "wolf",
     "stats": {
 
       "health":    6,

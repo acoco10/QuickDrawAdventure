@@ -116,6 +116,7 @@ type AnimatedEffect struct {
 	state        EffectState
 	scale        float64
 	effectType   GraphicEffectType
+	visible      bool
 }
 
 func (e *AnimatedEffect) UnTrigger() {
@@ -123,13 +124,16 @@ func (e *AnimatedEffect) UnTrigger() {
 }
 
 func (e *AnimatedEffect) Draw(screen *ebiten.Image) {
-	if e.state == Triggered {
+	if e.state == Triggered || e.visible {
 		img := e.img.SubImage(e.spriteSheet.Rect(e.frame)).(*ebiten.Image)
 		opts := &ebiten.DrawImageOptions{}
 		opts.GeoM.Scale(e.scale, e.scale)
 		opts.GeoM.Translate(e.x, e.y)
 		screen.DrawImage(img, opts)
 	}
+}
+func (e *AnimatedEffect) MakeVisible() {
+	e.visible = true
 }
 
 func (e *AnimatedEffect) CheckState() EffectState {
@@ -153,7 +157,6 @@ func (e *AnimatedEffect) Update() {
 
 			if e.frame == e.lastFrame {
 				e.frame = e.firstFrame
-
 				e.state = NotTriggered
 			}
 		}
@@ -184,7 +187,7 @@ func NewEffect(img *ebiten.Image, sheet *spritesheet.SpriteSheet, x float64, y f
 		cycles:       1,
 		state:        NotTriggered,
 		scale:        scale,
-		effectType:   Static,
+		effectType:   Animated,
 	}
 	return effect
 }

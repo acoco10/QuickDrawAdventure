@@ -1,7 +1,7 @@
 {
     "characters": [
         {
-            "name": "Elyse",
+            "name": "elyse",
             "skills": [
                 {
                     "type": "insult",
@@ -14,7 +14,7 @@
                     "unsuccessful": "You best walk away, my Posse will be here soon, 500 strong, all killers."
                 },
                 {
-                    "type": "stare down",
+                    "type": "stareDown",
                     "successful": "Elyse manages to look super cool and super intimidating at the same time",
                     "unsuccessful": "Elyse tries her best to squint in a cowboy-like fashion, but a bead of sweat rolls right into her eye and she ends up looking more consternated' than intimidatin'."
                 }
@@ -31,7 +31,7 @@
                     "unsuccessful": "Elyse: I'm soooooo scared."
                 },
                 {
-                    "type": "stare down",
+                    "type": "stareDown",
                     "successful": "Elyse is shaking in her boots!!!",
                     "unsuccessful": "Elyse: You couldn't scare the candy out of a baby."
                 }
@@ -39,7 +39,7 @@
         },
 
         {
-            "name": "Cowardly Cowboy",
+            "name": "cowardlyCowboy",
             "skills": [
                 {
                     "type": "insult",
@@ -52,7 +52,7 @@
                     "unsuccessful": "You better watch out bitch... I uh know the Sheriff."
                 },
                 {
-                    "type": "stare down",
+                    "type": "stareDown",
                     "successful": "Cowardly Cowboy musters all his courage and stares you deep in the eyes.",
                     "unsuccessful": "Cowardly Cowboy looks like he's going to crap himself."
                 }
@@ -69,9 +69,46 @@
                     "unsuccessful": "Cowardly Cowboy: Nice try, sister, it takes a liar to know one and no one is better at spinning a yarn than me!"
                 },
                 {
-                    "type": "stare down",
+                    "type": "stareDown",
                     "successful": "Cowardly Cowboy is shaking in his boots!!!",
                     "unsuccessful": "Cowardly Cowboy: I think you got something in your eye lil girl"
+                }
+            ]
+        },
+        {
+            "name": "sheriff",
+            "skills": [
+                {
+                    "type": "insult",
+                    "successful": "Sheriff: You're more gutless then a skinned pig",
+                    "unsuccessful": "Cowardly Cowboy: Not as sharp as I used to be no insults are coming to mind"
+                },
+                {
+                    "type": "brag",
+                    "successful": "Cowardly Cowboy: Not the first time I've gunned down a pip squeak like you, wont be the last.",
+                    "unsuccessful": "You better watch out bitch... I uh know the Sheriff."
+                },
+                {
+                    "type": "stareDown",
+                    "successful": "Cowardly Cowboy lights a cigar and stares at you as if he is bored by the whole affair.",
+                    "unsuccessful": "Cowardly Cowboy old lungs give out as he inhales and hacks his lungs up in an embarrassing fashion"
+                }
+            ],
+            "responses": [
+                {
+                    "type": "insult",
+                    "successful": "Sheriff: You best watch that tongue of yours cur, liable to make a man draw his iron.",
+                    "unsuccessful": "Sheriff stares at you."
+                },
+                {
+                    "type": "brag",
+                    "successful": "Even the biggest idiot is dangerous with a posse at their back",
+                    "unsuccessful": "I've plaid my fair share o poker and you madam are full of shit"
+                },
+                {
+                    "type": "stareDown",
+                    "successful": "Cowardly Cowboy is shaking in his boots!!!",
+                    "unsuccessful": "Cowardly Cowboy: Hard to shoot if you cant your eyes open"
                 }
             ]
         }

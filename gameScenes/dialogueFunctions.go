@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -37,7 +38,7 @@ func CheckInteractPopup(player gameObjects.Character, items map[string]gameObjec
 
 func DrawPopUp(screen *ebiten.Image, x, y, width float64, camera *camera.Camera) {
 
-	popupImg, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/popup.png")
+	popupImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/popup.png")
 	opts := ebiten.DrawImageOptions{}
 	dopts := text.DrawOptions{}
 	opts.GeoM.Scale(2, 2)

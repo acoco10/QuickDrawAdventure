@@ -190,11 +190,11 @@ func (bs *BattleSprite) CombatButtonAnimationTrigger(text string) {
 	if text == "shoot" || text == "bite" {
 		bs.CurrentCombatAnimation = AttackOne
 	}
-	if text == "focused_shot" {
-		bs.CurrentCombatAnimation = AttackThree
-	}
-	if text == "fan_shot" {
+	if text == "focusedShot" {
 		bs.CurrentCombatAnimation = AttackTwo
+	}
+	if text == "fanShot" {
+		bs.CurrentCombatAnimation = AttackThree
 	}
 	if text == "win" {
 		bs.CurrentCombatAnimation = Win

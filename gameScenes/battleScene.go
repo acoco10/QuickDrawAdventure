@@ -2,6 +2,7 @@ package gameScenes
 
 import (
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
@@ -10,8 +11,8 @@ import (
 	"github.com/ebitenui/ebitenui/input"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"image/color"
 	"log"
 )
 
@@ -42,6 +43,12 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.musicPlayer = audioManagement.NewSongPlayer(audioManagement.DialogueMusic)
 	g.scene = sceneManager.BattleSceneId
 
+	backgroundimg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/terrain/backgrounds/battleBackgroundCliff.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	g.backGround = *backgroundimg
+
 	playerBS := LoadPlayerBattleSprite()
 	g.playerBattleSprite = &playerBS
 
@@ -54,8 +61,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	}
 
 	g.onScreenStatsUI = &OnScreenStatsUI{
-		ammoEffect:  aEffect,
-		ammoCounter: 0,
+		ammoEffect: aEffect,
 	}
 
 	rootContainer := widget.NewContainer(
@@ -90,6 +96,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	dSkillsLength := len(elyse.DialogueSkills)
 	dialogueSkillNames := make([]string, dSkillsLength)
+
 	for _, skill := range elyse.DialogueSkills {
 		i := skill.Index
 		dialogueSkillNames[i] = skill.SkillName
@@ -106,9 +113,9 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	statusContainer := MakeStatusContainer()
 
 	//to dynamically update we need to create and ebitenUI textInput widget
-	statusText := StatusTextInput("b")
-	statusTextLine2 := StatusTextInput("b")
-	statusTextLine3 := StatusTextInput("b")
+	statusText := StatusTextInput("white")
+	statusTextLine2 := StatusTextInput("white")
+	statusTextLine3 := StatusTextInput("white")
 	statusContainer.AddChild(statusText)
 	statusContainer.AddChild(statusTextLine2)
 	statusContainer.AddChild(statusTextLine3)
@@ -229,7 +236,6 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	}
 
 	if g.eventCountDown > 0 {
-		println("event countdown:", g.eventCountDown)
 		g.eventCountDown--
 	}
 	//have the menu handle its own events
@@ -270,7 +276,6 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 
 	if g.eventCountDown == 1 && g.currentEvent != NoEvent {
 		g.TriggerEvent(g.currentEvent)
-		println("event received:", g.currentEvent, "0= move to dialogue menu, 3 = move to skill menu")
 		g.changeEvent(NoEvent, 0)
 	}
 
@@ -278,33 +283,33 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	g.EnemyDialogueTurn(turn)
 	g.PlayerShootingTurn(turn)
 	g.EnemyShootingTurn(turn)
-
-	err := g.onScreenStatsUI.Update(*turn)
+	g.UpdateSceneChangeCountdown()
+	err := g.onScreenStatsUI.Update()
 	if err != nil {
 		log.Fatal(err)
 	}
-	g.UpdateSceneChangeCountdown()
 
 	return g.scene
 }
 
 // Draw implements Ebiten Draw method.
 func (g *BattleScene) Draw(screen *ebiten.Image) {
-
-	screen.Fill(color.RGBA{R: 205, G: 176, B: 109, A: 255})
-
 	if g.turnTracker > 0 {
 		PrintStatus(g, screen)
 	}
-
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Scale(5, 5)
+	screen.DrawImage(&g.backGround, opts)
+	opts.GeoM.Reset()
 	g.DrawCharOutline(screen, *g.playerBattleSprite)
 	DrawBattleSprite(*g.playerBattleSprite, screen, g.playerBattleSprite.Scale)
-	DrawBattleSprite(*g.enemyBattleSprite, screen, g.playerBattleSprite.Scale)
-	g.onScreenStatsUI.Draw(screen)
+	DrawBattleSprite(*g.enemyBattleSprite, screen, g.enemyBattleSprite.Scale)
 	g.graphicalEffectManager.PlayerEffects.Draw(screen)
 	g.graphicalEffectManager.EnemyEffects.Draw(screen)
 	g.ui.Draw(screen)
 	debugTextPrint(screen, g)
+	g.onScreenStatsUI.Draw(screen)
+	PrintStatus(g, screen)
 
 }
 

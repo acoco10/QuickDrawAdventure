@@ -3,7 +3,6 @@ package battleStats
 import (
 	"encoding/json"
 	"log"
-	"os"
 )
 
 type Effect struct {
@@ -17,6 +16,7 @@ type Effect struct {
 	NShots      int    `json:"nShots"`
 	On          string `json:"on"`
 }
+
 type SkillJson struct {
 	Skills []Skill `json:"skills"`
 }
@@ -71,11 +71,11 @@ func EffectsTest(effect Effect, skillName string) bool {
 	return true
 }
 
-func LoadSkillsFromPath(path string) (map[string]Skill, error) {
+func LoadSkillsFromPath(fileName string) (map[string]Skill, error) {
 
 	skillMap := make(map[string]Skill)
 
-	contents, err := os.ReadFile(path)
+	contents, err := battleStatsData.ReadFile(fileName)
 
 	if err != nil {
 
@@ -109,11 +109,11 @@ func LoadSkillsFromPath(path string) (map[string]Skill, error) {
 }
 
 func LoadSkills() (combatSkills map[string]Skill, dialogueSkills map[string]Skill, err error) {
-	combatSkills, err = LoadSkillsFromPath("battleStats/data/combatSkills.JSON")
+	combatSkills, err = LoadSkillsFromPath("data/combatSkills.json")
 	if err != nil {
 		return combatSkills, dialogueSkills, err
 	}
-	dialogueSkills, err = LoadSkillsFromPath("battleStats/data/dialogueSkills.JSON")
+	dialogueSkills, err = LoadSkillsFromPath("data/dialogueSkills.json")
 	if err != nil {
 		return combatSkills, dialogueSkills, err
 	}

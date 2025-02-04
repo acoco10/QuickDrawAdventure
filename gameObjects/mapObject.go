@@ -198,7 +198,7 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 	objects := make([]*DoorObject, 0)
 
 	tavernDoorSpriteSheet := spritesheet.NewSpritesheet(2, 3, 20, 21)
-	tavernDoorImg, _, err := ebitenutil.NewImageFromFile("assets/images/buildings/tavernDoorSpriteSheet.png")
+	tavernDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/tavernDoorSpriteSheet.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -213,7 +213,7 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 	)
 
 	sunRiseDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 24, 38)
-	sunriseDoorImg, _, err := ebitenutil.NewImageFromFile("assets/images/buildings/sunriseInn/sunriseInnDoor.png")
+	sunriseDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/sunriseInn/sunriseInnDoor.png")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -12,7 +12,6 @@ import (
 	"image"
 	"image/color"
 	"log"
-	"os"
 	"strings"
 )
 
@@ -68,11 +67,11 @@ func GenerateSkillButtons(text string, g *BattleScene) (button *widget.Button) {
 }
 
 func MakeStatusContainer() *widget.Container {
-	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/menuBackground.png")
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/minorDialogue.png")
 	if err != nil {
 	}
 
-	nineSliceImage := eimage.NewNineSlice(img, [3]int{12, 600 - 24, 12}, [3]int{12, 200 - 24, 12})
+	nineSliceImage := eimage.NewNineSlice(img, [3]int{8, 66 - 16, 8}, [3]int{8, 32 - 16, 8})
 	statusContainer := widget.NewContainer(
 		widget.ContainerOpts.BackgroundImage(nineSliceImage),
 		widget.ContainerOpts.WidgetOpts(
@@ -141,7 +140,7 @@ func StatusTextInput(textColor string) *widget.TextInput {
 }
 
 func SkillBoxContainer(headerText string) *widget.Container {
-	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/menuBackground.png")
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/menuBackground.png")
 	if err != nil {
 	}
 
@@ -240,7 +239,7 @@ func LoadButtonImage() *widget.ButtonImage {
 	}*/
 
 	//click imp prints a line through our button to indicate which option was selected
-	clickImg, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/buttonClicked.png")
+	clickImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/buttonClicked.png")
 
 	if err != nil {
 		log.Fatal(err)
@@ -266,7 +265,7 @@ func LoadDrawButtonImage() *widget.ButtonImage {
 	}*/
 
 	//click imp prints a line through our button to indicate which option was selected
-	clickImg, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/drawButtonClicked.png")
+	clickImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/drawButtonClicked.png")
 
 	if err != nil {
 		log.Fatal("menuFunctions.go: 265", err)
@@ -291,7 +290,7 @@ func LoadStatusButtonImage() *widget.ButtonImage {
 	if err != nil {
 	}*/
 
-	statusButtonRaw, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/statusBarButton.png")
+	statusButtonRaw, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/statusBarButton.png")
 	if err != nil {
 		log.Fatalf("button image file not loading")
 	}
@@ -328,7 +327,7 @@ func LoadFont(size float64, font FontType) (text.Face, error) {
 		}
 	}
 	if font == NovemberOutline {
-		LoadedFont, err = os.ReadFile("november/novemmOutline.ttf")
+		LoadedFont, err = assets.Fonts.ReadFile("fonts/novemmOutline.ttf")
 		if err != nil {
 			return nil, err
 		}
@@ -394,7 +393,7 @@ func GenerateDrawButton(g *BattleScene) (button *widget.Button) {
 }
 
 func CombatSkillBoxContainer(headerText string) *widget.Container {
-	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/menuBackground.png")
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/menuBackground.png")
 	if err != nil {
 	}
 
@@ -621,7 +620,7 @@ func GenericStatusEffectButtonEvent(printer *TextPrinter) {
 }
 
 func MinorDialogueContainer() *widget.Container {
-	img, _, err := ebitenutil.NewImageFromFile("assets/images/menuAssets/minorDialogue.png")
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/minorDialogue.png")
 	if err != nil {
 	}
 

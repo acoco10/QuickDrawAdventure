@@ -3,6 +3,7 @@ package gameObjects
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"image"
 	"log"
 	"os"
@@ -151,11 +152,10 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 			tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
 			tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
 			tileJsonPath = filepath.Clean(tileJsonPath)
-			tileJsonPath = filepath.Join("assets", tileJsonPath)
 
 			fmt.Printf("Loading dyn tileset image from: %s\n", tileJsonPath)
 
-			img, _, err := ebitenutil.NewImageFromFile(tileJsonPath)
+			img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, tileJsonPath)
 
 			if err != nil {
 				return nil, fmt.Errorf("failed to load dyntileset image from %s: %w", tileJsonPath, err)
@@ -184,11 +184,10 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 	tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
 	tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
 	tileJsonPath = filepath.Clean(tileJsonPath)
-	tileJsonPath = filepath.Join("assets", tileJsonPath)
 
 	fmt.Printf("Loading uniform tileset image from: %s %d\n", tileJsonPath, gid)
 
-	img, _, err := ebitenutil.NewImageFromFile(tileJsonPath)
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, tileJsonPath)
 
 	if err != nil {
 		return nil, err

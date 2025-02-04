@@ -62,6 +62,7 @@ func GameSFXLoader() *resource.Loader {
 	if err != nil {
 		log.Fatal("cannot load cockingRevolver.wav")
 	}
+
 	maleEnemyGrunt, err := combatSFX.ReadFile("sounds/combatSFX/maleEnemyGrunt1.wav")
 	if err != nil {
 		log.Fatal("cannot load maleEnemyGrunt.wav")

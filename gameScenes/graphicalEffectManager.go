@@ -49,7 +49,10 @@ func (e *GraphicalEffectSequencer) TriggerEffectQueue() {
 }
 
 func (e *GraphicalEffectSequencer) Update() {
-	if e.state == Triggered {
+	if e.counter > 0 {
+		e.counter--
+	}
+	if e.state == Triggered && e.counter < 1 {
 		effect := e.EffectQueue[0]
 		effect.Update()
 		if effect.CheckState() == NotTriggered {
@@ -57,8 +60,10 @@ func (e *GraphicalEffectSequencer) Update() {
 			e.EffectQueue = e.EffectQueue[1:]
 			if len(e.EffectQueue) > 0 && e.EffectQueue[0] != nil {
 				e.EffectQueue[0].Trigger()
+				e.counter = 5
 			} else {
 				e.effectIndex = 0
+				e.counter = 0
 				e.state = NotTriggered
 			}
 		}
@@ -70,9 +75,11 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 	if turn.PlayerSkillUsed.SkillName != "" {
 		e.EffectQueue = make([]GraphicEffects, 0)
 		e.configured = true
-		if turn.PlayerSkillUsed.SkillName == "stare down" {
+		if turn.PlayerSkillUsed.SkillName == "stareDown" {
 			e.EffectQueue = append(e.EffectQueue, e.effects[StareEffect])
+			e.counter = 1
 		}
+
 		if turn.PlayerSkillUsed.SkillName == "brag" {
 			if turn.PlayerRoll {
 				e.EffectQueue = append(e.EffectQueue, e.effects[BragEffect])
@@ -80,6 +87,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 			if !turn.PlayerRoll {
 				e.EffectQueue = append(e.EffectQueue, e.effects[PlayerUnsuccessfulEffect])
 			}
+			e.counter = 1
 		}
 		if turn.PlayerSkillUsed.SkillName == "draw" {
 			if turn.EnemySkillUsed.SkillName != "draw" {
@@ -87,6 +95,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 			} else if turn.TurnInitiative == battle.Player {
 				e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
 			}
+			e.counter = 1
 		}
 		if turn.PlayerSkillUsed.SkillName == "insult" {
 			if turn.PlayerRoll {
@@ -96,6 +105,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 			if !turn.PlayerRoll {
 				e.EffectQueue = append(e.EffectQueue, e.effects[PlayerUnsuccessfulEffect])
 			}
+			e.counter = 1
 		}
 		if turn.EnemyWeakness {
 			weakImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/weaknessEffect.png")
@@ -116,7 +126,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 					log.Fatal(err)
 				}
 
-				fearImg, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/fearEffect.png")
+				fearImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/fearEffect.png")
 				if err != nil {
 					log.Printf("graphicalEffectManager.go:84 ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}
@@ -133,6 +143,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 		}
 		for _, result := range turn.DamageToEnemy {
 			if result > 0 {
+				e.counter = 10
 
 				println("appending damage effect to playerBattleSprite effects\n", "result:", result, "\n")
 				face, err := LoadFont(15, Lady)
@@ -140,7 +151,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 					log.Fatal("graphicalEffectManager.go:102", err)
 				}
 
-				oneDamageImg, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/1damage.png")
+				oneDamageImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/1damage.png")
 				if err != nil {
 					log.Printf("graphicalEffectManager.go:107 ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}
@@ -156,7 +167,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 			}
 
 			if result == 0 {
-				missImage, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/miss.png")
+				missImage, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/miss.png")
 				if err != nil {
 					log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}
@@ -169,7 +180,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 }
 
 func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
-	if turn.PlayerSkillUsed.SkillName != "" {
+	if turn.EnemySkillUsed.SkillName != "" {
 		e.EffectQueue = make([]GraphicEffects, 0)
 		e.configured = true
 		if turn.EnemySkillUsed.SkillName == "draw" {
@@ -179,12 +190,10 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 				e.EffectQueue = append(e.EffectQueue, e.effects[DrawEffect])
 			}
 		}
-		if turn.EnemySkillUsed.SkillName == "stare down" {
+		if turn.EnemySkillUsed.SkillName == "stareDown" {
 			e.EffectQueue = append(e.EffectQueue, e.effects[EnemyStareEffect])
 		}
-		if len(turn.EnemySkillUsed.Effects) == 0 {
-			log.Fatalf("Skill used = %s, has no effects or proccessing turn data with no enemy skill", turn.EnemySkillUsed.SkillName)
-		}
+
 		enemyEffect := turn.EnemySkillUsed.Effects[0]
 		if enemyEffect.EffectType == "buff" && turn.EnemyRoll {
 			if enemyEffect.Stat == "fear" {
@@ -193,7 +202,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 					log.Fatal(err)
 				}
 
-				fearImg, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/fearEffect.png")
+				fearImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/fearEffect.png")
 				if err != nil {
 					log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}
@@ -214,7 +223,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 				if err != nil {
 					log.Fatal(err)
 				}
-				oneDamageImg, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/1damage.png")
+				oneDamageImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/1damage.png")
 				if err != nil {
 					log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}
@@ -227,7 +236,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 				e.EffectQueue = append(e.EffectQueue, damageEffect)
 			}
 			if result == 0 {
-				missImage, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/miss.png")
+				missImage, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/miss.png")
 				if err != nil {
 					log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
 				}
@@ -244,7 +253,7 @@ func (e *GraphicalEffectSequencer) ProcessEnemyTurnData(turn *battle.Turn) {
 
 func (e *GraphicalEffectSequencer) loadCharacterEffects() {
 
-	drawImg, _, err := ebitenutil.NewImageFromFile("assets/images/effectAssets/DrawAffect.png")
+	drawImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/drawEffect.png")
 	if err != nil {
 		log.Fatalf("ebitenutil.NewImageFromFile file not found%s\n", err)
 	}
@@ -252,7 +261,7 @@ func (e *GraphicalEffectSequencer) loadCharacterEffects() {
 	drawEffectSpriteSheet := spritesheet.NewSpritesheet(1, 4, 199, 125)
 	drawEffect := NewEffect(drawImg, drawEffectSpriteSheet, 450, 200, 3, 0, 1, 12, 4)
 
-	enemyStaredownimg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/npc/battleSprites/sheriffStaredownAnimationSpriteSheet.png")
+	enemyStaredownimg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/battleSprites/sheriffStaredownAnimationSpriteSheet.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -260,7 +269,7 @@ func (e *GraphicalEffectSequencer) loadCharacterEffects() {
 	sheriffStareSpriteSheet := spritesheet.NewSpritesheet(7, 1, 320, 180)
 	enemyStareEffect := NewEffect(enemyStaredownimg, sheriffStareSpriteSheet, 0, 0, 6, 0, 1, 30, 5)
 
-	staredownimg, _, err := ebitenutil.NewImageFromFile("assets/images/characters/elyse/staredownAnimationSpriteSheet.png")
+	staredownimg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/elyse/stareDownAnimationSpriteSheet.png")
 	if err != nil {
 		log.Fatal(err)
 	}
