@@ -37,6 +37,7 @@ const (
 	BlowingSmoke
 	TextOutput
 	StareDownEffect
+	TensionIncrease
 )
 
 var audioContext = audio.NewContext(44100)
@@ -108,6 +109,11 @@ func GameSFXLoader() *resource.Loader {
 		log.Fatal("cannot load stare down SFX")
 	}
 
+	tensionIncrease, err := combatSFX.ReadFile("sounds/combatSFX/tensionIncrease.wav")
+	if err != nil {
+		log.Fatal("cannot load tension increase SFX")
+	}
+
 	var SoundData = map[string][]byte{
 		"sounds/combatSFX/gunShot.wav":                    gunShot,
 		"sounds/combatSFX/whizz.wav":                      miss,
@@ -122,6 +128,7 @@ func GameSFXLoader() *resource.Loader {
 		"sounds/combatSFX/blowingSmoke.wav":               victoryBlow,
 		"sounds/menuSFX/rpg-text-speech-sound-131477.wav": textSFX,
 		"sounds/combatSFX/stareDownSoundEffect.wav":       stareDownEffect,
+		"sounds/combatSFX/tensionIncrease.wav":            tensionIncrease,
 	}
 
 	l := resource.NewLoader(audioContext)
@@ -144,6 +151,7 @@ func GameSFXLoader() *resource.Loader {
 		BlowingSmoke:    {Path: "sounds/combatSFX/blowingSmoke.wav", Volume: 0.2},
 		TextOutput:      {Path: "sounds/menuSFX/rpg-text-speech-sound-131477.wav", Volume: 0.1},
 		StareDownEffect: {Path: "sounds/combatSFX/stareDownSoundEffect.wav", Volume: 0.1},
+		TensionIncrease: {Path: "sounds/combatSFX/tensionIncrease.wav", Volume: 0.2},
 	})
 
 	return l

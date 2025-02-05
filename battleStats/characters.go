@@ -73,6 +73,10 @@ func (pc *Character) DisplayStat(stat Stat) int {
 	return pc.Stats[stat]
 }
 
+func (pc *Character) DisplayBaselineStat(stat Stat) int {
+	return pc.baselineStats[stat]
+}
+
 func (pc *Character) DisplayStats() map[Stat]int {
 	return pc.Stats
 }
@@ -125,6 +129,11 @@ func NewCharacter(name string, stats map[string]int, combatSkills map[string]Ski
 			charStats[TensionThreshold] = stat
 		}
 	}
+	charStatsCopy := map[Stat]int{}
+	for key, stat := range charStats {
+		charStatsCopy[key] = stat
+	}
+
 	if Weakness == "fear" {
 		weakness = Fear
 	}
@@ -135,7 +144,7 @@ func NewCharacter(name string, stats map[string]int, combatSkills map[string]Ski
 	return Character{
 		Name:           name,
 		Stats:          charStats,
-		baselineStats:  charStats,
+		baselineStats:  charStatsCopy,
 		CombatSkills:   combatSkills,
 		DialogueSkills: dialogueSkills,
 		Weakness:       weakness,

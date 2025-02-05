@@ -47,7 +47,7 @@
       "accuracy":  5,
       "drawSpeed": 105,
       "fear":      2,
-      "tensionThreshold": 5,
+      "tensionThreshold": 3,
       "anger":     0
 
     },

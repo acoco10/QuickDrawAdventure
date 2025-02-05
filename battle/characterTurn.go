@@ -29,8 +29,9 @@ func Roll(successPer int) bool {
 func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStats.Skill) (skill battleStats.Skill, err error) {
 	if battle.BattlePhase == Dialogue {
 		drawChance := 0
-		if battle.Tension > battle.Enemy.Stats[battleStats.TensionThreshold] {
+		if battle.Tension >= battle.Enemy.Stats[battleStats.TensionThreshold] {
 			drawChance = int(math.Pow(float64(battle.Tension), 1.9))
+			println("drawChance =", drawChance)
 		}
 
 		if rand.IntN(100)+1 < drawChance {
@@ -39,6 +40,7 @@ func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStats.Skill) (
 
 		}
 	}
+
 	if len(enemySkills) == 1 {
 		return enemySkills["bite"], nil
 	}
@@ -49,30 +51,16 @@ func EnemyChooseSkill(battle Battle, enemySkills map[string]battleStats.Skill) (
 
 	randSkillInt := rand.IntN(len(enemySkills) - 1) //reload/draw are the last index and randn is exclusive
 
-	skillIndexes := make([]int, 0)
-
 	for _, skillOption := range enemySkills {
-		skillIndexes = append(skillIndexes, skillOption.Index)
-	}
-
-	i := 0
-	chosenIndex := 0
-	for _, skillIndex := range skillIndexes {
-		if i == randSkillInt {
-			chosenIndex = skillIndex
-		}
-		i++
-	}
-
-	for _, eSkill := range enemySkills {
-		if eSkill.Index == chosenIndex {
-			skill = eSkill
+		if skillOption.SkillName != "draw" && skillOption.SkillName != "reload" {
+			if skillOption.Index == randSkillInt {
+				fmt.Printf("Choosing skill for enemy:%s\n", skillOption.SkillName)
+				return skillOption, nil
+			}
 		}
 	}
+
 	fmt.Printf("Choosing skill for enemy:%s\n", skill.SkillName)
-	if skill.SkillName == "reload" {
-		skill = enemySkills["focusedShot"]
-	}
 
 	return skill, nil
 }

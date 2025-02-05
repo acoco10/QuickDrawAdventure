@@ -44,11 +44,11 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.musicPlayer = audioManagement.NewSongPlayer(audioManagement.DialogueMusic)
 	g.scene = sceneManager.BattleSceneId
 
-	backgroundimg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/terrain/backgrounds/battleBackgroundCliff.png")
+	backGroundImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/terrain/backgrounds/battleBackgroundCliff.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	g.backGround = *backgroundimg
+	g.backGround = *backGroundImg
 
 	playerBS := LoadPlayerBattleSprite()
 	g.playerBattleSprite = &playerBS
@@ -56,13 +56,11 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	enemyBS := LoadEnemyBattleSprite(enemy)
 	g.enemyBattleSprite = &enemyBS
 
-	aEffect, err := LoadEffects()
-	if err != nil {
-		log.Fatal("error loading AmmoEffect error:", err)
-	}
+	g.onScreenStatsUI = &OnScreenStatsUI{}
+	err = g.onScreenStatsUI.LoadEffects()
 
-	g.onScreenStatsUI = &OnScreenStatsUI{
-		ammoEffect: aEffect,
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	rootContainer := widget.NewContainer(
@@ -310,7 +308,8 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	g.graphicalEffectManager.PlayerEffects.Draw(screen)
 	g.graphicalEffectManager.EnemyEffects.Draw(screen)
 	g.ui.Draw(screen)
-	g.onScreenStatsUI.Draw(screen)
+	g.onScreenStatsUI.Draw(*g.battle, screen)
+	PrintStatus(g, screen)
 
 }
 

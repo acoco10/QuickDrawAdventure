@@ -16,6 +16,7 @@ import (
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	resource "github.com/quasilyte/ebitengine-resource"
 	"log"
 	"os"
 )
@@ -281,14 +282,7 @@ func (g *BattleScene) PlayerDialogueTurn(turn *battle.Turn) {
 			}
 			if g.graphicalEffectManager.PlayerEffects.state == NotTriggered {
 				if turn.PlayerSkillUsed.SkillName == "draw" {
-					g.dialogueMenu.DisableButtons()
-					g.battle.UpdateBattlePhase()
-					g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
-					g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
-					g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-					g.playerBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-					g.onScreenStatsUI.ammoEffect.MakeVisible()
-					g.musicPlayer.Mix(audioManagement.BattleMusic)
+					g.DrawSkillUsed(turn)
 					turn.EnemyTurnCompleted = true
 				}
 				g.ShowStatusBar()
@@ -296,6 +290,7 @@ func (g *BattleScene) PlayerDialogueTurn(turn *battle.Turn) {
 				g.TextPrinter.NextMessage = true
 				turn.PlayerIndex++
 				g.battle.EnactEffects(turn.PlayerSkillUsed, g.battle.Player, g.battle.Enemy, turn.PlayerRoll, turn.PlayerSecondaryRoll)
+				g.onScreenStatsUI.ProcessTurn(*g, turn.DamageToEnemy, turn.PlayerSkillUsed.SkillName)
 				g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
 			}
 
@@ -343,9 +338,12 @@ func (g *BattleScene) PlayerShootingTurn(turn *battle.Turn) {
 			g.graphicalEffectManager.PlayerEffects.ProcessPlayerTurnData(turn)
 			g.graphicalEffectManager.PlayerEffects.TriggerEffectQueue()
 			g.audioPlayer.ConfigureAttackResultSoundQueue(turn.DamageToEnemy, g.battle.Enemy.Name)
+			if turn.PlayerSkillUsed.SkillName == "reload" {
+				g.audioPlayer.Play(audioManagement.Reload)
+			}
 			turn.PlayerEffectsTriggered = true
 			turn.PlayerIndex++
-			g.onScreenStatsUI.ProcessTurn(turn.DamageToEnemy, turn.PlayerSkillUsed.SkillName)
+			g.onScreenStatsUI.ProcessTurn(*g, turn.DamageToEnemy, turn.PlayerSkillUsed.SkillName)
 			g.battle.DamageEnemy()
 			g.battle.UpdatePlayerAmmo()
 		}
@@ -377,6 +375,18 @@ func (g *BattleScene) PlayerShootingTurn(turn *battle.Turn) {
 	g.playerBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
 }*/
 
+func (g *BattleScene) DrawSkillUsed(turn *battle.Turn) {
+	g.dialogueMenu.DisableButtons()
+	g.battle.UpdateBattlePhase()
+	g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
+	g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
+	g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
+	g.playerBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
+	g.musicPlayer.Mix(audioManagement.BattleMusic)
+	soundList := []resource.AudioID{audioManagement.PistolUnHolster, audioManagement.PistolUnHolster}
+	g.audioPlayer.ConfigureSoundQueue(soundList)
+}
+
 func (g *BattleScene) EnemyDialogueTurn(turn *battle.Turn) {
 	if g.battle.State == battle.EnemyTurn && g.battle.BattlePhase == battle.Dialogue {
 		if turn.EnemyMessage == nil {
@@ -398,11 +408,7 @@ func (g *BattleScene) EnemyDialogueTurn(turn *battle.Turn) {
 			g.graphicalEffectManager.EnemyEffects.ProcessEnemyTurnData(turn)
 			g.graphicalEffectManager.EnemyEffects.TriggerEffectQueue()
 			if turn.EnemySkillUsed.SkillName == "draw" {
-				g.battle.UpdateBattlePhase()
-				g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
-				g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
-				g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-				g.playerBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
+				g.DrawSkillUsed(turn)
 				turn.PlayerTurnCompleted = true
 			}
 
@@ -433,6 +439,7 @@ func (g *BattleScene) EnemyDialogueTurn(turn *battle.Turn) {
 				g.TextPrinter.NextMessage = true
 				turn.EnemyIndex++
 				g.battle.EnactEffects(turn.EnemySkillUsed, g.battle.Enemy, g.battle.Player, turn.EnemyRoll, turn.EnemySecondaryRoll)
+				g.onScreenStatsUI.ProcessTurn(*g, turn.DamageToEnemy, turn.PlayerSkillUsed.SkillName)
 				g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
 			}
 		}
@@ -449,27 +456,6 @@ func (g *BattleScene) EnemyDialogueTurn(turn *battle.Turn) {
 			}
 		}
 
-		/*if turn.EnemySkillUsed.SkillName == "reload" {
-			g.audioEnemy.Play(audioManagement.Reload)
-			g.EnemyBattleSprite.CombatButtonAnimationTrigger("reload")
-			g.EnemyBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
-		}
-
-		if turn.EnemySkillUsed.SkillName == "draw" && g.battle.GetPhase() == battle.Dialogue {
-			turn.EnemyEventTriggered = true
-			g.enemyBattleSprite.DialogueButtonAnimationTrigger("draw")
-			g.enemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-			g.EnemyBattleSprite.UpdateState(gameObjects.UsingDialogueSkill)
-			g.EnemyBattleSprite.DialogueButtonAnimationTrigger("draw")
-			g.audioEnemy.Play(audioManagement.PistolUnHolster)
-			g.battle.UpdateBattlePhase()
-			g.musicEnemy.Mix(audioManagement.BattleMusic)
-
-		}
-		if turn.EnemySkillUsed.SkillName == "stare down" {
-			g.audioEnemy.Play(audioManagement.StareDownEffect)
-			g.EnemyBattleSprite.UpdateCharEffect(gameObjects.Outline, 150)
-		}*/
 	}
 }
 
@@ -495,7 +481,10 @@ func (g *BattleScene) EnemyShootingTurn(turn *battle.Turn) {
 			g.StatusButtonEvent = false
 			g.graphicalEffectManager.EnemyEffects.ProcessEnemyTurnData(turn)
 			g.graphicalEffectManager.EnemyEffects.TriggerEffectQueue()
-			g.audioPlayer.ConfigureAttackResultSoundQueue(g.battle.GetTurn().DamageToPlayer, "Player")
+			g.audioPlayer.ConfigureAttackResultSoundQueue(turn.DamageToPlayer, "Player")
+			if turn.EnemySkillUsed.SkillName == "reload" {
+				g.audioPlayer.Play(audioManagement.Reload)
+			}
 			turn.EnemyEffectsTriggered = true
 			turn.EnemyIndex++
 			g.battle.UpdateEnemyAmmo()
