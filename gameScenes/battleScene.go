@@ -34,6 +34,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	TextInput = []string{"you filthy Animal"}
 	g.statusMessage = TextInput
+	g.endTriggered = false
 	g.StatusButtonEvent = false
 	g.audioPlayer = audioManagement.NewAudioPlayer()
 	g.TextPrinter = NewTextPrinter()
@@ -55,7 +56,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	enemyBS := LoadEnemyBattleSprite(enemy)
 	g.enemyBattleSprite = &enemyBS
 
-	aEffect, err := LoadAmmoEffect()
+	aEffect, err := LoadEffects()
 	if err != nil {
 		log.Fatal("error loading AmmoEffect error:", err)
 	}
@@ -177,7 +178,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	// Ebiten setup
 	ebiten.SetWindowSize(g.resolutionWidth, g.resolutionHeight)
-	ebiten.SetWindowTitle("Quick Draw Adventure")
+	ebiten.SetWindowTitle("Quick ReadyDraw Adventure")
 	//Hiding mouse while we use custom cursor handling
 	ebiten.SetCursorMode(ebiten.CursorModeHidden)
 
@@ -283,7 +284,9 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	g.EnemyDialogueTurn(turn)
 	g.PlayerShootingTurn(turn)
 	g.EnemyShootingTurn(turn)
+	g.CheckAndEndBattle()
 	g.UpdateSceneChangeCountdown()
+
 	err := g.onScreenStatsUI.Update()
 	if err != nil {
 		log.Fatal(err)
@@ -307,9 +310,7 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	g.graphicalEffectManager.PlayerEffects.Draw(screen)
 	g.graphicalEffectManager.EnemyEffects.Draw(screen)
 	g.ui.Draw(screen)
-	debugTextPrint(screen, g)
 	g.onScreenStatsUI.Draw(screen)
-	PrintStatus(g, screen)
 
 }
 
@@ -324,7 +325,7 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 	playerAmmo := fmt.Sprintf("Player Ammo:%d", g.battle.PlayerAmmo)
 	enemyAmmo := fmt.Sprintf("Enemy Ammo :%d", g.battle.EnemyAmmo)
 
-	winningProbText := fmt.Sprintf("Probability of Winning Draw:%d", dp)
+	winningProbText := fmt.Sprintf("Probability of Winning ReadyDraw:%d", dp)
 	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.Player.DisplayStat(battleStats.Health))
 	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(battleStats.Health))
 	tensionMeter := fmt.Sprintf("Tension:%d", g.battle.Tension)
@@ -382,6 +383,9 @@ func debugTextPrint(screen *ebiten.Image, g *BattleScene) {
 	}
 	if g.battle.State == battle.NotStarted {
 		battleState = "battle state = Not Started"
+	}
+	if g.battle.State == battle.Over {
+		battleState = "battle state = Over"
 	}
 
 	dopts.GeoM.Translate(600, 500)

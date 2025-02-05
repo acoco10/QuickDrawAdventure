@@ -12,7 +12,7 @@ type OnScreenStatsUI struct {
 	shots      int
 }
 
-func LoadAmmoEffect() (*AnimatedEffect, error) {
+func LoadEffects() (*AnimatedEffect, error) {
 	ammoImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/ammoTracker.png")
 	if err != nil {
 		return nil, err
@@ -21,6 +21,8 @@ func LoadAmmoEffect() (*AnimatedEffect, error) {
 	ammoSpriteSheet := spritesheet.NewSpritesheet(23, 1, 32, 32)
 
 	ammoEffect := NewEffect(ammoImg, ammoSpriteSheet, 100, 100, 23, 0, 1, 12, 4)
+
+	healthImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/healthBar.png")
 
 	return ammoEffect, nil
 }

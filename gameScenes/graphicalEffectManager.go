@@ -143,7 +143,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 		}
 		for _, result := range turn.DamageToEnemy {
 			if result > 0 {
-				e.counter = 10
+				e.counter = 36
 
 				println("appending damage effect to playerBattleSprite effects\n", "result:", result, "\n")
 				face, err := LoadFont(15, Lady)
@@ -167,6 +167,7 @@ func (e *GraphicalEffectSequencer) ProcessPlayerTurnData(turn *battle.Turn) {
 			}
 
 			if result == 0 {
+				e.counter = 36
 				missImage, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/miss.png")
 				if err != nil {
 					log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)

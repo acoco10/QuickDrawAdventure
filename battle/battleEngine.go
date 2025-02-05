@@ -29,6 +29,7 @@ const (
 	EnemyTurn
 	NotStarted
 	NextTurn
+	Over
 )
 
 type Battle struct {
@@ -121,6 +122,9 @@ func (b *Battle) UpdateState() {
 		} else {
 			b.State = NextTurn
 		}
+	}
+	if b.BattleWon || b.BattleLost {
+		b.State = Over
 	}
 }
 
@@ -287,7 +291,7 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 
 	if enemySkill.SkillName == "draw" || playerSkill.SkillName == "draw" {
 
-		battleInitiative = Draw(b.Player.DisplayStats(), b.Enemy.DisplayStats())
+		battleInitiative = ReadyDraw(b.Player.DisplayStats(), b.Enemy.DisplayStats())
 		if battleInitiative {
 			b.nextTurnInitiative = Player
 		} else {
@@ -458,15 +462,17 @@ func (b *Battle) GenerateMessageForUsedCombatSkill(name string, skillName string
 	output1 := fmt.Sprintf("%s uses %s", name, skillName)
 	message = append(message, output1)
 
-	totalDmg := 0
-	for _, shot := range damage {
-		if shot > 0 {
-			totalDmg += shot
+	if skillName != "reload" {
+		totalDmg := 0
+		for _, shot := range damage {
+			if shot > 0 {
+				totalDmg += shot
+			}
 		}
-	}
 
-	output2 := fmt.Sprintf("It does %d total damage!,", totalDmg)
-	message = append(message, output2)
+		output2 := fmt.Sprintf("It does %d total damage!,", totalDmg)
+		message = append(message, output2)
+	}
 	return message
 }
 

@@ -1,7 +1,7 @@
 {"characters":[
     {"name": "elyse",
     "stats": {
-        "health":    8,
+        "health":    12,
 		"accuracy":  3,
 		"drawSpeed": 80,
 		"fear":      0,

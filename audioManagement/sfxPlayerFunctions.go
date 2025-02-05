@@ -23,7 +23,7 @@ func (a *SFXAudioPlayer) Update() {
 	if a.countDown == 1 && a.sfxQueue != nil {
 		if a.sfxQueueIndex <= len(a.sfxQueue)-1 {
 			a.Play(a.sfxQueue[a.sfxQueueIndex])
-			a.countDown = 7
+			a.countDown = 12
 			a.sfxQueueIndex++
 		} else {
 			a.countDown = 0
@@ -70,7 +70,7 @@ func (a *SFXAudioPlayer) ConfigureAttackResultSoundQueue(damage []int, target st
 			soundList = append(soundList, NoAmmo)
 		}
 	}
-	a.countDown = 2
+	a.countDown = 12
 	a.sfxQueue = soundList
 }
 
