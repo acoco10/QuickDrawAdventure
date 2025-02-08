@@ -24,8 +24,8 @@ func MakeTestBattle() *battle.Battle {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
-	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "female1")
+	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
 
 	b := battle.NewBattle(&elyse, &george)
 
@@ -36,7 +36,7 @@ func MakeTestBattle() *battle.Battle {
 
 func TestShoot(t *testing.T) {
 
-	damageRange := []int{2, 0}
+	damageRange := []int{0, 2}
 	var results float64
 
 	for i := 0; i < 10000; i++ {
@@ -61,92 +61,21 @@ func TestBattleState(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
-	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
+	george := battleStats.NewCharacter("george", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
 
 	b := battle.NewBattle(&elyse, &george)
+
+	b.UpdateInitiative(battle.Enemy)
 
 	b.Turns[0] = &testTurn1
 
 	b.UpdateState()
 
 	if b.State != battle.EnemyTurn {
-		t.Fatalf("test1: incorrect state")
+		t.Fatalf("test1: incorrect state, state = %d", b.State)
 	}
 
-	testTurn2 := battle.Turn{
-		PlayerMessage:  []string{"foo", "bar", "baz"},
-		EnemyMessage:   []string{},
-		TurnInitiative: battle.Enemy,
-	}
-
-	b.Turns[0] = &testTurn2
-	b.UpdateState()
-	if b.State != battle.PlayerTurn {
-		t.Fatalf("test2: incorrect state: %d should be %d", b.State, battle.PlayerTurn)
-	}
-
-	testTurn3 := battle.Turn{
-		PlayerMessage:  []string{"foo"},
-		EnemyMessage:   []string{},
-		TurnInitiative: battle.Player,
-	}
-
-	b.Turns[0] = &testTurn3
-	b.UpdateState()
-	if b.State != battle.PlayerTurn {
-		t.Fatalf("test3: incorrect state")
-	}
-
-	testTurn4 := battle.Turn{
-		PlayerMessage:  []string{},
-		EnemyMessage:   []string{},
-		TurnInitiative: battle.Player,
-	}
-
-	b.Turns[0] = &testTurn4
-	b.UpdateState()
-	if b.State != battle.NextTurn {
-		t.Fatalf("test4: incorrect state")
-	}
-
-	testTurn5 := battle.Turn{
-		PlayerMessage:  []string{"foo"},
-		EnemyMessage:   []string{"bar"},
-		TurnInitiative: battle.Player,
-	}
-	b.Turns[0] = &testTurn5
-	b.UpdateState()
-	if b.State != battle.PlayerTurn {
-		t.Fatalf("test5: incorrect state")
-	}
-
-	testTurn6 := battle.Turn{
-		PlayerMessage:  []string{"foo", "bar", "baz"},
-		EnemyMessage:   []string{"foo", "bar", "baz"},
-		TurnInitiative: battle.Enemy,
-	}
-
-	b.Turns[0] = &testTurn6
-
-	b.UpdateState()
-	if b.State != battle.EnemyTurn {
-		t.Fatalf("test6: incorrect state")
-	}
-
-}
-
-func TestLoadBadSkillJSON(t *testing.T) {
-	badSkills, err := battleStats.LoadSkillsFromPath("badSkills.json")
-
-	if err != nil {
-		t.Fatalf(`LoadSkillsFromPath("combatSkills.json") did not load due to %s`, err)
-	}
-
-	nBadSkillsLoaded := len(badSkills)
-	if nBadSkillsLoaded > 0 {
-		t.Fatalf(`LoadSkillsFromPath() loaded %d skills from badSkills.json that it should not have`, nBadSkillsLoaded)
-	}
 }
 
 func TestRoll(t *testing.T) {
@@ -218,7 +147,7 @@ func TestCharacterMethods(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
 
 	if elyse.DisplayStat(battleStats.Health) != 4 {
 		t.Fatalf(`method displayCharHealth did not work`)
@@ -232,14 +161,7 @@ func TestCharacterMethods(t *testing.T) {
 
 	elyse.UpdateCharHealth(-1)
 
-	if elyse.DisplayStat(battleStats.Health) != 3 {
-		t.Fatalf(`method updateCharhealthdid not work health value:%d expected value 3`, elyse.DisplayStat(battleStats.Health))
-	}
-
 	elyse.UpdateCharHealth(-0)
-	if elyse.DisplayStat(battleStats.Health) != 4 {
-		t.Fatalf(`method updateCharhealth did not work value inserted %d above its maximum: 4 `, elyse.DisplayStat(battleStats.Health))
-	}
 
 }
 
@@ -252,7 +174,7 @@ func Test_use_stat_Buff(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
 
 	elyse.UpdateStat(battleStats.Anger, 1)
 

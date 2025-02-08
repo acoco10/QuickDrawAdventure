@@ -313,7 +313,6 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	opts.GeoM.Scale(5, 5)
 	screen.DrawImage(&g.backGround, opts)
 	opts.GeoM.Reset()
-	g.DrawCharOutline(screen, *g.playerBattleSprite)
 	g.graphicalEffectManager.GameEffects.Draw(screen)
 	DrawBattleSprite(*g.playerBattleSprite, screen, g.playerBattleSprite.Scale)
 	DrawBattleSprite(*g.enemyBattleSprite, screen, g.enemyBattleSprite.Scale)
@@ -321,6 +320,7 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	g.graphicalEffectManager.EnemyEffects.Draw(screen)
 	g.ui.Draw(screen)
 	g.onScreenStatsUI.Draw(*g.battle, screen)
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 	//PrintStatus(g, screen)
 
 }

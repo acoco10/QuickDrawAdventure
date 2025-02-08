@@ -10,6 +10,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image"
 	"log"
@@ -390,7 +391,7 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 }
 
 func (g *TownScene) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

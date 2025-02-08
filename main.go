@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+
 	ebiten.SetWindowSize(1512, 982)
 	ebiten.SetWindowTitle("Quick Draw Adventure")
 

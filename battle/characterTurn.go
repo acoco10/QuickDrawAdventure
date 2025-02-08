@@ -15,7 +15,7 @@ func Shoot(aC int, a int, f int, ChanceToHit int, damageRange []int) (damage int
 	if (aC*2)+ChanceToHit-a-f > rand.IntN(100) {
 		if len(damageRange) > 1 {
 			return damageRange[0] + rand.IntN(damageRange[1])
-		} else {
+		} else if len(damageRange) > 0 {
 			return damageRange[0]
 		}
 	}
