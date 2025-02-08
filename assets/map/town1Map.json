@@ -5611,11 +5611,11 @@
         }, 
         {
          "firstgid":395,
-         "source":"..\/..\/..\/..\/..\/..\/projects\/go_projects\/rpg\/QuickDrawAdventure\/assets\/map\/tilesets\/fenceTiles.json"
+         "source":"tilesets\/fenceTiles.json"
         }, 
         {
          "firstgid":405,
-         "source":"..\/..\/..\/..\/..\/..\/projects\/go_projects\/rpg\/QuickDrawAdventure\/assets\/map\/tilesets\/farmCabin.json"
+         "source":"tilesets\/farmCabin.json"
         }],
  "tilewidth":16,
  "type":"map",

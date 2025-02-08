@@ -12,3 +12,6 @@ var Fonts embed.FS
 
 //go:embed map
 var Map embed.FS
+
+//go:embed dialogueData
+var Dialogue embed.FS

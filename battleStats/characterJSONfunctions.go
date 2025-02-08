@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 )
 
 type CharacterName uint8
@@ -34,7 +33,7 @@ type CharactersJSON struct {
 
 func LoadSingleCharacter(charName string) (CharacterData, error) {
 	var char CharacterData
-	contents, err := os.ReadFile("battleStats/data/characters.json")
+	contents, err := battleStatsData.ReadFile("data/characters.json")
 
 	if err != nil {
 		log.Fatal(err)
@@ -125,7 +124,7 @@ func LoadCharacter(characterJSON CharacterJSON) (CharacterData, error) {
 
 func LoadCharacters() (map[CharacterName]CharacterData, error) {
 
-	contents, err := os.ReadFile("battleStats/data/characters.json")
+	contents, err := battleStatsData.ReadFile("data/characters.json")
 
 	if err != nil {
 		log.Fatal(err)

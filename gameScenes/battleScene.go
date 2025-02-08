@@ -229,7 +229,6 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	if g.turnTracker < g.battle.Turn {
 		g.turnTracker++
 		log.Printf("Turn: %d proccessing turnTracker data for effect", g.battle.Turn)
-		g.updateTurnLog()
 	}
 
 	if g.graphicalEffectManager.PlayerEffects != nil {

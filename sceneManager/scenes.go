@@ -20,6 +20,7 @@ const (
 	GameOverSceneID
 	WinSceneID
 	TownSceneID
+	TestSceneID
 )
 
 type Scene interface {

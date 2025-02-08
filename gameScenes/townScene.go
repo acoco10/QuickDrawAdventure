@@ -46,7 +46,7 @@ func NewTownScene() *TownScene {
 
 func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
-	tileMapFile, err := assets.Map.ReadFile("assets/map/town1Map.json")
+	tileMapFile, err := assets.Map.ReadFile("map/town1Map.json")
 	if err != nil {
 		log.Fatal("tilemap file not loading", err)
 	}

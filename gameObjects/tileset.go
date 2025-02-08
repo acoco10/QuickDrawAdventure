@@ -6,7 +6,6 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"image"
 	"log"
-	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -116,7 +115,7 @@ func (d *DynTileset) Img(id int) *ebiten.Image {
 
 func NewTileSet(path string, gid int) (Tileset, error) {
 	//interactions file contents
-	contents, err := os.ReadFile(path)
+	contents, err := assets.Map.ReadFile(path)
 	fmt.Println(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to interactions file %s: %w", path, err)

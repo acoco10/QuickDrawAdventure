@@ -1,11 +1,10 @@
 package dialogueData
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/tidwall/gjson"
 	"log"
-	"os"
 )
 
 type NpcTownDialogue struct {
@@ -22,23 +21,6 @@ type TownDialogueData struct {
 	DialogueText string `json:"DialogueText"`
 }
 
-func LoadNpcTownDialogue() TownDialogue {
-	contents, err := os.ReadFile("dialogueData/townDialogue.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var townDialogue TownDialogue
-
-	err = json.Unmarshal(contents, &townDialogue)
-
-	if err != nil {
-		log.Fatal(contents, err)
-	}
-
-	return townDialogue
-}
-
 type DialogueTracker struct {
 	CharName string
 	Index    int
@@ -46,7 +28,7 @@ type DialogueTracker struct {
 
 func GetResponse(charName string, dialogueId int) string {
 
-	data, err := os.ReadFile("dialogueData/townDialogue.json")
+	data, err := assets.Dialogue.ReadFile("dialogueData/townDialogue.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +43,7 @@ func GetResponse(charName string, dialogueId int) string {
 }
 
 func GetPlayerResponse(charName string, storyPointId int, dialogueId int) string {
-	data, err := os.ReadFile("dialogueData/playerTownDialogue.json")
+	data, err := assets.Dialogue.ReadFile("dialogueData/playerTownDialogue.json")
 	if err != nil {
 		log.Fatal(err)
 	}

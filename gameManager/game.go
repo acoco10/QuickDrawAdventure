@@ -80,3 +80,23 @@ func NewBattleTestGame() *Game {
 	sceneMap[activeSceneId].FirstLoad(game.gameLog)
 	return &game
 }
+
+func NewWebTestGame() *Game {
+	sceneMap := map[sceneManager.SceneId]sceneManager.Scene{
+		sceneManager.TestSceneID: gameScenes.NewTestScene(),
+	}
+	elyseStats, err := battleStats.LoadSingleCharacter("elyse")
+	if err != nil {
+		log.Fatal(err)
+	}
+	activeSceneId := sceneManager.TestSceneID
+	glog := &sceneManager.GameLog{EnemyEncountered: battleStats.Sheriff,
+		PlayerStats: &elyseStats}
+	game := Game{
+		sceneMap,
+		activeSceneId,
+		glog,
+	}
+	sceneMap[activeSceneId].FirstLoad(game.gameLog)
+	return &game
+}
