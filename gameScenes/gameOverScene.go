@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -30,7 +31,7 @@ func (s *GameOverScene) Draw(screen *ebiten.Image) {
 		screen.DrawImage(titleScreenImg, &ebiten.DrawImageOptions{})*/
 
 	dopts := text.DrawOptions{}
-	face, err := LoadFont(60, November)
+	face, err := assetManagement.LoadFont(60, assetManagement.November)
 
 	if err != nil {
 		log.Fatal(err)

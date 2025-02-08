@@ -33,8 +33,9 @@ const (
 )
 
 type Spawn struct {
-	Name string
-	X, Y float64
+	Name    string
+	X, Y    float64
+	spawned bool
 }
 
 type Trigger struct {
@@ -53,7 +54,7 @@ func NewTrigger(json ObjectJSON) Trigger {
 	return *newTrigger
 }
 
-type Item struct {
+type MapItem struct {
 	Name string
 	X, Y float64
 	Img  *ebiten.Image
@@ -62,12 +63,12 @@ type Item struct {
 type MapObjectData struct {
 	EntryDoors        map[string]Trigger
 	ExitDoors         map[string]Trigger
-	NpcSpawns         map[string]Trigger
+	NpcSpawns         map[string]Spawn
 	Colliders         []image.Rectangle
 	StairTriggers     map[string]*Trigger //pointer because has on/ off setting eg for balcony, not trigger switch
 	ContextualObjects map[string]*Trigger
-	Items             map[string]*Item
-	InteractPoints    map[string]Item
+	Items             map[string]*MapItem
+	InteractPoints    map[string]MapItem
 	CameraPoints      map[string]Trigger
 	ObjectSpawns      map[string]Spawn
 	EnemySpawns       map[string]Trigger
@@ -78,16 +79,41 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	colliders := []image.Rectangle{}
 	entDoors := make(map[string]Trigger)
 	exDoors := make(map[string]Trigger)
-	npcSpawns := make(map[string]Trigger)
+	npcSpawns := make(map[string]Spawn)
 	stairTriggers := make(map[string]*Trigger)
 	contextualObjects := make(map[string]*Trigger)
-	items := make(map[string]*Item)
-	interactPoints := make(map[string]Item)
+	items := make(map[string]*MapItem)
+	interactPoints := make(map[string]MapItem)
 	cameraPoints := make(map[string]Trigger)
 	objectSpawns := make(map[string]Spawn)
 	enemies := make(map[string]Trigger)
-
 	for _, layer := range tilemapJSON.Layers {
+		if layer.Name == "colliders" {
+			for _, object := range layer.Objects {
+				rect := image.Rect(
+					int(object.X),
+					int(object.Y)-32,
+					int(object.Width+object.X),
+					int(object.Y+object.Height)-32)
+				colliders = append(colliders, rect)
+			}
+		}
+		if layer.Name == "npcSpawns" {
+			for _, object := range layer.Objects {
+				println("loading npcSpawn:", object.Name)
+				npcSpawn := Spawn{
+					Name:    object.Name,
+					X:       object.X,
+					Y:       object.Y,
+					spawned: true,
+				}
+				if object.Type == "conditionalNpcSpawn" {
+					npcSpawn.spawned = false
+				}
+				npcSpawns[object.Name] = npcSpawn
+			}
+		}
+
 		if layer.Type == "objectgroup" {
 			for _, object := range layer.Objects {
 				switch object.Type {
@@ -103,19 +129,6 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					door := NewTrigger(object)
 					door.Type = ExitDoor
 					exDoors[object.Name] = door
-				case "npcSpawn":
-					println("loading npcSpawn:", object.Name)
-					npcSpawn := NewTrigger(object)
-					npcSpawn.Type = NpcSpawnObject
-					npcSpawns[object.Name] = npcSpawn
-				case "collider":
-					rect := image.Rect(
-						int(object.X),
-						int(object.Y)-32,
-						int(object.Width+object.X),
-						int(object.Y+object.Height)-32,
-					)
-					colliders = append(colliders, rect)
 				case "stairTrigger":
 					stair := NewTrigger(object)
 					stair.Type = StairTrigger
@@ -123,7 +136,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 
 				case "objectSpawn":
 					println("loading objectSpawn:", object.Name)
-					objSpawn := Spawn{object.Name, object.X, object.Y - 32}
+					objSpawn := Spawn{object.Name, object.X, object.Y - 32, true}
 					objectSpawns[object.Name] = objSpawn
 
 				case "contextualObject":
@@ -140,7 +153,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					if err != nil {
 						log.Fatal(err)
 					}
-					item := Item{
+					item := MapItem{
 						Name: object.Name,
 						X:    object.X,
 						Y:    object.Y,
@@ -155,7 +168,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					if err != nil {
 						log.Fatal(err)
 					}
-					item := Item{
+					item := MapItem{
 						Name: object.Name,
 						X:    object.X,
 						Y:    object.Y - 32,

@@ -4,12 +4,13 @@ import (
 	"fmt"
 )
 
-type Character struct {
+type CharacterData struct {
 	Name           string
 	Stats          map[Stat]int
 	baselineStats  map[Stat]int
 	CombatSkills   map[string]Skill
 	DialogueSkills map[string]Skill
+	SoundFxType    string
 	Weakness       Stat
 }
 
@@ -30,14 +31,14 @@ const (
 	TensionThreshold
 )
 
-func (pc *Character) UpdateCharHealth(change int) {
+func (pc *CharacterData) UpdateCharHealth(change int) {
 	pc.Stats[Health] += change
 	if pc.Stats[Health] > pc.baselineStats[Health] {
 		pc.Stats[Health] = pc.baselineStats[Health]
 	}
 }
 
-func (pc *Character) UpdateCharAnger(change int) {
+func (pc *CharacterData) UpdateCharAnger(change int) {
 
 	pc.Stats[Anger] += change
 
@@ -46,7 +47,7 @@ func (pc *Character) UpdateCharAnger(change int) {
 	}
 }
 
-func (pc *Character) UpdateCharFear(change int) {
+func (pc *CharacterData) UpdateCharFear(change int) {
 	pc.Stats[Fear] += change
 
 	if pc.Stats[Fear] < 0 {
@@ -55,32 +56,32 @@ func (pc *Character) UpdateCharFear(change int) {
 
 }
 
-func (pc *Character) UpdateCharAccuracy(change int) {
+func (pc *CharacterData) UpdateCharAccuracy(change int) {
 	pc.Stats[Accuracy] += change
 	if pc.Stats[Accuracy] < 0 {
 		pc.Stats[Accuracy] = 0
 	}
 }
 
-func (pc *Character) UpdateCharDrawSpeed(change int) {
+func (pc *CharacterData) UpdateCharDrawSpeed(change int) {
 	pc.Stats[DrawSpeed] += change
 	if pc.Stats[DrawSpeed] < 0 {
 		pc.Stats[DrawSpeed] = 0
 	}
 }
 
-func (pc *Character) DisplayStat(stat Stat) int {
+func (pc *CharacterData) DisplayStat(stat Stat) int {
 	return pc.Stats[stat]
 }
 
-func (pc *Character) DisplayBaselineStat(stat Stat) int {
+func (pc *CharacterData) DisplayBaselineStat(stat Stat) int {
 	return pc.baselineStats[stat]
 }
 
-func (pc *Character) DisplayStats() map[Stat]int {
+func (pc *CharacterData) DisplayStats() map[Stat]int {
 	return pc.Stats
 }
-func (pc *Character) UpdateStat(stat Stat, amt int) {
+func (pc *CharacterData) UpdateStat(stat Stat, amt int) {
 	if stat == Fear {
 		pc.UpdateCharFear(amt)
 	}
@@ -95,18 +96,18 @@ func (pc *Character) UpdateStat(stat Stat, amt int) {
 	}
 }
 
-func (pc *Character) ResetStatusStats() {
+func (pc *CharacterData) ResetStatusStats() {
 	pc.Stats[Anger] = pc.baselineStats[Anger]
 	pc.Stats[Fear] = pc.baselineStats[Fear]
 	pc.Stats[Accuracy] = pc.baselineStats[Accuracy]
 	pc.Stats[DrawSpeed] = pc.baselineStats[DrawSpeed]
 }
 
-func (pc *Character) ResetHealth() {
+func (pc *CharacterData) ResetHealth() {
 	pc.Stats[Health] = pc.baselineStats[Health]
 }
 
-func NewCharacter(name string, stats map[string]int, combatSkills map[string]Skill, dialogueSkills map[string]Skill, Weakness string) Character {
+func NewCharacter(name string, stats map[string]int, combatSkills map[string]Skill, dialogueSkills map[string]Skill, Weakness string, soundFx string) CharacterData {
 	var weakness Stat
 	charStats := map[Stat]int{}
 	for key, stat := range stats {
@@ -141,13 +142,14 @@ func NewCharacter(name string, stats map[string]int, combatSkills map[string]Ski
 		weakness = Anger
 	}
 
-	return Character{
+	return CharacterData{
 		Name:           name,
 		Stats:          charStats,
 		baselineStats:  charStatsCopy,
 		CombatSkills:   combatSkills,
 		DialogueSkills: dialogueSkills,
 		Weakness:       weakness,
+		SoundFxType:    soundFx,
 	}
 }
 

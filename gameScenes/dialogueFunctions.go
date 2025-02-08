@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
@@ -27,13 +28,13 @@ func CheckDialoguePopup(player gameObjects.Character, npc map[string]*gameObject
 	return gameObjects.Character{}
 }
 
-func CheckInteractPopup(player gameObjects.Character, items map[string]gameObjects.Item) gameObjects.Item {
+func CheckInteractPopup(player gameObjects.Character, items map[string]gameObjects.MapItem) gameObjects.MapItem {
 	for _, item := range items {
 		if CheckTrigger(player, item.X, item.Y) {
 			return item
 		}
 	}
-	return gameObjects.Item{}
+	return gameObjects.MapItem{}
 }
 
 func DrawPopUp(screen *ebiten.Image, x, y, width float64, camera *camera.Camera) {
@@ -46,7 +47,7 @@ func DrawPopUp(screen *ebiten.Image, x, y, width float64, camera *camera.Camera)
 	opts.GeoM.Translate(x*4+width/2+camera.X*4, y*4-64+camera.Y*4)
 
 	txt := "E"
-	face, err := LoadFont(10, November)
+	face, err := assetManagement.LoadFont(10, assetManagement.November)
 	if err != nil {
 		log.Fatal("err loading font")
 	}

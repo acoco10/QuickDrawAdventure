@@ -47,27 +47,35 @@ func (a *SFXAudioPlayer) QueueSound(id resource.AudioID) {
 	a.sfxQueue[a.sfxQueueIndex] = id
 }
 
-func (a *SFXAudioPlayer) ConfigureAttackResultSoundQueue(damage []int, target string) {
+func (a *SFXAudioPlayer) ConfigureAttackResultSoundQueue(damage []int, target string, attacker string) {
 	log.Printf("Formatting attack sound queue")
 	var soundList []resource.AudioID
 	for _, result := range damage {
-		if result > 0 {
-			soundList = append(soundList, GunShot)
-			soundList = append(soundList, BulletHit)
-			if target == "Player" {
+		if attacker == "wolf" {
+			soundList = append(soundList, WolfBite)
+			if result > 0 {
 				soundList = append(soundList, ElyseGrunt)
-			} else {
-				soundList = append(soundList, EnemyGrunt)
+
 			}
-			soundList = append(soundList, GunCock)
-		}
-		if result == 0 {
-			soundList = append(soundList, GunShot)
-			soundList = append(soundList, BulletMiss)
-			soundList = append(soundList, GunCock)
-		}
-		if result == -1 {
-			soundList = append(soundList, NoAmmo)
+		} else {
+			if result > 0 {
+				soundList = append(soundList, GunShot)
+				soundList = append(soundList, BulletHit)
+				if target == "Player" {
+					soundList = append(soundList, ElyseGrunt)
+				} else {
+					soundList = append(soundList, EnemyGrunt)
+				}
+				soundList = append(soundList, GunCock)
+			}
+			if result == 0 {
+				soundList = append(soundList, GunShot)
+				soundList = append(soundList, BulletMiss)
+				soundList = append(soundList, GunCock)
+			}
+			if result == -1 {
+				soundList = append(soundList, NoAmmo)
+			}
 		}
 	}
 	a.countDown = 12

@@ -1,4 +1,4 @@
-package gameScenes
+package graphicEffects
 
 import (
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
@@ -19,7 +19,7 @@ const (
 	Animated
 )
 
-type GraphicEffects interface {
+type GraphicEffect interface {
 	Draw(screen *ebiten.Image)
 	Update()
 	AccessImage() *ebiten.Image
@@ -27,6 +27,7 @@ type GraphicEffects interface {
 	CheckState() EffectState
 	UnTrigger()
 	Type() GraphicEffectType
+	SetCoord(x float64, y float64)
 }
 
 type StaticEffect struct {
@@ -48,6 +49,10 @@ func (se *StaticEffect) Trigger() {
 }
 func (se *StaticEffect) UnTrigger() {
 	se.state = NotTriggered
+}
+func (se *StaticEffect) SetCoord(x float64, y float64) {
+	se.x = x
+	se.y = y
 }
 
 func (se *StaticEffect) Draw(screen *ebiten.Image) {
@@ -106,11 +111,11 @@ type AnimatedEffect struct {
 	spriteSheet  *spritesheet.SpriteSheet
 	x, y         float64
 	firstFrame   int
-	lastFrame    int
+	LastFrame    int
 	frame        int
 	step         int
 	speed        int
-	frameCounter int
+	FrameCounter int
 	cycleCounter int
 	cycles       int
 	state        EffectState
@@ -121,6 +126,10 @@ type AnimatedEffect struct {
 
 func (e *AnimatedEffect) UnTrigger() {
 	e.state = NotTriggered
+}
+func (e *AnimatedEffect) SetCoord(x float64, y float64) {
+	e.x = x
+	e.y = y
 }
 
 func (e *AnimatedEffect) Draw(screen *ebiten.Image) {
@@ -134,6 +143,14 @@ func (e *AnimatedEffect) Draw(screen *ebiten.Image) {
 }
 func (e *AnimatedEffect) MakeVisible() {
 	e.visible = true
+}
+
+func (e *AnimatedEffect) Frame() int {
+	return e.frame
+}
+func (e *AnimatedEffect) Reset() {
+	e.frame = 0
+	e.FrameCounter = 0
 }
 
 func (e *AnimatedEffect) CheckState() EffectState {
@@ -150,12 +167,12 @@ func (e *AnimatedEffect) Trigger() {
 
 func (e *AnimatedEffect) Update() {
 	if e.state == Triggered {
-		e.frameCounter -= 1.0
-		if e.frameCounter < 0 {
-			e.frameCounter = e.speed
+		e.FrameCounter -= 1.0
+		if e.FrameCounter < 0 {
+			e.FrameCounter = e.speed
 			e.frame += e.step
 
-			if e.frame == e.lastFrame {
+			if e.frame == e.LastFrame {
 				e.frame = e.firstFrame
 				e.state = NotTriggered
 			}
@@ -178,11 +195,11 @@ func NewEffect(img *ebiten.Image, sheet *spritesheet.SpriteSheet, x float64, y f
 		x:            x,
 		y:            y,
 		firstFrame:   firstF,
-		lastFrame:    lastF,
+		LastFrame:    lastF,
 		frame:        firstF,
 		step:         step,
 		speed:        speed,
-		frameCounter: speed,
+		FrameCounter: speed,
 		cycleCounter: 1,
 		cycles:       1,
 		state:        NotTriggered,

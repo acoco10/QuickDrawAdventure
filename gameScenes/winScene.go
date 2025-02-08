@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,7 +37,7 @@ func (s *WinScene) Draw(screen *ebiten.Image) {
 	DrawBattleSprite(s.playerBattleSprite, screen, 8)
 
 	dopts := text.DrawOptions{}
-	face, err := LoadFont(60, November)
+	face, err := assetManagement.LoadFont(60, assetManagement.November)
 
 	if err != nil {
 		log.Fatal(err)

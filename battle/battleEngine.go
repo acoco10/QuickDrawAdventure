@@ -34,8 +34,8 @@ const (
 
 type Battle struct {
 	EnemyTurn          bool
-	Player             *battleStats.Character
-	Enemy              *battleStats.Character
+	Player             *battleStats.CharacterData
+	Enemy              *battleStats.CharacterData
 	turnInitiative     Initiative
 	nextTurnInitiative Initiative
 	BattlePhase        Phase
@@ -77,7 +77,7 @@ type Turn struct {
 	PlayerWeakness         bool
 }
 
-func NewBattle(player *battleStats.Character, enemy *battleStats.Character) *Battle {
+func NewBattle(player *battleStats.CharacterData, enemy *battleStats.CharacterData) *Battle {
 	battle := Battle{}
 	battle.EnemyTurn = false
 	battle.Player = player
@@ -186,7 +186,7 @@ func CapitalizeWord(word string) string {
 	return strings.ToUpper(string(word[0])) + word[1:]
 }
 
-func (b *Battle) Buff(usedOn *battleStats.Character, effect battleStats.Effect) {
+func (b *Battle) Buff(usedOn *battleStats.CharacterData, effect battleStats.Effect) {
 	weakness, err := battleStats.StringToStat(effect.Stat)
 	stats := usedOn.DisplayStats()
 	affectedStat, err := battleStats.StringToStat(effect.Stat)
@@ -342,7 +342,7 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 
 }
 
-func (b *Battle) DrawFunction(user *battleStats.Character, opponent *battleStats.Character, battleInitiative bool) []string {
+func (b *Battle) DrawFunction(user *battleStats.CharacterData, opponent *battleStats.CharacterData, battleInitiative bool) []string {
 
 	drawSkillDialogue := b.generateDrawMessage(user, opponent, battleInitiative)
 
@@ -354,7 +354,7 @@ func (b *Battle) DrawFunction(user *battleStats.Character, opponent *battleStats
 	return drawSkillDialogue
 }
 
-func (b *Battle) EnactEffects(skill battleStats.Skill, user *battleStats.Character, opponent *battleStats.Character, roll bool, secondaryRoll bool) {
+func (b *Battle) EnactEffects(skill battleStats.Skill, user *battleStats.CharacterData, opponent *battleStats.CharacterData, roll bool, secondaryRoll bool) {
 	b.Tension = b.Tension + skill.Tension
 	SkillEffectOne := skill.Effects[0]
 	var skillEffectTwo battleStats.Effect
@@ -387,7 +387,7 @@ func (b *Battle) EnactEffects(skill battleStats.Skill, user *battleStats.Charact
 	}
 }
 
-func (b *Battle) generateDrawMessage(turnTaker *battleStats.Character, opponent *battleStats.Character, battleInitiative bool) (drawMessage []string) {
+func (b *Battle) generateDrawMessage(turnTaker *battleStats.CharacterData, opponent *battleStats.CharacterData, battleInitiative bool) (drawMessage []string) {
 
 	if b.Player.Name == turnTaker.Name {
 		if battleInitiative {
@@ -417,7 +417,7 @@ func (b *Battle) generateDrawMessage(turnTaker *battleStats.Character, opponent 
 	}
 }
 
-func (b *Battle) generateMessageForUsedDialogueSkill(turnTaker battleStats.Character, opponent battleStats.Character, skill battleStats.Skill, roll bool, secondaryRoll bool) (message []string) {
+func (b *Battle) generateMessageForUsedDialogueSkill(turnTaker battleStats.CharacterData, opponent battleStats.CharacterData, skill battleStats.Skill, roll bool, secondaryRoll bool) (message []string) {
 
 	output := fmt.Sprintf("%s uses %s", turnTaker.Name, skill.SkillName)
 

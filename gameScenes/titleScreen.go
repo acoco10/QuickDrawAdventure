@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
@@ -37,7 +38,7 @@ func (s *StartScene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(titleScreenImg, &ebiten.DrawImageOptions{})
 
 	dopts := text.DrawOptions{}
-	face, err := LoadFont(60, November)
+	face, err := assetManagement.LoadFont(60, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}

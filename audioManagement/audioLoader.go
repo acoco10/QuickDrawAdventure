@@ -34,10 +34,10 @@ const (
 	IntroMusic
 	DialogueMusic
 	BattleMusic
-	BlowingSmoke
 	TextOutput
 	StareDownEffect
 	TensionIncrease
+	WolfBite
 )
 
 var audioContext = audio.NewContext(44100)
@@ -94,11 +94,6 @@ func GameSFXLoader() *resource.Loader {
 		log.Fatal("cannot load reload.wav")
 	}
 
-	victoryBlow, err := combatSFX.ReadFile("sounds/combatSFX/blowingSmoke.wav")
-	if err != nil {
-		log.Fatal("cannot load blowing.wav")
-	}
-
 	textSFX, err := menuSFX.ReadFile("sounds/menuSFX/rpg-text-speech-sound-131477.wav")
 	if err != nil {
 		log.Fatal("cannot load textSFX")
@@ -114,6 +109,11 @@ func GameSFXLoader() *resource.Loader {
 		log.Fatal("cannot load tension increase SFX")
 	}
 
+	wolfBite, err := combatSFX.ReadFile("sounds/combatSFX/wolfBite.wav")
+	if err != nil {
+		log.Fatal("cannot load wolfBite")
+	}
+
 	var SoundData = map[string][]byte{
 		"sounds/combatSFX/gunShot.wav":                    gunShot,
 		"sounds/combatSFX/whizz.wav":                      miss,
@@ -125,10 +125,10 @@ func GameSFXLoader() *resource.Loader {
 		"sounds/combatSFX/drawButtonClick.wav":            drawButton,
 		"sounds/combatSFX/noAmmo.wav":                     noAmmo,
 		"sounds/combatSFX/reload.wav":                     reload,
-		"sounds/combatSFX/blowingSmoke.wav":               victoryBlow,
 		"sounds/menuSFX/rpg-text-speech-sound-131477.wav": textSFX,
 		"sounds/combatSFX/stareDownSoundEffect.wav":       stareDownEffect,
 		"sounds/combatSFX/tensionIncrease.wav":            tensionIncrease,
+		"sounds/combatSFX/wolfBite.wav":                   wolfBite,
 	}
 
 	l := resource.NewLoader(audioContext)
@@ -148,10 +148,10 @@ func GameSFXLoader() *resource.Loader {
 		DrawButton:      {Path: "sounds/combatSFX/drawButtonClick.wav", Volume: -0.3},
 		NoAmmo:          {Path: "sounds/combatSFX/noAmmo.wav", Volume: 0.2},
 		Reload:          {Path: "sounds/combatSFX/reload.wav", Volume: -0.3},
-		BlowingSmoke:    {Path: "sounds/combatSFX/blowingSmoke.wav", Volume: 0.2},
 		TextOutput:      {Path: "sounds/menuSFX/rpg-text-speech-sound-131477.wav", Volume: 0.1},
 		StareDownEffect: {Path: "sounds/combatSFX/stareDownSoundEffect.wav", Volume: 0.1},
 		TensionIncrease: {Path: "sounds/combatSFX/tensionIncrease.wav", Volume: 0.2},
+		WolfBite:        {Path: "sounds/combatSFX/wolfBite.wav", Volume: 0.2},
 	})
 
 	return l

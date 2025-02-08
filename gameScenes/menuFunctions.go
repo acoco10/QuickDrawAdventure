@@ -1,32 +1,23 @@
 package gameScenes
 
 import (
-	"bytes"
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	eimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image"
 	"image/color"
 	"log"
 	"strings"
 )
 
-type FontType uint8
-
-const (
-	November FontType = iota
-	Lady
-	NovemberOutline
-)
-
 func GenerateSkillButtons(text string, g *BattleScene) (button *widget.Button) {
 
 	// load gameScenes font, more fonts will be selectable later when we implement a resource manager
-	face, err := LoadFont(20, November)
+	face, err := assetManagement.LoadFont(20, assetManagement.November)
 	buttonText := strings.ToUpper(string(text[0])) + text[1:]
 	if err != nil {
 		log.Fatal(err)
@@ -100,7 +91,7 @@ func MakeStatusContainer() *widget.Container {
 
 func StatusTextInput(textColor string) *widget.TextInput {
 
-	face, err := LoadFont(14, November)
+	face, err := assetManagement.LoadFont(14, assetManagement.November)
 	white := color.RGBA{R: 232, G: 225, B: 219, A: 255}
 	faceColor := color.RGBA{R: 102, G: 57, B: 48, A: 255}
 	if textColor == "white" {
@@ -164,7 +155,7 @@ func SkillBoxContainer(headerText string) *widget.Container {
 		),
 	)
 
-	face, err := LoadFont(24, November)
+	face, err := assetManagement.LoadFont(24, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -314,46 +305,11 @@ func LoadStatusButtonImage() *widget.ButtonImage {
 	}
 }
 
-func LoadFont(size float64, font FontType) (text.Face, error) {
-	//reading tff file
-	LoadedFont, err := assets.Fonts.ReadFile("fonts/novem.ttf")
-	if err != nil {
-		return nil, err
-	}
-	if font == Lady {
-		LoadedFont, err = assets.Fonts.ReadFile("fonts/KOMIKZBA.ttf")
-		if err != nil {
-			return nil, err
-		}
-	}
-	if font == NovemberOutline {
-		LoadedFont, err = assets.Fonts.ReadFile("fonts/novemmOutline.ttf")
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	//extrapolating bytes to new reader object
-	s, err := text.NewGoTextFaceSource(bytes.NewReader(LoadedFont))
-
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-
-	face := text.GoTextFace{
-		Source: s,    //source font from tff file
-		Size:   size, //input by function
-	}
-
-	return &face, nil
-}
-
 func GenerateDrawButton(g *BattleScene) (button *widget.Button) {
 	buttonText := "Draw"
 
 	// load gameScenes font, more fonts will be selectable later when we implement a resource manager
-	face, err := LoadFont(22, November)
+	face, err := assetManagement.LoadFont(22, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -417,7 +373,7 @@ func CombatSkillBoxContainer(headerText string) *widget.Container {
 		),
 	)
 
-	face, err := LoadFont(24, November)
+	face, err := assetManagement.LoadFont(24, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -467,7 +423,7 @@ func CombatSkillBoxContainer(headerText string) *widget.Container {
 func GenerateCombatSkillButtons(text string, g *BattleScene) (button *widget.Button) {
 
 	// load gameScenes font, more fonts will be selectable later when we implement a resource manager
-	face, err := LoadFont(20, November)
+	face, err := assetManagement.LoadFont(20, assetManagement.November)
 	buttonText := strings.ToUpper(string(text[0])) + text[1:]
 	if err != nil {
 		log.Fatal(err)

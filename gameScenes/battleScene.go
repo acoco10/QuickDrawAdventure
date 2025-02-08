@@ -2,10 +2,12 @@ package gameScenes
 
 import (
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
+	"github.com/acoco10/QuickDrawAdventure/graphicEffects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/input"
@@ -19,12 +21,14 @@ import (
 func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	println("Battle Scene first load executing\n")
 
+	g.gameLog = gameLog
+
 	characters, err := battleStats.LoadCharacters()
 	if err != nil {
 		log.Fatal("error loading characters.json error:", err)
 	}
 
-	elyse := characters[battleStats.Elyse]
+	elyse := gameLog.PlayerStats
 	enemy := characters[gameLog.EnemyEncountered]
 
 	println("elyse stats after loading=", elyse.DisplayStats()[battleStats.DrawSpeed])
@@ -39,8 +43,8 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.audioPlayer = audioManagement.NewAudioPlayer()
 	g.TextPrinter = NewTextPrinter()
 	g.TextPrinter.TextInput = "Welcome to QuickDraw Adventure!"
-	g.battle = battle.NewBattle(&elyse, &enemy)
-	g.graphicalEffectManager = NewGraphicalEffectManager()
+	g.battle = battle.NewBattle(elyse, &enemy)
+	g.graphicalEffectManager = graphicEffects.NewGraphicalEffectManager()
 	g.musicPlayer = audioManagement.NewSongPlayer(audioManagement.DialogueMusic)
 	g.scene = sceneManager.BattleSceneId
 
@@ -51,13 +55,17 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.backGround = *backGroundImg
 
 	playerBS := LoadPlayerBattleSprite()
+	playerBS.LoadEffect(*g.battle.Player)
 	g.playerBattleSprite = &playerBS
 
 	enemyBS := LoadEnemyBattleSprite(enemy)
+	enemyBS.LoadEffect(*g.battle.Enemy)
 	g.enemyBattleSprite = &enemyBS
 
 	g.onScreenStatsUI = &OnScreenStatsUI{}
 	err = g.onScreenStatsUI.LoadEffects()
+
+	g.LoadGameEffects()
 
 	if err != nil {
 		log.Fatal(err)
@@ -185,7 +193,6 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.HideCombatMenu()
 
 	g.loaded = true
-
 }
 
 func (g *BattleScene) OnEnter() {
@@ -222,13 +229,18 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	if g.turnTracker < g.battle.Turn {
 		g.turnTracker++
 		log.Printf("Turn: %d proccessing turnTracker data for effect", g.battle.Turn)
-		log.Printf("playerBattleSprite effect queue lengths = %d", len(g.graphicalEffectManager.PlayerEffects.EffectQueue))
 		g.updateTurnLog()
 	}
 
-	g.graphicalEffectManager.EnemyEffects.Update()
-
-	g.graphicalEffectManager.PlayerEffects.Update()
+	if g.graphicalEffectManager.PlayerEffects != nil {
+		g.graphicalEffectManager.PlayerEffects.Update()
+	}
+	if g.graphicalEffectManager.EnemyEffects != nil {
+		g.graphicalEffectManager.EnemyEffects.Update()
+	}
+	if g.graphicalEffectManager.GameEffects != nil {
+		g.graphicalEffectManager.GameEffects.Update()
+	}
 
 	if g.Cursor.countdown > 0 {
 		g.Cursor.countdown--
@@ -303,18 +315,19 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(&g.backGround, opts)
 	opts.GeoM.Reset()
 	g.DrawCharOutline(screen, *g.playerBattleSprite)
+	g.graphicalEffectManager.GameEffects.Draw(screen)
 	DrawBattleSprite(*g.playerBattleSprite, screen, g.playerBattleSprite.Scale)
 	DrawBattleSprite(*g.enemyBattleSprite, screen, g.enemyBattleSprite.Scale)
 	g.graphicalEffectManager.PlayerEffects.Draw(screen)
 	g.graphicalEffectManager.EnemyEffects.Draw(screen)
 	g.ui.Draw(screen)
 	g.onScreenStatsUI.Draw(*g.battle, screen)
-	PrintStatus(g, screen)
+	//PrintStatus(g, screen)
 
 }
 
 func PrintStatus(g *BattleScene, screen *ebiten.Image) {
-	face, err := LoadFont(40, November)
+	face, err := assetManagement.LoadFont(40, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -339,7 +352,7 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 	dopts.GeoM.Translate(400, 100)
 	text.Draw(screen, tensionMeter, face, &dopts)
 
-	face, err = LoadFont(16, November)
+	face, err = assetManagement.LoadFont(16, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -362,7 +375,7 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 }
 
 func debugTextPrint(screen *ebiten.Image, g *BattleScene) {
-	face, err := LoadFont(40, November)
+	face, err := assetManagement.LoadFont(40, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}

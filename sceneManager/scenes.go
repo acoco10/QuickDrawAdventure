@@ -7,7 +7,7 @@ import (
 
 type GameLog struct {
 	PlayerLocation   string
-	PlayerStats      battleStats.Character
+	PlayerStats      *battleStats.CharacterData
 	EnemyEncountered battleStats.CharacterName
 	PreviousScene    SceneId
 }

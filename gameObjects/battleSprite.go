@@ -2,8 +2,14 @@ package gameObjects
 
 import (
 	"github.com/acoco10/QuickDrawAdventure/animations"
+	"github.com/acoco10/QuickDrawAdventure/assets"
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
+	"github.com/acoco10/QuickDrawAdventure/graphicEffects"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	resource "github.com/quasilyte/ebitengine-resource"
+	"log"
 )
 
 type SpriteBattleState uint8
@@ -14,6 +20,16 @@ const (
 	UsingCombatSkill
 	UsingDialogueSkill
 	Dead
+)
+
+type SoundFxType uint8
+
+const (
+	Attack SoundFxType = iota
+	GotHit
+	Miss
+	HitDialogue
+	HitTarget
 )
 
 type CAnimation uint8
@@ -47,11 +63,9 @@ const (
 type CountDownEvent uint8
 
 const (
-	NoEvenet CountDownEvent = iota
+	NoEvent CountDownEvent = iota
 	TurnOffOutline
 )
-
-type OTSCAnimation uint8
 
 type BattleSprite struct {
 	*Sprite
@@ -68,13 +82,16 @@ type BattleSprite struct {
 	counter                  int
 	countdown                int
 	inAnimation              bool
+	Effects                  map[graphicEffects.EffectType]graphicEffects.GraphicEffect
+	SoundFX                  map[SoundFxType]resource.AudioID
 	EffectApplied            CharEffect
 	CountDownEvent           CountDownEvent
+	Hit                      bool
 }
 
-func (bs *BattleSprite) changeEvent(state SpriteBattleState, timer int) {
-	bs.state = state
-	bs.counter = timer
+func (bs *BattleSprite) GotHit(timer int) {
+	bs.Hit = true
+	bs.countdown = timer
 }
 
 func (bs *BattleSprite) UpdateDialogueAnimation(animation DAnimation) {
@@ -87,10 +104,6 @@ func (bs *BattleSprite) UpdateCombatAnimation(animation CAnimation) {
 
 func (bs *BattleSprite) UpdateState(state SpriteBattleState) {
 	bs.state = state
-}
-
-func (bs *BattleSprite) UpdateHitCounter(counter int) {
-	bs.HitCounter = counter
 }
 
 func (bs *BattleSprite) GetAnimation() *animations.Animation {
@@ -140,11 +153,12 @@ func (bs *BattleSprite) TriggerCountDownEvent() {
 }
 
 func (bs *BattleSprite) Update() {
-	if bs.countdown == 1 {
-		bs.TriggerCountDownEvent()
-	}
 	if bs.countdown > 0 {
 		bs.countdown--
+		println("battleSprite counter", bs.countdown)
+	}
+	if bs.countdown == 0 {
+		bs.Hit = false
 	}
 
 	bsAnimation := bs.GetAnimation()
@@ -232,7 +246,7 @@ func (bs *BattleSprite) UpdateCharEffect(effect CharEffect, countDown int) {
 	bs.CountDownEvent = TurnOffOutline
 }
 
-func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x float64, y float64, scale float64, canimations map[CAnimation]*animations.CyclicAnimation) (*BattleSprite, error) {
+func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x float64, y float64, scale float64, canimations map[CAnimation]*animations.CyclicAnimation, cIdle *animations.Animation) (*BattleSprite, error) {
 	bSprite := &BattleSprite{
 		Scale:       scale,
 		SpriteSheet: spriteSheet,
@@ -244,14 +258,14 @@ func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x
 		},
 		CombatAnimations: canimations,
 		DialogueAnimations: map[DAnimation]*animations.CyclicAnimation{
-			Insult:     animations.NewCyclicAnimation(1, 21, 10, 12, 3),
-			Brag:       animations.NewCyclicAnimation(1, 21, 10, 12, 3),
-			Intimidate: animations.NewCyclicAnimation(1, 21, 10, 12, 3),
-			Draw:       animations.NewCyclicAnimation(2, 22, 10, 7, 1),
+			Insult:     animations.NewCyclicAnimation(1, 21, 10, 15, 3),
+			Brag:       animations.NewCyclicAnimation(1, 21, 10, 15, 3),
+			Intimidate: animations.NewCyclicAnimation(1, 21, 10, 15, 3),
+			Draw:       animations.NewCyclicAnimation(2, 22, 10, 15, 1),
 		},
 
 		IdleAnimation:            animations.NewAnimation(0, 0, 0, 10),
-		CombatIdleAnimation:      animations.NewAnimation(12, 12, 0, 10),
+		CombatIdleAnimation:      animations.NewAnimation(3, 3, 0, 10),
 		counter:                  0,
 		state:                    Idle,
 		CurrentDialogueAnimation: NoDialogueSkill,
@@ -259,6 +273,88 @@ func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x
 		inAnimation:              false,
 		EffectApplied:            NoEffect,
 	}
+	if cIdle != nil {
+		bSprite.CombatIdleAnimation = cIdle
+	}
 
 	return bSprite, nil
+}
+
+func (bs *BattleSprite) LoadEffect(char battleStats.CharacterData) {
+	effects := make(map[graphicEffects.EffectType]graphicEffects.GraphicEffect, 0)
+	basePath := "images/characters/battleSprites/" + char.Name + "/" + char.Name
+	if len(char.DialogueSkills) > 0 {
+		starePath := basePath + "StareEffect.png"
+		stareSpriteSheet := spritesheet.NewSpritesheet(7, 1, 320, 180)
+		stareDownImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, starePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		stareEffect := graphicEffects.NewEffect(stareDownImg, stareSpriteSheet, 0, 0, 3, 0, 1, 30, 5)
+		successfulPath := basePath + "SuccessfulEffect.png"
+		successfulImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, successfulPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		successfulEffect := graphicEffects.NewStaticEffect(successfulImg, 0, 0, 0, 5)
+
+		unSuccessfulPath := basePath + "UnsuccessfulEffect.png"
+		unSuccessfulImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, unSuccessfulPath)
+		unSuccessfulEffect := graphicEffects.NewStaticEffect(unSuccessfulImg, 0, 0, 0, 5)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		effects[graphicEffects.StareEffect] = stareEffect
+		effects[graphicEffects.SuccessfulEffect] = successfulEffect
+		effects[graphicEffects.UnsuccessfulEffect] = unSuccessfulEffect
+
+	}
+
+	hitStaticEffect := graphicEffects.NewStaticEffect(ebiten.NewImage(1, 1), 0, 0, 50, 1)
+	redClrMap := map[string]float32{
+		"r": 1,
+		"b": 0.2,
+		"g": 0,
+		"a": 0.5,
+	}
+	hitEffect := NewBattleSpriteEffect(*hitStaticEffect, redClrMap, *bs)
+	effects[graphicEffects.TookDamageEffect] = hitEffect
+	bs.Effects = effects
+}
+
+func (bs *BattleSprite) LoadSoundFx(char battleStats.CharacterData) {
+
+}
+
+type BattleSpriteEffect struct {
+	battleSprite BattleSprite
+	clr          map[string]float32
+	graphicEffects.StaticEffect
+}
+
+func (bse *BattleSpriteEffect) Draw(screen *ebiten.Image) {
+	if bse.StaticEffect.CheckState() == graphicEffects.Triggered {
+		if bse.StaticEffect.Frame() < 20 {
+			opts := &ebiten.DrawImageOptions{}
+			opts.GeoM.Scale(bse.battleSprite.Scale, bse.battleSprite.Scale)
+			opts.GeoM.Translate(bse.battleSprite.X, bse.battleSprite.Y)
+			opts.ColorScale.Scale(bse.clr["r"], bse.clr["g"], bse.clr["b"], bse.clr["a"])
+			frame := bse.battleSprite.CombatIdleAnimation.FirstF
+			img := bse.battleSprite.Img.SubImage(
+				bse.battleSprite.SpriteSheet.Rect(frame),
+			).(*ebiten.Image)
+			screen.DrawImage(img, opts)
+		}
+	}
+}
+
+func NewBattleSpriteEffect(staticEffect graphicEffects.StaticEffect, clr map[string]float32, sprite BattleSprite) *BattleSpriteEffect {
+
+	return &BattleSpriteEffect{
+		battleSprite: sprite,
+		StaticEffect: staticEffect,
+		clr:          clr,
+	}
+
 }

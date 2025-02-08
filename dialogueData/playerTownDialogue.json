@@ -21,20 +21,28 @@
           ]
         },
         {
-          "name": "billyBob",
+          "name": "marthaJean",
           "dialogue": [
             {
               "dialogueId": 1,
               "dialogueText": "Beth Anne at the Rose said you were having some trouble with a gang."
+            },
+            {
+              "dialogueId": 2,
+              "dialogueText": "Don't worry Martha I dont take too kindly to bullies throwing their weight around"
+            },
+            {
+              "dialogueId": 3,
+              "dialogueText": "A hot supper will be plenty, this farm reminds me a little of where I grew up"
             }
           ]
         },
         {
-          "name": "gangMember1",
+          "name": "antonio",
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "No I think it's bring your inbred idiot to work day."
+              "dialogueText": "better n' you"
             },
             {
               "dialogueId": 2,

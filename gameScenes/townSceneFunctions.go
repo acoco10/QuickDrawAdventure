@@ -49,6 +49,7 @@ func (g *TownScene) UpdateDoors() {
 						g.Player.X = x
 						g.Player.Y = y
 						g.Player.InAnimation = false
+						g.Player.ExitShadow()
 						objectAnimation.Update()
 
 					} else if objectAnimation.Frame() == objectAnimation.LastF {
@@ -102,7 +103,6 @@ func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam c
 	rDustEffect, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/nonBattleCharacterAffects/walkingRightDust.png")
 
 	opts := &ebiten.DrawImageOptions{}
-
 	opts.GeoM.Translate(character.X, character.Y)
 	opts.GeoM.Translate(cam.X, cam.Y)
 	opts.GeoM.Scale(4, 4)
@@ -157,7 +157,9 @@ func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam c
 func (g *TownScene) DrawCharacters(screen *ebiten.Image) {
 	characters := g.SortCharacters()
 	for _, character := range characters {
-		DrawCharacter(character, screen, *g.cam)
+		if character.Spawned == true {
+			DrawCharacter(character, screen, *g.cam)
+		}
 	}
 }
 
@@ -165,4 +167,20 @@ func LockCursorForDialogue() {
 	updater := CreateCursorUpdater()
 	updater.MoveToLockedSpecificPosition(1002, 306)
 	input.SetCursorUpdater(updater)
+}
+
+func ProcessEvent() {
+
+}
+
+type Event interface {
+	TriggerEvent()
+}
+
+type NpcSpawn struct {
+	npcName string
+}
+
+func (n *NpcSpawn) TriggerEvent(npcName string) {
+
 }

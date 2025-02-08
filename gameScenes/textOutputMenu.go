@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
@@ -30,7 +31,7 @@ type TextUI struct {
 }
 
 func MakeTextUI(resolutionHeight int, resolutionWidth int) (*TextUI, error) {
-	face, err := LoadFont(14, NovemberOutline)
+	face, err := assetManagement.LoadFont(14, assetManagement.NovemberOutline)
 	if err != nil {
 		log.Fatal(err)
 	}

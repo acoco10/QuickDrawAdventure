@@ -2,8 +2,10 @@ package gameObjects
 
 import (
 	"github.com/acoco10/QuickDrawAdventure/animations"
+	"github.com/acoco10/QuickDrawAdventure/assets"
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
-	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type CharState uint8
@@ -29,10 +31,9 @@ type Character struct {
 	Animations  map[CharState]*animations.Animation
 	SpriteSheet spritesheet.SpriteSheet
 	CharType    CharType
-}
-
-func (p *Character) ShowY() float64 {
-	return p.Y
+	Spawned     bool
+	Inventory   *Inventory
+	BattleStats *battleStats.CharacterData
 }
 
 func (p *Character) ActiveAnimation(dX, dY int) *animations.Animation {
@@ -54,13 +55,25 @@ func (p *Character) ActiveAnimation(dX, dY int) *animations.Animation {
 
 	return nil
 }
+func (p *Character) Spawn() {
+	p.Spawned = true
+}
+func (p *Character) DeSpawn() {
+	p.Spawned = false
+}
 
-func NewCharacter(img *ebiten.Image, spawnPoint Trigger, sheet spritesheet.SpriteSheet, charType CharType) (*Character, error) {
+func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType CharType) (*Character, error) {
+
+	imgPath := "images/characters/npc/townFolk/" + spawnPoint.Name + ".png"
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
+	if err != nil {
+		return nil, err
+	}
 	character := &Character{
 		Sprite: &Sprite{
 			Img:       img,
-			X:         float64(spawnPoint.Rect.Min.X),
-			Y:         float64(spawnPoint.Rect.Min.Y - 64),
+			X:         float64(spawnPoint.X),
+			Y:         float64(spawnPoint.Y - 64),
 			Visible:   true,
 			Direction: "Down",
 		},
@@ -81,7 +94,25 @@ func NewCharacter(img *ebiten.Image, spawnPoint Trigger, sheet spritesheet.Sprit
 			Left:  animations.NewAnimation(3, 23, 4, 10.0),
 			Right: animations.NewAnimation(1, 21, 4, 10.0),
 		}
+		inv := Inventory{
+			items:          make([]Item, 0),
+			ammo:           24,
+			weaponEquipped: "Colt 1851",
+		}
+		character.Inventory = &inv
+		charStats, err := battleStats.LoadSingleCharacter(spawnPoint.Name)
 
+		if err != nil {
+			return nil, err
+		}
+
+		character.BattleStats = &charStats
+
+	}
+	if spawnPoint.spawned {
+		character.Spawned = true
+	} else {
+		character.Spawned = false
 	}
 
 	return character, nil

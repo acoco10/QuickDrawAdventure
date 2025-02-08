@@ -1,16 +1,18 @@
 {
 	"Phase": 0,
 	"PlayerSkillUsed": {
-		"name": "focusedShot",
-		"index": 1,
+		"name": "fanShot",
+		"index": 2,
 		"effects": [
 			{
 				"type": "buff",
 				"stat": "accuracy",
-				"amount": 3,
+				"amount": -2,
 				"duration": 0,
 				"initiativeL": false,
-				"damage": [],
+				"damage": [
+					0
+				],
 				"successPer": 100,
 				"nShots": 0,
 				"on": "self"
@@ -22,31 +24,32 @@
 				"duration": 0,
 				"initiativeL": false,
 				"damage": [
+					1,
 					2
 				],
-				"successPer": 70,
-				"nShots": 1,
+				"successPer": 50,
+				"nShots": 3,
 				"on": ""
 			}
 		],
 		"tension": 0
 	},
 	"EnemySkillUsed": {
-		"name": "bite",
-		"index": 4,
+		"name": "reload",
+		"index": 3,
 		"effects": [
 			{
-				"type": "shot",
+				"type": "reload",
 				"stat": "na",
 				"amount": 0,
 				"duration": 0,
 				"initiativeL": false,
 				"damage": [
-					1,
-					2
+					0,
+					0
 				],
-				"successPer": 80,
-				"nShots": 1,
+				"successPer": 0,
+				"nShots": 0,
 				"on": ""
 			}
 		],
@@ -56,23 +59,22 @@
 	"PlayerSecondaryRoll": false,
 	"EnemyRoll": false,
 	"EnemySecondaryRoll": false,
-	"DamageToPlayer": [
-		-1
-	],
+	"DamageToPlayer": null,
 	"DamageToEnemy": [
-		2
+		0,
+		-1,
+		-1
 	],
 	"EnemyEventTriggered": false,
 	"PlayerEventTriggered": false,
 	"WinProbAfterPlayerTurn": 0,
 	"WinProbAfterEnemyTurn": 0,
 	"PlayerMessage": [
-		"elyse uses focusedShot",
-		"It does 2 total damage!,"
+		"elyse uses fanShot",
+		"It does 0 total damage!,"
 	],
 	"EnemyMessage": [
-		"wolf uses bite",
-		"It does 0 total damage!,"
+		"sheriff uses reload"
 	],
 	"TurnInitiative": 0,
 	"PlayerEffectsTriggered": false,

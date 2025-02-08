@@ -1,6 +1,7 @@
 package gameScenes
 
 import (
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/dialogueData"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/acoco10/QuickDrawAdventure/ui"
@@ -75,7 +76,7 @@ func GenerateMenuButton(popup TextPopup) (button *widget.Button) {
 }
 
 func MakeDialogueUI(resolutionHeight int, resolutionWidth int) (*DialogueUI, error) {
-	face, err := LoadFont(14, NovemberOutline)
+	face, err := assetManagement.LoadFont(14, assetManagement.NovemberOutline)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -189,7 +190,7 @@ func (d *DialogueUI) Reset() {
 	d.triggered = false
 }
 
-func (d *DialogueUI) Update() {
+func (d *DialogueUI) Update() sceneManager.SceneId {
 	if d.triggered {
 		d.ui.Update()
 		textInput := d.TextPrinter.TextInput
@@ -233,10 +234,12 @@ func (d *DialogueUI) Update() {
 			if d.State == Completed {
 				d.Reset()
 				d.ButtonEvent = false
+				return d.triggerScene
 			}
 
 		}
 	}
+	return sceneManager.TownSceneID
 }
 
 func (d *DialogueUI) Draw(screen *ebiten.Image) error {

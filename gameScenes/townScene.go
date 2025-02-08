@@ -2,6 +2,7 @@ package gameScenes
 
 import (
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/camera"
@@ -9,11 +10,9 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image"
 	"log"
-	"os"
 )
 
 type TownScene struct {
@@ -33,7 +32,7 @@ type TownScene struct {
 	loaded              bool
 	cursor              BattleMenuCursorUpdater
 	npcInProximity      gameObjects.Character
-	interactInProximity gameObjects.Item
+	interactInProximity gameObjects.MapItem
 	triggerInteraction  bool
 	dustEffect          *ebiten.Image
 	scene               sceneManager.SceneId
@@ -47,7 +46,7 @@ func NewTownScene() *TownScene {
 
 func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
-	tileMapFile, err := os.ReadFile("assets/map/town1Map.json")
+	tileMapFile, err := assets.Map.ReadFile("assets/map/town1Map.json")
 	if err != nil {
 		log.Fatal("tilemap file not loading", err)
 	}
@@ -82,69 +81,70 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	charSpriteSheet := spritesheet.NewSpritesheet(4, 6, 16, 32)
 
-	playerImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/elyse/elyseSpriteSheet.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bethAnneImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/townFolk/bethAnne.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	jarvisImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/townFolk/jarvis.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	zephImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/npc/townFolk/zeph.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	npcSpawn := g.MapData.NpcSpawns
 
-	jarvis, err := gameObjects.NewCharacter(jarvisImg, npcSpawn["jarvis"], *charSpriteSheet, gameObjects.NonPlayer)
+	jarvis, err := gameObjects.NewCharacter(npcSpawn["jarvis"], *charSpriteSheet, gameObjects.NonPlayer)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	bethSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 25)
 
-	bethAnne, err := gameObjects.NewCharacter(bethAnneImg, npcSpawn["bethAnne"], *bethSpriteSheet, gameObjects.NonPlayer)
+	bethAnne, err := gameObjects.NewCharacter(npcSpawn["bethAnne"], *bethSpriteSheet, gameObjects.NonPlayer)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	zephSpriteSheet := spritesheet.NewSpritesheet(3, 1, 15, 29)
 
-	zeph, err := gameObjects.NewCharacter(zephImg, npcSpawn["zeph"], *zephSpriteSheet, gameObjects.NonPlayer)
+	zeph, err := gameObjects.NewCharacter(npcSpawn["zeph"], *zephSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	marthaSpriteSheet := spritesheet.NewSpritesheet(1, 1, 15, 27)
 
-	player, err := gameObjects.NewCharacter(playerImg, npcSpawn["player"], *charSpriteSheet, gameObjects.Player)
+	martha, err := gameObjects.NewCharacter(npcSpawn["marthaJean"], *marthaSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	player, err := gameObjects.NewCharacter(npcSpawn["elyse"], *charSpriteSheet, gameObjects.Player)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	antonio, err := gameObjects.NewCharacter(npcSpawn["antonio"], *charSpriteSheet, gameObjects.Player)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	g.Player = player
 
+	g.gameLog.PlayerStats = player.BattleStats
+
 	g.NPC = map[string]*gameObjects.Character{}
 
 	g.NPC["bethAnne"] = bethAnne
 	g.NPC["jarvis"] = jarvis
 	g.NPC["zeph"] = zeph
+	g.NPC["martha"] = martha
+	g.NPC["antonio"] = antonio
 
 	g.dialogueUi, err = MakeDialogueUI(1512, 918)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	g.dialogueUi.UpdateTriggerScene(sceneManager.BattleSceneId)
+	g.dialogueUi.UpdateTriggerScene(sceneManager.TownSceneID)
 
 }
 
 func (g *TownScene) Update() sceneManager.SceneId {
 
-	g.dialogueUi.Update()
+	sceneUpdate := g.dialogueUi.Update()
+	if sceneUpdate != sceneManager.TownSceneID {
+		g.scene = sceneManager.BattleSceneId
+	}
 
 	g.Player.Dx = 0
 
@@ -173,6 +173,13 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.npcInProximity.Name != "" {
 		g.dialogueUi.LoadUI(g.npcInProximity.Name)
+		if g.npcInProximity.Name == "marthaJean" {
+			g.NPC["antonio"].Spawned = true
+		}
+		if g.npcInProximity.Name == "antonio" {
+			g.dialogueUi.UpdateTriggerScene(sceneManager.BattleSceneId)
+			g.gameLog.EnemyEncountered = battleStats.Sheriff
+		}
 		LockCursorForDialogue()
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
@@ -405,7 +412,7 @@ func (g *TownScene) IsLoaded() bool {
 }
 
 func DebugCamera(cam camera.Camera, player gameObjects.Character, screen *ebiten.Image) {
-	face, err := LoadFont(40, November)
+	face, err := assetManagement.LoadFont(40, assetManagement.November)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -8,7 +8,7 @@
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "Owner of this bar, Beth Anne knows everyone in town."
+              "dialogueText": "Owner of this bar, Beth Anne, knows everyone in town."
             }
           ]
         }
@@ -30,7 +30,7 @@
             },
             {
               "dialogueId": 3,
-              "dialogueText": "Hmmm I heard about a farmer who was having some trouble with a local gang throwing their weight around. He lives north of here"
+              "dialogueText": "Hmmm theres a family who live on a farm up north who was having some trouble with a local gang, not sure how much they can pay but they're decent folk"
             }
           ]
         },
@@ -55,6 +55,47 @@
         ]
       }
     ]
+    },
+    {
+      "name": "marthaJean",
+      "dialogues": [
+        {
+          "storyPoint": 1,
+          "dialogue": [
+            {
+              "dialogueId": 1,
+              "dialogueText": "Oh shucks Beth Anne is always looking out for us, yeah they shot up my husband pretty good"
+            },
+            {
+              "dialogueId": 2,
+              "dialogueText": "We were gonna pack up and leave after what happened to John."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "antonio",
+      "dialogues": [
+        {
+          "storyPoint": 1,
+          "dialogue": [
+            {
+              "dialogueId": 1,
+              "dialogueText": "Well, well, well, what do we have here."
+            },
+            {
+              "dialogueId": 2,
+              "dialogueText": "Sure you know how to use that pistol little girl?"
+            },
+            {
+              "dialogueId": 3,
+              "dialogueText": "An attitude like that may get you involved in some duels missy."
+            }
+
+          ]
+        }
+      ]
     }
   ]
 }

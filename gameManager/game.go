@@ -5,6 +5,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/gameScenes"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/hajimehoshi/ebiten/v2"
+	"log"
 )
 
 type Game struct {
@@ -64,8 +65,13 @@ func NewBattleTestGame() *Game {
 		sceneManager.WinSceneID:      gameScenes.NewWinScene(),
 		sceneManager.StartSceneId:    gameScenes.NewStartScene(),
 	}
+	elyseStats, err := battleStats.LoadSingleCharacter("elyse")
+	if err != nil {
+		log.Fatal(err)
+	}
 	activeSceneId := sceneManager.BattleSceneId
-	glog := &sceneManager.GameLog{EnemyEncountered: battleStats.Sheriff}
+	glog := &sceneManager.GameLog{EnemyEncountered: battleStats.Sheriff,
+		PlayerStats: &elyseStats}
 	game := Game{
 		sceneMap,
 		activeSceneId,

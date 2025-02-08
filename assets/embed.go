@@ -9,3 +9,6 @@ var ImagesDir embed.FS
 
 //go:embed fonts
 var Fonts embed.FS
+
+//go:embed map
+var Map embed.FS

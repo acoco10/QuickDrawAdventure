@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/animations"
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
 	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
+	"github.com/acoco10/QuickDrawAdventure/graphicEffects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/acoco10/QuickDrawAdventure/ui"
@@ -16,15 +18,19 @@ import (
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	resource "github.com/quasilyte/ebitengine-resource"
 	"log"
+	"math/rand/v2"
 	"os"
+	"strconv"
 )
 
 type BattleScene struct {
 	ui                                *ebitenui.UI
 	resolutionWidth, resolutionHeight int
 	inMenu                            bool
+	gameLog                           *sceneManager.GameLog
 	audioPlayer                       *audioManagement.SFXAudioPlayer
 	musicPlayer                       *audioManagement.DJ
 	TextPrinter                       *TextPrinter
@@ -43,7 +49,7 @@ type BattleScene struct {
 	eventCountDown                    int
 	events                            map[EventName]string
 	currentEvent                      EventName
-	graphicalEffectManager            GraphicalEffectManager
+	graphicalEffectManager            *graphicEffects.GraphicalEffectManager
 	turnTracker                       int
 	loaded                            bool
 	sceneChangeCountdown              int
@@ -52,6 +58,7 @@ type BattleScene struct {
 	onScreenStatsUI                   *OnScreenStatsUI
 	backGround                        ebiten.Image
 	endTriggered                      bool
+	gameEffects                       map[graphicEffects.EffectType]graphicEffects.GraphicEffect
 }
 
 type EventName uint8
@@ -167,20 +174,20 @@ func (g *BattleScene) KeepCursorPressed() {
 
 func LoadPlayerBattleSprite() gameObjects.BattleSprite {
 	cAnimations := map[gameObjects.CAnimation]*animations.CyclicAnimation{
-		gameObjects.AttackOne:   animations.NewCyclicAnimation(5, 25, 10, 15, 1),
-		gameObjects.AttackTwo:   animations.NewCyclicAnimation(4, 34, 10, 15, 1),
-		gameObjects.AttackThree: animations.NewCyclicAnimation(3, 23, 10, 15, 3),
-		gameObjects.Win:         animations.NewCyclicAnimation(8, 68, 10, 15, 5),
-		gameObjects.Reload:      animations.NewCyclicAnimation(9, 39, 10, 15, 1),
+		gameObjects.AttackOne:   animations.NewCyclicAnimation(5, 25, 10, 14, 1),
+		gameObjects.AttackTwo:   animations.NewCyclicAnimation(4, 34, 10, 14, 1),
+		gameObjects.AttackThree: animations.NewCyclicAnimation(3, 23, 10, 14, 3),
+		gameObjects.Win:         animations.NewCyclicAnimation(8, 68, 10, 14, 5),
+		gameObjects.Reload:      animations.NewCyclicAnimation(9, 39, 10, 14, 1),
 	}
-	playerImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/elyse/elyseBattleSprite.png")
+	playerImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/characters/battleSprites/elyse/elyseBattleSprite.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	playerSpriteSheet := spritesheet.NewSpritesheet(10, 7, 32, 48)
 
-	playerBattleSprite, err := gameObjects.NewBattleSprite(playerImg, playerSpriteSheet, 700, 350, 5, cAnimations)
+	playerBattleSprite, err := gameObjects.NewBattleSprite(playerImg, playerSpriteSheet, 700, 350, 5, cAnimations, nil)
 	if err != nil {
 		log.Fatal(err)
 
@@ -189,7 +196,7 @@ func LoadPlayerBattleSprite() gameObjects.BattleSprite {
 
 }
 
-func LoadEnemyBattleSprite(enemy battleStats.Character) gameObjects.BattleSprite {
+func LoadEnemyBattleSprite(enemy battleStats.CharacterData) gameObjects.BattleSprite {
 	humanCAnimations := map[gameObjects.CAnimation]*animations.CyclicAnimation{
 		gameObjects.AttackOne:   animations.NewCyclicAnimation(5, 25, 10, 15, 1),
 		gameObjects.AttackTwo:   animations.NewCyclicAnimation(4, 34, 10, 15, 1),
@@ -200,7 +207,7 @@ func LoadEnemyBattleSprite(enemy battleStats.Character) gameObjects.BattleSprite
 	animalCAnimations := map[gameObjects.CAnimation]*animations.CyclicAnimation{
 		gameObjects.AttackOne: animations.NewCyclicAnimation(0, 2, 1, 15, 1),
 	}
-	enemyPath := fmt.Sprintf("images/characters/npc/battleSprites/%sBattleSprite.png", enemy.Name)
+	enemyPath := fmt.Sprintf("images/characters/battleSprites/%s/%sBattleSprite.png", enemy.Name, enemy.Name)
 	enemyImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, enemyPath)
 	if err != nil {
 		log.Fatal(err)
@@ -208,13 +215,14 @@ func LoadEnemyBattleSprite(enemy battleStats.Character) gameObjects.BattleSprite
 	var enemyBs *gameObjects.BattleSprite
 	if enemy.Name != "wolf" {
 		enemySpriteSheet := spritesheet.NewSpritesheet(10, 4, 32, 64)
-		enemyBs, err = gameObjects.NewBattleSprite(enemyImg, enemySpriteSheet, 600, 100, 3.2, humanCAnimations)
+		enemyBs, err = gameObjects.NewBattleSprite(enemyImg, enemySpriteSheet, 600, 100, 3.2, humanCAnimations, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		enemySpriteSheet := spritesheet.NewSpritesheet(3, 1, 15, 19)
-		enemyBs, err = gameObjects.NewBattleSprite(enemyImg, enemySpriteSheet, 600, 150, 4, animalCAnimations)
+		idle := animations.NewAnimation(0, 0, 0, 10)
+		enemySpriteSheet := spritesheet.NewSpritesheet(12, 1, 15, 19)
+		enemyBs, err = gameObjects.NewBattleSprite(enemyImg, enemySpriteSheet, 600, 250, 4, animalCAnimations, idle)
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -261,28 +269,28 @@ func (g *BattleScene) PlayerDialogueTurn(turn *battle.Turn) {
 
 		if turn.PlayerIndex == 1 && g.TextPrinter.state == NotPrinting && g.StatusButtonEvent {
 			g.StatusButtonEvent = false
-			g.graphicalEffectManager.PlayerEffects.ProcessPlayerTurnData(turn)
+			g.ProcessTurnEffects(*g.playerBattleSprite, turn)
 			g.graphicalEffectManager.PlayerEffects.TriggerEffectQueue()
 			turn.PlayerEffectsTriggered = true
 			turn.PlayerIndex++
-			if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Animated {
+			if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == graphicEffects.Animated {
 				g.HideStatusBar()
 			}
-			if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Static {
+			if g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == graphicEffects.Static {
 				g.incrementTextPrinter()
 				g.TextPrinter.NextMessage = true
 			}
 		}
 		if turn.PlayerIndex == 2 {
 			if len(g.graphicalEffectManager.PlayerEffects.EffectQueue) > 0 {
-				if g.StatusButtonEvent && g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == Static {
+				if g.StatusButtonEvent && g.graphicalEffectManager.PlayerEffects.EffectQueue[0].Type() == graphicEffects.Static {
 					g.graphicalEffectManager.PlayerEffects.EffectQueue[0].UnTrigger()
 					g.StatusButtonEvent = false
 				}
 			}
-			if g.graphicalEffectManager.PlayerEffects.state == NotTriggered {
+			if g.graphicalEffectManager.PlayerEffects.GetState() == graphicEffects.NotTriggered {
 				if turn.PlayerSkillUsed.SkillName == "draw" {
-					g.DrawSkillUsed(turn)
+					g.DrawSkillUsed()
 					turn.EnemyTurnCompleted = true
 				}
 				g.ShowStatusBar()
@@ -335,9 +343,10 @@ func (g *BattleScene) PlayerShootingTurn(turn *battle.Turn) {
 			g.playerBattleSprite.CombatButtonAnimationTrigger(turn.PlayerSkillUsed.SkillName)
 			g.playerBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
 			g.StatusButtonEvent = false
-			g.graphicalEffectManager.PlayerEffects.ProcessPlayerTurnData(turn)
+			g.ProcessTurnEffects(*g.playerBattleSprite, turn)
+			g.graphicalEffectManager.GameEffects.TriggerEffectQueue()
 			g.graphicalEffectManager.PlayerEffects.TriggerEffectQueue()
-			g.audioPlayer.ConfigureAttackResultSoundQueue(turn.DamageToEnemy, g.battle.Enemy.Name)
+			g.audioPlayer.ConfigureAttackResultSoundQueue(turn.DamageToEnemy, g.battle.Enemy.Name, g.battle.Player.Name)
 			if turn.PlayerSkillUsed.SkillName == "reload" {
 				g.audioPlayer.Play(audioManagement.Reload)
 			}
@@ -347,7 +356,7 @@ func (g *BattleScene) PlayerShootingTurn(turn *battle.Turn) {
 			g.battle.DamageEnemy()
 			g.battle.UpdatePlayerAmmo()
 		}
-		if turn.PlayerIndex == 2 && g.graphicalEffectManager.PlayerEffects.state == NotTriggered {
+		if turn.PlayerIndex == 2 && g.graphicalEffectManager.PlayerEffects.GetState() == graphicEffects.NotTriggered {
 			g.ShowStatusBar()
 			g.incrementTextPrinter()
 			g.TextPrinter.NextMessage = true
@@ -375,7 +384,7 @@ func (g *BattleScene) PlayerShootingTurn(turn *battle.Turn) {
 	g.playerBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
 }*/
 
-func (g *BattleScene) DrawSkillUsed(turn *battle.Turn) {
+func (g *BattleScene) DrawSkillUsed() {
 	g.dialogueMenu.DisableButtons()
 	g.battle.UpdateBattlePhase()
 	g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
@@ -405,10 +414,10 @@ func (g *BattleScene) EnemyDialogueTurn(turn *battle.Turn) {
 		}
 		if turn.EnemyIndex == 1 && g.TextPrinter.state == NotPrinting && g.StatusButtonEvent {
 			g.StatusButtonEvent = false
-			g.graphicalEffectManager.EnemyEffects.ProcessEnemyTurnData(turn)
+			g.ProcessTurnEffects(*g.enemyBattleSprite, turn)
 			g.graphicalEffectManager.EnemyEffects.TriggerEffectQueue()
 			if turn.EnemySkillUsed.SkillName == "draw" {
-				g.DrawSkillUsed(turn)
+				g.DrawSkillUsed()
 				turn.PlayerTurnCompleted = true
 			}
 
@@ -416,10 +425,10 @@ func (g *BattleScene) EnemyDialogueTurn(turn *battle.Turn) {
 			turn.EnemyIndex++
 
 			if len(g.graphicalEffectManager.EnemyEffects.EffectQueue) > 0 {
-				if g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == Animated {
+				if g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == graphicEffects.Animated {
 					g.HideStatusBar()
 				}
-				if g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == Static {
+				if g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == graphicEffects.Static {
 					g.incrementTextPrinter()
 					g.TextPrinter.NextMessage = true
 				}
@@ -428,12 +437,12 @@ func (g *BattleScene) EnemyDialogueTurn(turn *battle.Turn) {
 		if turn.EnemyIndex == 2 {
 			g.battle.UpdateWinProbability(battle.DrawProb(g.battle.Player.DisplayStats(), g.battle.Enemy.DisplayStats()))
 			if len(g.graphicalEffectManager.EnemyEffects.EffectQueue) > 0 {
-				if g.StatusButtonEvent && g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == Static {
+				if g.StatusButtonEvent && g.graphicalEffectManager.EnemyEffects.EffectQueue[0].Type() == graphicEffects.Static {
 					g.graphicalEffectManager.EnemyEffects.EffectQueue[0].UnTrigger()
 					g.StatusButtonEvent = false
 				}
 			}
-			if g.graphicalEffectManager.EnemyEffects.state == NotTriggered {
+			if g.graphicalEffectManager.EnemyEffects.GetState() == graphicEffects.NotTriggered {
 				g.ShowStatusBar()
 				g.incrementTextPrinter()
 				g.TextPrinter.NextMessage = true
@@ -479,9 +488,10 @@ func (g *BattleScene) EnemyShootingTurn(turn *battle.Turn) {
 			g.enemyBattleSprite.CombatButtonAnimationTrigger(turn.EnemySkillUsed.SkillName)
 			g.enemyBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
 			g.StatusButtonEvent = false
-			g.graphicalEffectManager.EnemyEffects.ProcessEnemyTurnData(turn)
+			g.ProcessTurnEffects(*g.enemyBattleSprite, turn)
 			g.graphicalEffectManager.EnemyEffects.TriggerEffectQueue()
-			g.audioPlayer.ConfigureAttackResultSoundQueue(turn.DamageToPlayer, "Player")
+			g.graphicalEffectManager.GameEffects.TriggerEffectQueue()
+			g.audioPlayer.ConfigureAttackResultSoundQueue(turn.DamageToPlayer, "Player", g.battle.Enemy.Name)
 			if turn.EnemySkillUsed.SkillName == "reload" {
 				g.audioPlayer.Play(audioManagement.Reload)
 			}
@@ -491,7 +501,7 @@ func (g *BattleScene) EnemyShootingTurn(turn *battle.Turn) {
 			g.battle.DamagePlayer()
 		}
 		if turn.EnemyIndex == 2 {
-			if g.graphicalEffectManager.EnemyEffects.state == NotTriggered {
+			if g.graphicalEffectManager.EnemyEffects.GetState() == graphicEffects.NotTriggered {
 				g.incrementTextPrinter()
 				g.ShowStatusBar()
 				g.TextPrinter.NextMessage = true
@@ -532,7 +542,7 @@ func (g *BattleScene) CheckAndEndBattle() {
 	if g.StatusButtonEvent && g.endTriggered {
 		g.StatusButtonEvent = false
 		println("changing scene")
-		g.sceneChangeCountdown = 10
+		g.sceneChangeCountdown = 100
 	}
 }
 
@@ -556,7 +566,6 @@ func (g *BattleScene) CheckForWinner() {
 	}
 	if g.battle.Player.DisplayStat(battleStats.Health) <= 0 {
 		g.battle.BattleLost = true
-		//g.sceneChangeCountdown = 100
 	}
 }
 
@@ -634,4 +643,241 @@ func (g *BattleScene) UpdateOutputDuringNonTurn() {
 			}
 		}
 	}
+}
+
+func (g *BattleScene) ProcessTurnEffects(bs gameObjects.BattleSprite, turn *battle.Turn) {
+	var skillUsed battleStats.Skill
+	var effectSequencer *graphicEffects.GraphicalEffectSequencer
+	var dmg []int
+	var weakness bool
+	var roll bool
+	var enemyBs gameObjects.BattleSprite
+	gameEffectQueue := g.graphicalEffectManager.GameEffects.EffectQueue
+	if g.battle.State == battle.PlayerTurn {
+		weakness = turn.EnemyWeakness
+		skillUsed = turn.PlayerSkillUsed
+		effectSequencer = g.graphicalEffectManager.PlayerEffects
+		dmg = turn.DamageToEnemy
+		roll = turn.PlayerRoll
+		enemyBs = *g.enemyBattleSprite
+	}
+	if g.battle.State == battle.EnemyTurn {
+		skillUsed = turn.EnemySkillUsed
+		effectSequencer = g.graphicalEffectManager.EnemyEffects
+		dmg = turn.DamageToPlayer
+		roll = turn.EnemyRoll
+		enemyBs = *g.playerBattleSprite
+	}
+	if skillUsed.SkillName != "" {
+		EffectQueue := make([]graphicEffects.GraphicEffect, 0)
+
+		if skillUsed.SkillName == "stareDown" {
+			EffectQueue = append(EffectQueue, bs.Effects[graphicEffects.StareEffect])
+			effectSequencer.Counter = 1
+		}
+
+		if skillUsed.SkillName == "brag" {
+			println("appending skill")
+			if roll {
+				EffectQueue = append(EffectQueue, bs.Effects[graphicEffects.SuccessfulEffect])
+			}
+			if !roll {
+				EffectQueue = append(EffectQueue, bs.Effects[graphicEffects.UnsuccessfulEffect])
+			}
+			effectSequencer.Counter = 1
+		}
+		if skillUsed.SkillName == "insult" {
+			if roll {
+				EffectQueue = append(EffectQueue, bs.Effects[graphicEffects.SuccessfulEffect])
+			}
+
+			if !roll {
+				EffectQueue = append(EffectQueue, bs.Effects[graphicEffects.UnsuccessfulEffect])
+			}
+			effectSequencer.Counter = 1
+		}
+		if skillUsed.SkillName == "draw" {
+			if turn.EnemySkillUsed.SkillName != "draw" || turn.TurnInitiative == battle.Player {
+				EffectQueue = append(EffectQueue, g.gameEffects[graphicEffects.DrawEffect])
+				effectSequencer.Counter = 1
+			}
+		}
+
+		if weakness {
+			EffectQueue = append(EffectQueue, g.gameEffects[graphicEffects.WeaknessEffect])
+			println("adding weakness effect to player effect queue")
+		}
+
+		Effect := skillUsed.Effects[0]
+		if Effect.EffectType == "buff" && roll {
+			if Effect.Stat == "fear" {
+				amt := Effect.Amount
+				if weakness {
+					amt = amt * 2
+				}
+				eff := g.SetEffectCoord(g.gameEffects[graphicEffects.FearEffect], graphicEffects.FearEffect)
+				eff = AddTextToImageEffect(g.gameEffects[graphicEffects.FearEffect], amt, graphicEffects.FearEffect)
+				EffectQueue = append(EffectQueue, eff)
+				effectSequencer.Counter = 1
+				println("battleSceneFunctions.go:712 length of effect Queue =", len(EffectQueue), "\n")
+			}
+
+		}
+
+		for _, result := range dmg {
+			if result >= 0 {
+				g.graphicalEffectManager.GameEffects.Counter = 14
+				eff := g.SetEffectCoord(g.gameEffects[graphicEffects.MuzzleEffect], graphicEffects.MuzzleEffect)
+				gameEffectQueue = append(gameEffectQueue, eff)
+			}
+			if result > 0 {
+				effectSequencer.Counter = 36
+				g.graphicalEffectManager.GameEffects.Counter = 36
+				eff := AddTextToImageEffect(g.gameEffects[graphicEffects.HitSplatEffect], result, graphicEffects.HitSplatEffect)
+				eff = g.SetEffectCoord(eff, graphicEffects.HitSplatEffect)
+				gameEffectQueue = append(gameEffectQueue, eff)
+				EffectQueue = append(EffectQueue, enemyBs.Effects[graphicEffects.TookDamageEffect])
+			}
+
+			if result == 0 {
+				effectSequencer.Counter = 36
+				g.graphicalEffectManager.GameEffects.Counter = 36
+				eff := g.SetEffectCoord(g.gameEffects[graphicEffects.MissEffect], graphicEffects.MissEffect)
+				gameEffectQueue = append(gameEffectQueue, eff)
+				EffectQueue = append(EffectQueue, g.gameEffects[graphicEffects.FillerEffect])
+			}
+		}
+		effectSequencer.EffectQueue = EffectQueue
+		g.graphicalEffectManager.GameEffects.EffectQueue = gameEffectQueue
+		effectSequencer.Configured = true
+
+	}
+}
+
+func (g *BattleScene) LoadGameEffects() {
+	drawImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/drawEffect.png")
+	if err != nil {
+		log.Fatalf("ebitenutil.NewImageFromFile file not found%s\n", err)
+	}
+
+	drawEffectSpriteSheet := spritesheet.NewSpritesheet(1, 4, 199, 125)
+	drawEffect := graphicEffects.NewEffect(drawImg, drawEffectSpriteSheet, 450, 200, 3, 0, 1, 12, 4)
+
+	missImage, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/missEffect.png")
+	if err != nil {
+		log.Printf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
+	}
+	missEffect := graphicEffects.NewStaticEffect(missImage, 520+float64(rand.IntN(80)), 200+float64(rand.IntN(80)), 12, 1)
+
+	damageImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/damageEffect.png")
+	if err != nil {
+		log.Printf("graphicalEffectManager.go:107 ebitenutil.NewImageFromFile file not found due to: %s\n", err)
+	}
+
+	damagedEffect := graphicEffects.NewStaticEffect(damageImg, g.playerBattleSprite.X*g.playerBattleSprite.Scale, g.playerBattleSprite.Y*g.playerBattleSprite.Scale-float64(rand.IntN(80)), 50, 1)
+
+	fearImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/fearEffect.png")
+	if err != nil {
+		log.Printf("graphicalEffectManager.go:84 ebitenutil.NewImageFromFile file not found due to: %s\n", err)
+	}
+
+	fearEffect := graphicEffects.NewStaticEffect(fearImg, g.playerBattleSprite.X, g.playerBattleSprite.Y-float64(rand.IntN(80)), 100, 1)
+
+	weakImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/weaknessEffect.png")
+	if err != nil {
+		log.Fatalf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
+	}
+
+	weaknessEffect := graphicEffects.NewStaticEffect(weakImg, 600, 250, 100, 1)
+
+	muzzleFlashImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/effectAssets/muzzleFlash+smoke.png")
+	if err != nil {
+		log.Fatalf("ebitenutil.NewImageFromFile file not found due to: %s\n", err)
+	}
+
+	muzzleSpriteSheet := spritesheet.NewSpritesheet(7, 1, 23, 32)
+	muzzleFlashEffect := graphicEffects.NewEffect(muzzleFlashImg, muzzleSpriteSheet, 250, 100, 6, 0, 1, 2, 4)
+
+	fillerImg := ebiten.NewImage(1, 1)
+	fillerEffect := graphicEffects.NewStaticEffect(fillerImg, 600, 250, 12, 1)
+
+	g.gameEffects = map[graphicEffects.EffectType]graphicEffects.GraphicEffect{
+		graphicEffects.DrawEffect:     drawEffect,
+		graphicEffects.FearEffect:     fearEffect,
+		graphicEffects.HitSplatEffect: damagedEffect,
+		graphicEffects.WeaknessEffect: weaknessEffect,
+		graphicEffects.MissEffect:     missEffect,
+		graphicEffects.FillerEffect:   fillerEffect,
+		graphicEffects.MuzzleEffect:   muzzleFlashEffect,
+	}
+}
+func (g *BattleScene) SetEffectCoord(effectInput graphicEffects.GraphicEffect, etype graphicEffects.EffectType) graphicEffects.GraphicEffect {
+	var effect graphicEffects.GraphicEffect
+	switch e := effectInput.(type) {
+	case *graphicEffects.AnimatedEffect:
+		effect = effectInput
+	case *graphicEffects.StaticEffect:
+		effect = graphicEffects.NewStaticEffect(e.AccessImage(), 0, 0, 10, 1)
+	}
+	if g.battle.State == battle.EnemyTurn {
+		if etype == graphicEffects.MissEffect {
+
+			check := rand.IntN(2)
+			if check == 0 {
+				effect.SetCoord(g.playerBattleSprite.X-20-rand.Float64()*70, g.playerBattleSprite.Y+50+rand.Float64()*100)
+			} else {
+				effect.SetCoord(g.playerBattleSprite.X+100+rand.Float64()*70, g.playerBattleSprite.Y+50+rand.Float64()*100)
+			}
+		}
+		if etype == graphicEffects.HitSplatEffect {
+			minX := float64(g.playerBattleSprite.Img.Bounds().Min.X) - 10
+			minY := float64(g.playerBattleSprite.Img.Bounds().Min.Y) - 10
+			effect.SetCoord(g.playerBattleSprite.X+rand.Float64()*minX, g.playerBattleSprite.Y+50+rand.Float64()*minY)
+		}
+		if etype == graphicEffects.FearEffect {
+			effectInput.SetCoord(g.playerBattleSprite.X, g.playerBattleSprite.Y+100)
+		}
+	}
+	if g.battle.State == battle.PlayerTurn {
+		if etype == graphicEffects.MissEffect {
+			check := rand.IntN(2)
+			if check == 0 {
+				effect.SetCoord(g.enemyBattleSprite.X-20-rand.Float64()*70, g.enemyBattleSprite.Y+50+rand.Float64()*100)
+			} else {
+				effect.SetCoord(g.enemyBattleSprite.X+100+rand.Float64()*70, g.enemyBattleSprite.Y+50+rand.Float64()*100)
+			}
+		}
+		if etype == graphicEffects.HitSplatEffect {
+			minX := float64(g.enemyBattleSprite.Img.Bounds().Min.X) - 10
+			minY := float64(g.enemyBattleSprite.Img.Bounds().Min.Y) - 10
+			effect.SetCoord(g.enemyBattleSprite.X+rand.Float64()*minX, g.enemyBattleSprite.Y+50+rand.Float64()*minY)
+		}
+		if etype == graphicEffects.FearEffect {
+			effectInput.SetCoord(g.enemyBattleSprite.X, g.enemyBattleSprite.Y+100)
+		}
+		if etype == graphicEffects.MuzzleEffect {
+			effectInput.SetCoord(g.playerBattleSprite.X+60, g.playerBattleSprite.Y)
+		}
+	}
+	return effect
+}
+
+func AddTextToImageEffect(inputEffect graphicEffects.GraphicEffect, input int, effectType graphicEffects.EffectType) graphicEffects.GraphicEffect {
+	img := ebiten.NewImageFromImage(inputEffect.AccessImage())
+	effect := graphicEffects.NewStaticEffect(img, 0, 0, 10, 1)
+	face, err := assetManagement.LoadFont(18, assetManagement.Lady)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dopts := text.DrawOptions{}
+	inputText := strconv.FormatInt(int64(input), 10)
+	if effectType == graphicEffects.HitSplatEffect {
+		dopts.GeoM.Translate(16, 10)
+	}
+	if effectType == graphicEffects.FearEffect {
+		inputText += " Fear"
+		dopts.GeoM.Translate(45, 10)
+	}
+	text.Draw(effect.AccessImage(), inputText, face, &dopts)
+	return effect
 }
