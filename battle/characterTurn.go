@@ -2,12 +2,12 @@ package battle
 
 import (
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/tidwall/gjson"
 	"log"
 	"math"
 	"math/rand/v2"
-	"os"
 )
 
 func Shoot(aC int, a int, f int, ChanceToHit int, damageRange []int) (damage int) {
@@ -95,7 +95,7 @@ func DrawProb(userStats map[battleStats.Stat]int, oppStats map[battleStats.Stat]
 }
 
 func GetSkillDialogue(charName string, skillName string, status bool) string {
-	data, err := os.ReadFile("battle/battleDialogue.json")
+	data, err := assets.Dialogue.ReadFile("dialogueData/battleDialogue.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func GetSkillDialogue(charName string, skillName string, status bool) string {
 }
 
 func GetResponse(charName string, skillName string, status bool) string {
-	data, err := os.ReadFile("battle/battleDialogue.json")
+	data, err := assets.Dialogue.ReadFile("dialogueData/battleDialogue.json")
 	if err != nil {
 		log.Fatal(err)
 	}

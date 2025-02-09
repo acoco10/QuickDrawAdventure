@@ -20,7 +20,7 @@ const (
 )
 
 type GraphicEffect interface {
-	Draw(screen *ebiten.Image)
+	Draw(screen *ebiten.Image, depth int)
 	Update()
 	AccessImage() *ebiten.Image
 	Trigger()
@@ -28,9 +28,11 @@ type GraphicEffect interface {
 	UnTrigger()
 	Type() GraphicEffectType
 	SetCoord(x float64, y float64)
+	SetDepth(depth int)
 }
 
 type StaticEffect struct {
+	name       EffectType
 	img        *ebiten.Image
 	state      EffectState
 	duration   int
@@ -38,6 +40,7 @@ type StaticEffect struct {
 	x, y       float64
 	counter    int
 	scale      float64
+	depth      int
 }
 
 func (se *StaticEffect) CheckState() EffectState {
@@ -55,14 +58,19 @@ func (se *StaticEffect) SetCoord(x float64, y float64) {
 	se.y = y
 }
 
-func (se *StaticEffect) Draw(screen *ebiten.Image) {
-	if se.state == Triggered {
+func (se *StaticEffect) Draw(screen *ebiten.Image, depth int) {
+	if se.state == Triggered && se.depth == depth {
 		opts := &ebiten.DrawImageOptions{}
 		opts.GeoM.Reset()
 		opts.GeoM.Translate(se.x, se.y)
 		opts.GeoM.Scale(se.scale, se.scale)
 		screen.DrawImage(se.img, opts)
 	}
+
+}
+
+func (se *StaticEffect) SetDepth(depth int) {
+	se.depth = depth
 
 }
 
@@ -89,7 +97,7 @@ func (se *StaticEffect) Type() GraphicEffectType {
 	return Static
 }
 
-func NewStaticEffect(img *ebiten.Image, x, y float64, duration int, scale float64) *StaticEffect {
+func NewStaticEffect(img *ebiten.Image, x, y float64, duration int, scale float64, effectType EffectType) *StaticEffect {
 	se := StaticEffect{
 		img:        img,
 		x:          x,
@@ -99,6 +107,7 @@ func NewStaticEffect(img *ebiten.Image, x, y float64, duration int, scale float6
 		state:      NotTriggered,
 		scale:      scale,
 		indefinite: false,
+		name:       effectType,
 	}
 	if duration == 0 {
 		se.indefinite = true
@@ -122,6 +131,7 @@ type AnimatedEffect struct {
 	scale        float64
 	effectType   GraphicEffectType
 	visible      bool
+	depth        int
 }
 
 func (e *AnimatedEffect) UnTrigger() {
@@ -131,9 +141,12 @@ func (e *AnimatedEffect) SetCoord(x float64, y float64) {
 	e.x = x
 	e.y = y
 }
+func (e *AnimatedEffect) SetDepth(depth int) {
+	e.depth = depth
+}
 
-func (e *AnimatedEffect) Draw(screen *ebiten.Image) {
-	if e.state == Triggered || e.visible {
+func (e *AnimatedEffect) Draw(screen *ebiten.Image, depth int) {
+	if (e.state == Triggered || e.visible) && e.depth == depth {
 		img := e.img.SubImage(e.spriteSheet.Rect(e.frame)).(*ebiten.Image)
 		opts := &ebiten.DrawImageOptions{}
 		opts.GeoM.Scale(e.scale, e.scale)
@@ -143,6 +156,9 @@ func (e *AnimatedEffect) Draw(screen *ebiten.Image) {
 }
 func (e *AnimatedEffect) MakeVisible() {
 	e.visible = true
+}
+func (e *AnimatedEffect) MakeNoyVisible() {
+	e.visible = false
 }
 
 func (e *AnimatedEffect) Frame() int {

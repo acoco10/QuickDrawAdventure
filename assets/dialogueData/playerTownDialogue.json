@@ -5,6 +5,7 @@
       "playerDialogue": [
         {
           "name": "bethAnne",
+          "talkFirst": false,
           "dialogue": [
             {
               "dialogueId": 1,
@@ -22,31 +23,45 @@
         },
         {
           "name": "marthaJean",
+          "talkFirst": true,
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "Beth Anne at the Rose said you were having some trouble with a gang."
+              "dialogueText": "I heard there was some trouble at this ranch anything I can do to help?"
             },
             {
               "dialogueId": 2,
-              "dialogueText": "Don't worry Martha I dont take too kindly to bullies throwing their weight around"
+              "dialogueText": "Oh my god, I'm sorry to hear that"
             },
             {
               "dialogueId": 3,
-              "dialogueText": "A hot supper will be plenty, this farm reminds me a little of where I grew up"
+              "dialogueText": "Well I certainly got no family to worry about, how about I take care of this gang problem and you give a couple bucks for a room and some supper"
+            },
+            {
+              "dialogueId": 4,
+              "dialogueText":"Elyse"
+            },
+            {
+              "dialogueId": 5,
+              "dialogueText":"Don't worry about me Martha I can handle myself"
             }
           ]
         },
         {
           "name": "antonio",
+          "talkFirst": false,
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "better n' you"
+              "dialogueText": "I wouldn't call offering a struggling family some help scheming."
             },
             {
               "dialogueId": 2,
-              "dialogueText": "Fine by me, just say when."
+              "dialogueText": "Quick enough"
+            },
+            {
+              "dialogueId": 3,
+              "dialogueText": "Trouble's just what I'm looking for"
             }
           ]
         }
@@ -54,7 +69,9 @@
     },
     {
       "storyPointId": 2,
-      "playerDialogue": []
+      "playerDialogue": [
+
+      ]
     }
   ]
 }

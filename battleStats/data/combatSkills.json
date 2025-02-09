@@ -3,22 +3,12 @@
                 "index": 1,
             "effects": [
                 {
-                    "type": "buff",
-                    "stat": "accuracy",
-                    "amount": 3,
-                    "duration": 0,
-                    "nshots": 0,
-                    "successPer": 100,
-                    "damage": [],
-                    "on": "self"
-                },
-                {
                     "type": "shot",
                     "stat": "",
                     "amount": 0,
                     "duration": 0,
                     "nshots": 1,
-                    "successPer": 70,
+                    "successPer": 80,
                     "damage": [2]
                 }
             ]
@@ -76,7 +66,7 @@
         "stat": "na",
         "amount": 0,
         "nshots": 1,
-        "successPer": 80,
+        "successPer": 60,
         "damage": [1,2]
     }]
     }

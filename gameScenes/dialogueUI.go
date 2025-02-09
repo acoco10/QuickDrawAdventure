@@ -146,14 +146,24 @@ func (d *DialogueUI) LoadUI(charName string) {
 
 	npcDialogueTracker := dialogueData.DialogueTracker{
 		CharName: charName,
-		Index:    1,
+		Index:    0,
 	}
+	playerFirst := dialogueData.TalkFirst(charName, d.StoryPoint)
 	d.triggered = true
 	d.PlayerDialogueTracker = playerDialogueTracker
 	d.NpcDialogueTracker = npcDialogueTracker
-	d.TextPrinter.TextInput = dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
+	if playerFirst {
+		d.PlayerDialogueTracker.Index = d.PlayerDialogueTracker.Index + 1
+		d.TextPrinter.TextInput = dialogueData.GetPlayerResponse(d.PlayerDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
+		d.State = PrintingPlayerDialogue
+	} else {
+		d.NpcDialogueTracker.Index = d.NpcDialogueTracker.Index + 1
+		d.TextPrinter.TextInput = dialogueData.GetResponse(d.NpcDialogueTracker.CharName, d.NpcDialogueTracker.Index)
+		d.State = PrintingNpcDialogue
+
+	}
+
 	d.TextPrinter.NextMessage = true
-	d.State = PrintingNpcDialogue
 	d.loaded = true
 }
 
@@ -223,6 +233,7 @@ func (d *DialogueUI) Update() sceneManager.SceneId {
 				d.PlayerDialogueTracker.Index++
 				playerResponse := dialogueData.GetPlayerResponse(d.PlayerDialogueTracker.CharName, d.StoryPoint, d.PlayerDialogueTracker.Index)
 				if playerResponse != "" {
+					println(playerResponse)
 					d.TextPrinter.TextInput = playerResponse
 					d.TextPrinter.NextMessage = true
 				} else {

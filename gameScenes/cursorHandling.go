@@ -14,6 +14,8 @@ import (
 type BattleMenuCursorUpdater struct {
 	currentPosition image.Point
 	systemPosition  image.Point
+	statusX         int
+	statusY         int
 	cursorImages    map[string]*ebiten.Image
 	counter         int
 	maxY            int
@@ -25,11 +27,12 @@ type BattleMenuCursorUpdater struct {
 	Event           EventName
 }
 
-func CreateCursorUpdater() *BattleMenuCursorUpdater {
+func CreateCursorUpdater(resWidth int, resHeight int) *BattleMenuCursorUpdater {
 	cu := BattleMenuCursorUpdater{}
-
 	X, Y := ebiten.CursorPosition()
-	X1, Y1 := 1010, 712
+	X1, Y1 := int(0.66*float64(resWidth)), int(0.75*float64(resHeight))
+	cu.statusX = X1
+	cu.statusY = Y1
 	cu.systemPosition = image.Point{X1, Y1}
 	cu.currentPosition = image.Point{X, Y}
 	cu.cursorImages = make(map[string]*ebiten.Image)
@@ -42,7 +45,6 @@ func CreateCursorUpdater() *BattleMenuCursorUpdater {
 	cu.minY = Y1
 	cu.minX = X1
 	return &cu
-
 }
 
 func (cu *BattleMenuCursorUpdater) MoveToLockedSpecificPosition(x, y int) {
@@ -58,9 +60,9 @@ func (cu *BattleMenuCursorUpdater) MoveCursorToSkillMenu() {
 }
 
 func (cu *BattleMenuCursorUpdater) MoveCursorToStatusBar() {
-	cu.minX = 1010
-	cu.minY = 712
-	cu.maxY = 712
+	cu.minX = cu.statusX
+	cu.minY = cu.statusY
+	cu.maxY = cu.statusY
 }
 
 const (

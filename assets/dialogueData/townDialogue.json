@@ -64,11 +64,23 @@
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "Oh shucks Beth Anne is always looking out for us, yeah they shot up my husband pretty good"
+              "dialogueText": "That cursed gang shot up my husband, all over some stupid land, I'd go out there and get revenge if I didn't have a family to look after."
             },
             {
               "dialogueId": 2,
-              "dialogueText": "We were gonna pack up and leave after what happened to John."
+              "dialogueText": "Luckily he's hanging on, I'm not too worried though he's a tough one."
+            },
+            {
+              "dialogueId": 3,
+              "dialogueText": "Sounds like a deal..."
+            },
+            {
+              "dialogueId": 4,
+              "dialogueText": "Elyse, I'm Martha Jean, be careful out there."
+            },
+            {
+              "dialogueId": 5,
+              "dialogueText": "You'll find them in these hills to the East, cross a rickety old bridge, feel free to grab any supplies you need from inside."
             }
           ]
         }
@@ -82,15 +94,15 @@
           "dialogue": [
             {
               "dialogueId": 1,
-              "dialogueText": "Well, well, well, what do we have here."
+              "dialogueText": "Well, well, well, what do we have here. Heard you scheming against my gang with Martha up there."
             },
             {
               "dialogueId": 2,
-              "dialogueText": "Sure you know how to use that pistol little girl?"
+              "dialogueText": "Heh, you got a quick tongue but how quick are you with that colt?"
             },
             {
               "dialogueId": 3,
-              "dialogueText": "An attitude like that may get you involved in some duels missy."
+              "dialogueText": "An attitude like that will get you in trouble missy."
             }
 
           ]

@@ -4,6 +4,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -18,6 +19,7 @@ type StartScene struct {
 	audioPlayer       *audioManagement.SFXAudioPlayer
 	musicPlayer       *audioManagement.DJ
 	playingIntroMusic bool
+	gameLog           *sceneManager.GameLog
 }
 
 func NewStartScene() *StartScene {
@@ -49,6 +51,7 @@ func (s *StartScene) Draw(screen *ebiten.Image) {
 
 func (s *StartScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	s.loaded = true
+	s.gameLog = gameLog
 }
 
 func (s *StartScene) IsLoaded() bool {
@@ -66,7 +69,18 @@ func (s *StartScene) OnExit() {
 func (s *StartScene) Update() sceneManager.SceneId {
 	s.musicPlayer.Update()
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		return sceneManager.TownSceneID
+		if s.gameLog.Mode == sceneManager.BattleTest {
+			println("entering battleTest mode")
+			s.gameLog.EnemyEncountered = battleStats.Sheriff
+			elyseStats, err := battleStats.LoadSingleCharacter("elyse")
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.gameLog.PlayerStats = &elyseStats
+			return sceneManager.BattleSceneId
+		} else {
+			return sceneManager.TownSceneID
+		}
 
 	}
 

@@ -10,6 +10,7 @@ type GameLog struct {
 	PlayerStats      *battleStats.CharacterData
 	EnemyEncountered battleStats.CharacterName
 	PreviousScene    SceneId
+	Mode             GameMode
 }
 
 type SceneId uint
@@ -21,6 +22,14 @@ const (
 	WinSceneID
 	TownSceneID
 	TestSceneID
+)
+
+type GameMode uint
+
+const (
+	BattleTest GameMode = iota
+	Standard
+	WebTest
 )
 
 type Scene interface {

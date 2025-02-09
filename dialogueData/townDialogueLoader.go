@@ -26,6 +26,26 @@ type DialogueTracker struct {
 	Index    int
 }
 
+func TalkFirst(charName string, storyPointId int) bool {
+
+	data, err := assets.Dialogue.ReadFile("dialogueData/playerTownDialogue.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	jsonString := string(data)
+	var response string
+
+	query := fmt.Sprintf("storyPoints.#(storyPointId==%d).playerDialogue.#(name==%s).talkFirst", storyPointId, charName)
+	results := gjson.Get(jsonString, query)
+	response = results.String()
+	if response == "true" {
+		println("talkfirst function output:", response)
+		return true
+	}
+	println("talkfirst function output: false")
+	return false
+}
+
 func GetResponse(charName string, dialogueId int) string {
 
 	data, err := assets.Dialogue.ReadFile("dialogueData/townDialogue.json")

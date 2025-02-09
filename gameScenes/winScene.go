@@ -16,6 +16,7 @@ type WinScene struct {
 	loaded             bool
 	playerBattleSprite gameObjects.BattleSprite
 	enemyBattleSprite  gameObjects.BattleSprite
+	gameLog            *sceneManager.GameLog
 }
 
 func NewWinScene() *WinScene {
@@ -56,6 +57,7 @@ func (s *WinScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	s.playerBattleSprite = LoadPlayerBattleSprite()
 	s.playerBattleSprite.CombatButtonAnimationTrigger("win")
 	s.playerBattleSprite.UpdateState(gameObjects.UsingCombatSkill)
+	s.gameLog = gameLog
 }
 
 func (s *WinScene) IsLoaded() bool {
@@ -71,7 +73,11 @@ func (s *WinScene) OnExit() {
 
 func (s *WinScene) Update() sceneManager.SceneId {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		return sceneManager.TownSceneID
+		if s.gameLog.Mode == sceneManager.BattleTest {
+			return sceneManager.StartSceneId
+		} else {
+			return sceneManager.TownSceneID
+		}
 	}
 
 	s.playerBattleSprite.Update()

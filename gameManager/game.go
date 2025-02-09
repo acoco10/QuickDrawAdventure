@@ -44,6 +44,9 @@ func (g *Game) Update() error {
 		if !nextScene.IsLoaded() {
 			nextScene.FirstLoad(g.gameLog)
 		}
+		if g.gameLog.Mode == sceneManager.BattleTest {
+			nextScene.FirstLoad(g.gameLog)
+		}
 		nextScene.OnEnter()
 	}
 	g.activeSceneId = nextSceneId
@@ -69,9 +72,12 @@ func NewBattleTestGame() *Game {
 	if err != nil {
 		log.Fatal(err)
 	}
-	activeSceneId := sceneManager.BattleSceneId
+
+	activeSceneId := sceneManager.StartSceneId
 	glog := &sceneManager.GameLog{EnemyEncountered: battleStats.Sheriff,
-		PlayerStats: &elyseStats}
+		PlayerStats: &elyseStats,
+		Mode:        sceneManager.BattleTest,
+	}
 	game := Game{
 		sceneMap,
 		activeSceneId,

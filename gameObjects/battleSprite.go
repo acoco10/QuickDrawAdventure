@@ -261,7 +261,7 @@ func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x
 			Insult:     animations.NewCyclicAnimation(1, 21, 10, 15, 3),
 			Brag:       animations.NewCyclicAnimation(1, 21, 10, 15, 3),
 			Intimidate: animations.NewCyclicAnimation(1, 21, 10, 15, 3),
-			Draw:       animations.NewCyclicAnimation(2, 22, 10, 15, 1),
+			Draw:       animations.NewCyclicAnimation(2, 22, 10, 10, 1),
 		},
 
 		IdleAnimation:            animations.NewAnimation(0, 0, 0, 10),
@@ -296,11 +296,11 @@ func (bs *BattleSprite) LoadEffect(char battleStats.CharacterData) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		successfulEffect := graphicEffects.NewStaticEffect(successfulImg, 0, 0, 0, 5)
+		successfulEffect := graphicEffects.NewStaticEffect(successfulImg, 0, 0, 0, 5, graphicEffects.SuccessfulEffect)
 
 		unSuccessfulPath := basePath + "UnsuccessfulEffect.png"
 		unSuccessfulImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, unSuccessfulPath)
-		unSuccessfulEffect := graphicEffects.NewStaticEffect(unSuccessfulImg, 0, 0, 0, 5)
+		unSuccessfulEffect := graphicEffects.NewStaticEffect(unSuccessfulImg, 0, 0, 0, 5, graphicEffects.UnsuccessfulEffect)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -311,7 +311,7 @@ func (bs *BattleSprite) LoadEffect(char battleStats.CharacterData) {
 
 	}
 
-	hitStaticEffect := graphicEffects.NewStaticEffect(ebiten.NewImage(1, 1), 0, 0, 50, 1)
+	hitStaticEffect := graphicEffects.NewStaticEffect(ebiten.NewImage(1, 1), 0, 0, 50, 1, graphicEffects.TookDamageEffect)
 	redClrMap := map[string]float32{
 		"r": 1,
 		"b": 0.2,
@@ -333,7 +333,7 @@ type BattleSpriteEffect struct {
 	graphicEffects.StaticEffect
 }
 
-func (bse *BattleSpriteEffect) Draw(screen *ebiten.Image) {
+func (bse *BattleSpriteEffect) Draw(screen *ebiten.Image, depth int) {
 	if bse.StaticEffect.CheckState() == graphicEffects.Triggered {
 		if bse.StaticEffect.Frame() < 20 {
 			opts := &ebiten.DrawImageOptions{}

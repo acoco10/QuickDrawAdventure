@@ -48,6 +48,8 @@ type Battle struct {
 	WinningProb        int
 	State              State
 	Tension            int
+	EnemyDrawBonus     bool
+	PlayerDrawBonus    bool
 }
 
 type Turn struct {
@@ -294,8 +296,10 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 		battleInitiative = ReadyDraw(b.Player.DisplayStats(), b.Enemy.DisplayStats())
 		if battleInitiative {
 			b.nextTurnInitiative = Player
+			b.PlayerDrawBonus = true
 		} else {
 			b.nextTurnInitiative = Enemy
+			b.EnemyDrawBonus = true
 		}
 
 		if playerSkill.SkillName == "draw" {
@@ -507,7 +511,11 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
 	turn.PlayerSkillUsed = playerSkill
 
 	if enemySkill.SkillName == "focusedShot" {
-		b.nextTurnInitiative = Player
+		if playerSkill.SkillName != "focusedShot" {
+			b.nextTurnInitiative = Player
+		} else if b.turnInitiative == Enemy {
+			b.nextTurnInitiative = Enemy
+		}
 	}
 
 	eOneTurnBuffAmount := 0
@@ -550,7 +558,7 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
 	if eOneTurnBuffAmount > 0 {
 		fmt.Printf("battle line 350: Resetting %s one turn buff from: %d ", b.Enemy.Name, b.Enemy.DisplayStat(eAffectedStat))
 		b.Enemy.UpdateStat(eAffectedStat, -eOneTurnBuffAmount)
-		fmt.Printf("to: %d\n", b.Enemy.DisplayStat(eAffectedStat))
+		fmt.Printf("to: %d\n buff amount was: %d\n", b.Enemy.DisplayStat(eAffectedStat), eOneTurnBuffAmount)
 	}
 
 	pTurnAmmo := b.PlayerAmmo
@@ -589,10 +597,10 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
 		}
 	}
 
-	if pOneTurnBuffAmount > 0 {
+	if pOneTurnBuffAmount > 0 || pOneTurnBuffAmount < 0 {
 		fmt.Printf("battle line 379:Resetting %s one turn buff from: %d ", b.Player.Name, b.Player.DisplayStat(pAffectedStat))
 		b.Player.UpdateStat(pAffectedStat, -pOneTurnBuffAmount)
-		fmt.Printf("to: %d\n", b.Player.DisplayStat(pAffectedStat))
+		fmt.Printf("to: %d\n buff amount was:%d", b.Player.DisplayStat(pAffectedStat), pOneTurnBuffAmount)
 	}
 
 	enemyMessage := b.GenerateMessageForUsedCombatSkill(b.Enemy.Name, enemySkill.SkillName, turn.DamageToPlayer)

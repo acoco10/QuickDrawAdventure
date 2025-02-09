@@ -38,6 +38,7 @@ type TownScene struct {
 	dustEffect          *ebiten.Image
 	scene               sceneManager.SceneId
 	gameLog             *sceneManager.GameLog
+	enemyCountDown      int
 }
 
 func NewTownScene() *TownScene {
@@ -173,16 +174,22 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.npcInProximity.Name != "" {
-		g.dialogueUi.LoadUI(g.npcInProximity.Name)
 		if g.npcInProximity.Name == "marthaJean" {
-			g.NPC["antonio"].Spawned = true
+			g.NPC["antonio"].Spawn()
 		}
-		if g.npcInProximity.Name == "antonio" {
+		g.dialogueUi.LoadUI(g.npcInProximity.Name)
+		LockCursorForDialogue()
+	}
+
+	if g.npcInProximity.Name == "antonio" {
+		if !g.dialogueUi.triggered {
+			g.dialogueUi.LoadUI(g.npcInProximity.Name)
 			g.dialogueUi.UpdateTriggerScene(sceneManager.BattleSceneId)
 			g.gameLog.EnemyEncountered = battleStats.Sheriff
 		}
 		LockCursorForDialogue()
 	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
 		g.Player.Visible = false
 		g.triggerInteraction = true
@@ -266,10 +273,12 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	g.interactInProximity = CheckInteractPopup(*g.Player, g.MapData.InteractPoints)
 	enemyEncounter := battleStats.None
 	if g.Player.Dx > 0 || g.Player.Dy > 0 {
-		enemyEncounter = gameObjects.CheckEnemyTrigger(g.Player, g.MapData.EnemySpawns)
+		g.enemyCountDown++
+		enemyEncounter = gameObjects.CheckEnemyTrigger(g.Player, g.MapData.EnemySpawns, g.enemyCountDown)
 	}
 
 	if enemyEncounter != battleStats.None {
+		g.enemyCountDown = 0
 		g.gameLog.EnemyEncountered = enemyEncounter
 		enemyEncounter = battleStats.None
 		g.scene = sceneManager.BattleSceneId

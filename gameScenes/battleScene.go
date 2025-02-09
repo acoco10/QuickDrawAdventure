@@ -30,7 +30,6 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	elyse := gameLog.PlayerStats
 	enemy := characters[gameLog.EnemyEncountered]
-
 	println("elyse stats after loading=", elyse.DisplayStats()[battleStats.DrawSpeed])
 	println("enemy stats after loading=", enemy.DisplayStats()[battleStats.DrawSpeed])
 
@@ -92,10 +91,11 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
 			widget.AnchorLayoutOpts.Padding(
 				widget.Insets{
-					Top:    int(0.57 * float32(g.resolutionHeight)),
+					Top:    int(0.75 * float32(g.resolutionHeight)),
 					Left:   int(0.5*float32(g.resolutionWidth)) - int(0.5*float32(600)),
 					Right:  int(0.5*float32(g.resolutionWidth)) - int(0.5*float32(600)),
-					Bottom: 200},
+					Bottom: int(0.35 * float32(g.resolutionHeight)),
+				},
 			),
 		),
 		),
@@ -179,7 +179,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.TextPrinter.StatusText[2] = statusTextLine3
 
 	//making input be controlled by arrowKeys through cursorHandling code
-	g.Cursor = CreateCursorUpdater()
+	g.Cursor = CreateCursorUpdater(g.resolutionWidth, g.resolutionHeight)
 	input.SetCursorUpdater(g.Cursor)
 
 	// Ebiten setup
@@ -204,6 +204,8 @@ func (g *BattleScene) OnExit() {
 	}
 	g.loaded = false
 	g.musicPlayer.Stop()
+	g.gameLog.EnemyEncountered = battleStats.None
+
 }
 
 // Layout implements gameScenes.
@@ -313,16 +315,36 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	opts.GeoM.Scale(5, 5)
 	screen.DrawImage(&g.backGround, opts)
 	opts.GeoM.Reset()
-	g.graphicalEffectManager.GameEffects.Draw(screen)
+	depth := 0
+	g.graphicalEffectManager.GameEffects.Draw(screen, depth)
 	DrawBattleSprite(*g.playerBattleSprite, screen, g.playerBattleSprite.Scale)
 	DrawBattleSprite(*g.enemyBattleSprite, screen, g.enemyBattleSprite.Scale)
-	g.graphicalEffectManager.PlayerEffects.Draw(screen)
-	g.graphicalEffectManager.EnemyEffects.Draw(screen)
+	g.graphicalEffectManager.PlayerEffects.Draw(screen, depth)
+	g.graphicalEffectManager.EnemyEffects.Draw(screen, depth)
+	depth++
+	g.graphicalEffectManager.GameEffects.Draw(screen, depth)
 	g.ui.Draw(screen)
 	g.onScreenStatsUI.Draw(*g.battle, screen)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 	//PrintStatus(g, screen)
+	//debugTextPrint(screen, g)
+	if g.battle.BattlePhase == battle.Dialogue {
+		PrintOnlyDrawProb(g, screen)
+	}
 
+}
+
+func PrintOnlyDrawProb(g *BattleScene, screen *ebiten.Image) {
+	face, err := assetManagement.LoadFont(40, assetManagement.November)
+	dp := g.battle.WinningProb
+	if err != nil {
+		log.Fatal(err)
+	}
+	winningProbText := fmt.Sprintf("Probability of Winning Draw:%d", dp)
+	dopts := text.DrawOptions{}
+	dopts.DrawImageOptions.ColorScale.Scale(1, 0, 0, 255)
+	dopts.GeoM.Translate(400, 50)
+	text.Draw(screen, winningProbText, face, &dopts)
 }
 
 func PrintStatus(g *BattleScene, screen *ebiten.Image) {

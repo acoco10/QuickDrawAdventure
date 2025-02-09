@@ -20,6 +20,8 @@ const (
 	UnsuccesfulStareEffect
 	FillerEffect
 	MuzzleEffect
+	AngerEffect
+	DrawWinEffect
 )
 
 type GraphicalEffectManager struct {
@@ -71,11 +73,11 @@ func (e *GraphicalEffectSequencer) Update() {
 	}
 }
 
-func (e *GraphicalEffectSequencer) Draw(screen *ebiten.Image) {
+func (e *GraphicalEffectSequencer) Draw(screen *ebiten.Image, depth int) {
 	if e.state == Triggered {
 		if len(e.EffectQueue) > 0 && e.EffectQueue[0] != nil {
 			effect := e.EffectQueue[0]
-			effect.Draw(screen)
+			effect.Draw(screen, depth)
 		}
 
 	}

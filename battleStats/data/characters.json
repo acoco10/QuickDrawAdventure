@@ -2,10 +2,10 @@
     {"name": "elyse",
     "stats": {
         "health":    12,
-		"accuracy":  3,
-		"drawSpeed": 80,
+		"accuracy":  7,
+		"drawSpeed": 90,
 		"fear":      0,
-		"anger":     2
+		"anger":     0
     },
     "combat_skills": ["shoot", "focusedShot", "fanShot", "reload"],
     "dialogue_skills": ["stareDown", "draw", "insult", "brag"],
@@ -48,10 +48,10 @@
     "stats": {
 
       "health":    10,
-      "accuracy":  5,
+      "accuracy":  9,
       "drawSpeed": 105,
-      "fear":      2,
-      "tensionThreshold": 3,
+      "fear":      0,
+      "tensionThreshold": 5,
       "anger":     0
 
     },

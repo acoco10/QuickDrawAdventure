@@ -51,6 +51,9 @@ func (t *TextPrinter) MessageLoop() {
 	if len(t.lines) == 0 {
 		t.configureLines()
 		t.lineCounter = 0
+		for _, line := range t.lines {
+			println(line)
+		}
 	}
 
 	t.StatusText[t.lineCounter].SetText(t.PrintText())

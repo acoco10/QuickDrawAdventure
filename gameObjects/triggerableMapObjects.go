@@ -64,7 +64,7 @@ func CheckContextualTriggers(player *Character, contextTriggers map[string]*Trig
 	return returnMap
 }
 
-func CheckEnemyTrigger(player *Character, enemySpawn map[string]Trigger) battleStats.CharacterName {
+func CheckEnemyTrigger(player *Character, enemySpawn map[string]Trigger, countDown int) battleStats.CharacterName {
 	playerRect := image.Rect(
 		int(player.X),
 		int(player.Y)+20,
@@ -73,7 +73,7 @@ func CheckEnemyTrigger(player *Character, enemySpawn map[string]Trigger) battleS
 
 	for _, trig := range enemySpawn {
 		if trig.Rect.Overlaps(playerRect) {
-			if rand.IntN(500) <= 2 {
+			if rand.IntN(1000-countDown) <= 2 {
 				return battleStats.Wolf
 			}
 		}

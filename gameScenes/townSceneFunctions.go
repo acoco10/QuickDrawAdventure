@@ -164,7 +164,7 @@ func (g *TownScene) DrawCharacters(screen *ebiten.Image) {
 }
 
 func LockCursorForDialogue() {
-	updater := CreateCursorUpdater()
+	updater := CreateCursorUpdater(10, 10)
 	updater.MoveToLockedSpecificPosition(1002, 306)
 	input.SetCursorUpdater(updater)
 }

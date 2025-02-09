@@ -44,8 +44,12 @@ func (os *OnScreenStatsUI) LoadEffects() error {
 		return err
 	}
 	tensionSpriteSheet := spritesheet.NewSpritesheet(10, 1, 93, 54)
-
-	os.tensionMeter = graphicEffects.NewEffect(tensionMeterImg, tensionSpriteSheet, 20, 300, 10, 0, 1, 25, 3)
+	width := float64(tensionMeterImg.Bounds().Dx()) / 10
+	height := float64(tensionMeterImg.Bounds().Dy()) * 2
+	xPosition := 1512*0.4 - width
+	yPosition := 918*0.65 - height
+	println("xPosition of tensionmeter =", xPosition)
+	os.tensionMeter = graphicEffects.NewEffect(tensionMeterImg, tensionSpriteSheet, xPosition, yPosition, 10, 0, 1, 25, 2)
 	return nil
 }
 func (os *OnScreenStatsUI) ProcessTension(bs BattleScene) {
@@ -59,7 +63,7 @@ func (os *OnScreenStatsUI) ProcessTension(bs BattleScene) {
 		}
 	}
 
-	if bs.battle.Tension > enemyTensionThreshHold {
+	if bs.battle.Tension > enemyTensionThreshHold && bs.battle.BattlePhase == battle.Dialogue {
 		os.tensionMeter.Trigger()
 		bs.audioPlayer.Play(audioManagement.TensionIncrease)
 	}
@@ -120,7 +124,7 @@ func (os *OnScreenStatsUI) Draw(gameBattle battle.Battle, screen *ebiten.Image) 
 	opts := ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(100, 100)
 	opts.GeoM.Scale(4, 4)
-	os.ammoEffect.Draw(screen)
+	os.ammoEffect.Draw(screen, 0)
 	opts.GeoM.Reset()
 	opts.GeoM.Scale(4, 4)
 	opts.GeoM.Translate(100, 50)
@@ -133,7 +137,6 @@ func (os *OnScreenStatsUI) Draw(gameBattle battle.Battle, screen *ebiten.Image) 
 	}
 
 	if gameBattle.BattlePhase == battle.Dialogue {
-		os.tensionMeter.MakeVisible()
-		os.tensionMeter.Draw(screen)
+		os.tensionMeter.Draw(screen, 0)
 	}
 }
