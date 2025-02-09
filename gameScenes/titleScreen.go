@@ -70,6 +70,7 @@ func (s *StartScene) Update() sceneManager.SceneId {
 	s.musicPlayer.Update()
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		if s.gameLog.Mode == sceneManager.BattleTest {
+			s.musicPlayer.Stop()
 			println("entering battleTest mode")
 			s.gameLog.EnemyEncountered = battleStats.Sheriff
 			elyseStats, err := battleStats.LoadSingleCharacter("elyse")
