@@ -8,23 +8,35 @@
  "margin":0,
  "name":"generalStore",
  "spacing":0,
- "tilecount":2,
+ "tilecount":4,
  "tiledversion":"1.11.0",
- "tileheight":96,
+ "tileheight":160,
  "tiles":[
         {
          "id":0,
          "image":"..\/..\/images\/buildings\/generalStoreTop.png",
-         "imageheight":64,
-         "imagewidth":107
+         "imageheight":132,
+         "imagewidth":108
         }, 
         {
          "id":1,
          "image":"..\/..\/images\/buildings\/generalStorebottom.png",
          "imageheight":96,
          "imagewidth":108
+        }, 
+        {
+         "id":2,
+         "image":"..\/..\/images\/buildings\/generalStoreInterior.png",
+         "imageheight":160,
+         "imagewidth":192
+        }, 
+        {
+         "id":3,
+         "image":"..\/..\/images\/buildings\/generalStoreWalls.png",
+         "imageheight":48,
+         "imagewidth":192
         }],
- "tilewidth":108,
+ "tilewidth":192,
  "type":"tileset",
  "version":"1.10"
 }

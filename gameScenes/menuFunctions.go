@@ -89,13 +89,22 @@ func MakeStatusContainer() *widget.Container {
 	return statusContainer
 }
 
-func StatusTextInput(textColor string) *widget.TextInput {
+func StatusTextInput(textType string) *widget.TextInput {
 
 	face, err := assetManagement.LoadFont(14, assetManagement.November)
 	white := color.RGBA{R: 232, G: 225, B: 219, A: 255}
 	faceColor := color.RGBA{R: 102, G: 57, B: 48, A: 255}
-	if textColor == "white" {
+	if textType == "white" {
 		faceColor = white
+	}
+
+	if textType == "playerName" {
+		face, err = assetManagement.LoadFont(18, assetManagement.November)
+		faceColor = color.RGBA{R: 153, G: 229, B: 80, A: 255}
+	}
+	if textType == "npcName" {
+		face, err = assetManagement.LoadFont(18, assetManagement.November)
+		faceColor = color.RGBA{R: 250, G: 218, B: 56, A: 255}
 	}
 	if err != nil {
 		log.Fatal(err)

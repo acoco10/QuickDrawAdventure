@@ -311,7 +311,7 @@ func (bs *BattleSprite) LoadEffect(char battleStats.CharacterData) {
 
 	}
 
-	hitStaticEffect := graphicEffects.NewStaticEffect(ebiten.NewImage(1, 1), 0, 0, 50, 1, graphicEffects.TookDamageEffect)
+	hitStaticEffect := graphicEffects.NewStaticEffect(ebiten.NewImage(1, 1), 0, 0, 30, 1, graphicEffects.TookDamageEffect)
 	redClrMap := map[string]float32{
 		"r": 1,
 		"b": 0.2,

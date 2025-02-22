@@ -8,9 +8,9 @@
  "margin":0,
  "name":"farmCabin",
  "spacing":0,
- "tilecount":2,
+ "tilecount":6,
  "tiledversion":"1.11.0",
- "tileheight":64,
+ "tileheight":145,
  "tiles":[
         {
          "id":0,
@@ -23,8 +23,32 @@
          "image":"..\/..\/images\/buildings\/farmCabin.png",
          "imageheight":64,
          "imagewidth":92
+        }, 
+        {
+         "id":2,
+         "image":"..\/..\/images\/buildings\/farmCabinInteriorWall.png",
+         "imageheight":45,
+         "imagewidth":191
+        }, 
+        {
+         "id":3,
+         "image":"..\/..\/images\/buildings\/farmCabinInterior.png",
+         "imageheight":145,
+         "imagewidth":192
+        }, 
+        {
+         "id":4,
+         "image":"..\/..\/images\/buildings\/farmCabinWindowLight.png",
+         "imageheight":80,
+         "imagewidth":64
+        }, 
+        {
+         "id":5,
+         "image":"..\/..\/images\/buildings\/farmCabinLighting.png",
+         "imageheight":145,
+         "imagewidth":192
         }],
- "tilewidth":92,
+ "tilewidth":192,
  "type":"tileset",
  "version":"1.10"
 }

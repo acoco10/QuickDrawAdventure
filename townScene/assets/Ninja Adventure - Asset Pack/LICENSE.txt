@@ -42,7 +42,7 @@ to, the following:
   iv. rights protecting against unfair competition in regards to a Work,
   subject to the limitations in paragraph 4(a), below;
 
-  v. rights protecting the extraction, dissemination, use and reuse of data in
+  v. rights protecting the extraction, dissemination, use and reuse of playerData in
   a Work;
 
   vi. database rights (such as those arising under Directive 96/9/EC of the

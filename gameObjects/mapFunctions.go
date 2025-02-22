@@ -17,6 +17,11 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 			gids[i] = tilesets[i].Gid()
 		}
 		tileindex := DetermineTileSet(layer.Data, gids)
+
+		if layer.Class == "above,below" {
+			continue
+		}
+
 		for index, id := range layer.Data {
 
 			if id == 0 {
@@ -85,7 +90,7 @@ func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.
 			x *= 16
 			y *= 16
 
-			if layer.Class == "above" || layer.Class == "above,below" || layer.Class == "trigger" {
+			if layer.Class == "above" || layer.Class == "trigger" {
 				if int(player.Y)+48 < y {
 
 					img := tilesets[tileIndex].Img(id)
@@ -103,7 +108,7 @@ func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.
 					opts.GeoM.Reset()
 				}
 			}
-			if layer.Class == "below" || layer.Class == "above,below" {
+			if layer.Class == "below" {
 				if int(player.Y)-48 < y {
 
 					img := tilesets[tileIndex].Img(id)
@@ -121,7 +126,22 @@ func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.
 					opts.GeoM.Reset()
 				}
 			}
+			if layer.Class == "above,below" {
+				img := tilesets[tileIndex].Img(id)
 
+				opts.GeoM.Translate(float64(x), float64(y))
+
+				opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
+
+				opts.GeoM.Translate(cam.X, cam.Y)
+				opts.GeoM.Scale(4, 4)
+
+				screen.DrawImage(img, &opts)
+
+				// reset the opts for the next tile
+				opts.GeoM.Reset()
+			}
 		}
+
 	}
 }

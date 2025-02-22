@@ -52,6 +52,7 @@ func (s *StartScene) Draw(screen *ebiten.Image) {
 func (s *StartScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	s.loaded = true
 	s.gameLog = gameLog
+
 }
 
 func (s *StartScene) IsLoaded() bool {

@@ -296,10 +296,8 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 		battleInitiative = ReadyDraw(b.Player.DisplayStats(), b.Enemy.DisplayStats())
 		if battleInitiative {
 			b.nextTurnInitiative = Player
-			b.PlayerDrawBonus = true
 		} else {
 			b.nextTurnInitiative = Enemy
-			b.EnemyDrawBonus = true
 		}
 
 		if playerSkill.SkillName == "draw" {
@@ -356,6 +354,14 @@ func (b *Battle) DrawFunction(user *battleStats.CharacterData, opponent *battleS
 		b.nextTurnInitiative = Enemy
 	}
 	return drawSkillDialogue
+}
+
+func (b *Battle) SetDrawBonus() {
+	if b.nextTurnInitiative == Player {
+		b.PlayerDrawBonus = true
+	} else {
+		b.EnemyDrawBonus = true
+	}
 }
 
 func (b *Battle) EnactEffects(skill battleStats.Skill, user *battleStats.CharacterData, opponent *battleStats.CharacterData, roll bool, secondaryRoll bool) {

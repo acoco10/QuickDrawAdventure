@@ -29,6 +29,7 @@ type GraphicEffect interface {
 	Type() GraphicEffectType
 	SetCoord(x float64, y float64)
 	SetDepth(depth int)
+	SetDuration(frames int)
 }
 
 type StaticEffect struct {
@@ -89,6 +90,9 @@ func (se *StaticEffect) Update() {
 func (se *StaticEffect) Frame() int {
 	return se.counter
 }
+func (se *StaticEffect) SetDuration(frames int) {
+	se.duration = frames
+}
 
 func (se *StaticEffect) AccessImage() *ebiten.Image {
 	return se.img
@@ -132,6 +136,11 @@ type AnimatedEffect struct {
 	effectType   GraphicEffectType
 	visible      bool
 	depth        int
+}
+
+func (e *AnimatedEffect) SetDuration(frames int) {
+	//filler func as animated effects have set duration based on animation/frame speed
+	//but needed for static effect
 }
 
 func (e *AnimatedEffect) UnTrigger() {

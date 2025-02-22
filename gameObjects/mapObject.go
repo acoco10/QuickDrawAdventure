@@ -243,7 +243,7 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sunRiseSideDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 17, 23)
+	sunRiseSideDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 23)
 	sideDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/sunriseInn/sideBuildingDoor.png")
 	if err != nil {
 		log.Fatal(err)
@@ -260,6 +260,22 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	generalStoreDoor, err := NewObject(
+		sideDoorImg,
+		*sunRiseSideDoorSpriteSheet,
+		standardDoorAnimation,
+		standardDoorAnimation,
+		mapObjectData.EntryDoors["generalStore"],
+	)
+
+	farmCabinDoor, err := NewObject(
+		sideDoorImg,
+		*sunRiseSideDoorSpriteSheet,
+		standardDoorAnimation,
+		standardDoorAnimation,
+		mapObjectData.EntryDoors["farmCabin"],
+	)
 
 	beadedCurtainSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 24)
 	beadedCurtainImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/beadedCurtain.png")
@@ -284,6 +300,6 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	objects = append(objects, tavernDoorObject, sunriseDoor, sideDoor, beadedCurtain)
+	objects = append(objects, tavernDoorObject, sunriseDoor, sideDoor, beadedCurtain, generalStoreDoor, farmCabinDoor)
 	return objects, err
 }

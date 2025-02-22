@@ -73,6 +73,7 @@ func CheckEnemyTrigger(player *Character, enemySpawn map[string]Trigger, countDo
 
 	for _, trig := range enemySpawn {
 		if trig.Rect.Overlaps(playerRect) {
+			countDown--
 			if rand.IntN(1000-countDown) <= 2 {
 				return battleStats.Wolf
 			}

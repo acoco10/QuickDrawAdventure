@@ -22,6 +22,7 @@ const (
 	WinSceneID
 	TownSceneID
 	TestSceneID
+	PhysicsSceneID
 )
 
 type GameMode uint

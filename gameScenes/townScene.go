@@ -115,11 +115,16 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 		log.Fatal(err)
 	}
 
-	antonio, err := gameObjects.NewCharacter(npcSpawn["antonio"], *charSpriteSheet, gameObjects.Player)
+	antonio, err := gameObjects.NewCharacter(npcSpawn["antonio"], *charSpriteSheet, gameObjects.NonPlayer)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	oMLSpriteSheet := spritesheet.NewSpritesheet(3, 1, 14, 18)
+	oldManLandry, err := gameObjects.NewCharacter(npcSpawn["oldManLandry"], *oMLSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
 	g.Player = player
 
 	g.gameLog.PlayerStats = player.BattleStats
@@ -131,6 +136,7 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.NPC["zeph"] = zeph
 	g.NPC["martha"] = martha
 	g.NPC["antonio"] = antonio
+	g.NPC["oldManLandry"] = oldManLandry
 
 	g.dialogueUi, err = MakeDialogueUI(1512, 918)
 	if err != nil {
@@ -177,17 +183,14 @@ func (g *TownScene) Update() sceneManager.SceneId {
 		if g.npcInProximity.Name == "marthaJean" {
 			g.NPC["antonio"].Spawn()
 		}
-		g.dialogueUi.LoadUI(g.npcInProximity.Name)
-		LockCursorForDialogue()
-	}
-
-	if g.npcInProximity.Name == "antonio" {
-		if !g.dialogueUi.triggered {
-			g.dialogueUi.LoadUI(g.npcInProximity.Name)
+		g.dialogueUi.Load(g.npcInProximity.Name, Dialogue)
+		LockCursorForDialogue(*g.dialogueUi)
+		if g.npcInProximity.Name == "antonio" {
+			g.dialogueUi.Load(g.npcInProximity.Name, ShowDown)
 			g.dialogueUi.UpdateTriggerScene(sceneManager.BattleSceneId)
-			g.gameLog.EnemyEncountered = battleStats.Sheriff
+			g.gameLog.EnemyEncountered = battleStats.Antonio
+			LockCursorForDialogue(*g.dialogueUi)
 		}
-		LockCursorForDialogue()
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
@@ -234,6 +237,9 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	bethAnneAnimation := g.NPC["bethAnne"].ActiveAnimation(int(g.Player.Dx), int(g.Player.Dy))
 	bethAnneAnimation.Update()
 
+	oldManActiveAnimation := g.NPC["oldManLandry"].ActiveAnimation(int(g.Player.Dx), int(g.Player.Dy))
+	oldManActiveAnimation.Update()
+
 	g.UpdateDoors()
 
 	//updating camera to Player position
@@ -273,7 +279,6 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	g.interactInProximity = CheckInteractPopup(*g.Player, g.MapData.InteractPoints)
 	enemyEncounter := battleStats.None
 	if g.Player.Dx > 0 || g.Player.Dy > 0 {
-		g.enemyCountDown++
 		enemyEncounter = gameObjects.CheckEnemyTrigger(g.Player, g.MapData.EnemySpawns, g.enemyCountDown)
 	}
 
@@ -362,31 +367,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 
 	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.StairTriggers)
 
-	/*	for _, door := range g.MapData.EntryDoors {
-			vector.StrokeRect(
-				screen,
-				float32(door.Rect.Min.X)*4+float32(g.cam.X)*4,
-				float32(door.Rect.Min.Y)*4+float32(g.cam.Y)*4,
-				float32(door.Rect.Dx())*4,
-				float32(door.Rect.Dy())*4,
-				1.0,
-				color.RGBA{255, 0, 0, 255},
-				false,
-			)
-		}
-
-		for _, collider := range g.MapData.Colliders {
-			vector.StrokeRect(
-				screen,
-				float32(collider.Min.X)*4+float32(g.cam.X)*4,
-				float32(collider.Min.Y)*4+float32(g.cam.Y)*4,
-				float32(collider.Dx())*4,
-				float32(collider.Dy())*4,
-				1.0,
-				color.RGBA{255, 0, 0, 255},
-				false,
-			)
-		}*/
 	if g.npcInProximity.Name != "" {
 		DrawPopUp(screen, g.npcInProximity.X, g.npcInProximity.Y, float64(g.npcInProximity.SpriteSheet.SpriteWidth), g.cam)
 	}

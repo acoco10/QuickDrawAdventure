@@ -29,17 +29,16 @@
   "soundFxType": "male1"
 },
 
-{"name": "gunSlinger",
+{"name": "antonio",
         "stats": {
-
-            "health":    6,
-            "accuracy":  5,
-            "drawSpeed": 3,
+            "health":    10,
+            "accuracy":  8,
+            "drawSpeed": 100,
             "fear":      0,
-          "tensionThreshold": 4,
-            "anger":     2
+            "tensionThreshold": 4,
+            "anger":     0
         },
-        "combat_skills": ["shoot", "focusedShot", "reload"],
+        "combat_skills": ["shoot", "focusedShot", "reload", "fanShot"],
         "dialogue_skills": ["stareDown", "draw", "insult", "brag"],
         "weakness": "anger",
   "soundFxType": "male1"

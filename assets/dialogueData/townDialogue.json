@@ -1,52 +1,64 @@
-{
-  "characters": [
-    {
-      "name": "jarvis",
-      "dialogues": [
-        {
-          "storyPoint": 1,
-          "dialogue": [
-            {
-              "dialogueId": 1,
-              "dialogueText": "Owner of this bar, Beth Anne, knows everyone in town."
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "bethAnne",
-      "dialogues": [
-        {
-          "storyPoint": 1,
-          "dialogue": [
-            {
-              "dialogueId": 1,
-              "dialogueText": "Howdy there! what brings a girl like you to a town like this?"
-            },
-            {
-              "dialogueId": 2,
-              "dialogueText": "Sure I might... you look a little thirsty though."
-            },
-            {
-              "dialogueId": 3,
-              "dialogueText": "Hmmm theres a family who live on a farm up north who was having some trouble with a local gang, not sure how much they can pay but they're decent folk"
-            }
-          ]
-        },
-        {
-          "storyPoint": 2,
-          "dialogue": [
-
-          ]
-        }
-      ]
-    },
-    {
+[
+  {
+    "name": "jarvis",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "Owner of this bar, Beth Anne, knows everyone in town."
+          },
+          {
+            "dialogueId": 2,
+            "dialogueText": "I asked her out once, didn't go well."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "bethAnne",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "Howdy there! What brings a girl like you to a town like this?"
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "Sure I may have... You look a little thirsty though."
+          },
+          {
+            "dialogueId": 6,
+            "dialogueText": "Hmmm, Decent or indecent?"
+          },
+          {
+            "dialogueId": 8,
+            "dialogueText": "Hmmm, well there is a family I know that's having some trouble with a local gang."
+          },
+          {
+            "dialogueId": 9,
+            "dialogueText": "Not sure how much they can pay but they're good folk. I'd be happy to help with whatever you need if you can give them a hand."
+          },
+          {
+            "dialogueId": 11,
+            "dialogueText": "They're in the hills north of here."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "name": "zeph",
     "dialogues": [
       {
         "storyPoint": 1,
+        "talkFirst": false,
         "dialogue": [
           {
             "dialogueId": 1,
@@ -55,59 +67,90 @@
         ]
       }
     ]
-    },
-    {
-      "name": "marthaJean",
-      "dialogues": [
-        {
-          "storyPoint": 1,
-          "dialogue": [
-            {
-              "dialogueId": 1,
-              "dialogueText": "That cursed gang shot up my husband, all over some stupid land, I'd go out there and get revenge if I didn't have a family to look after."
-            },
-            {
-              "dialogueId": 2,
-              "dialogueText": "Luckily he's hanging on, I'm not too worried though he's a tough one."
-            },
-            {
-              "dialogueId": 3,
-              "dialogueText": "Sounds like a deal..."
-            },
-            {
-              "dialogueId": 4,
-              "dialogueText": "Elyse, I'm Martha Jean, be careful out there."
-            },
-            {
-              "dialogueId": 5,
-              "dialogueText": "You'll find them in these hills to the East, cross a rickety old bridge, feel free to grab any supplies you need from inside."
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "antonio",
-      "dialogues": [
-        {
-          "storyPoint": 1,
-          "dialogue": [
-            {
-              "dialogueId": 1,
-              "dialogueText": "Well, well, well, what do we have here. Heard you scheming against my gang with Martha up there."
-            },
-            {
-              "dialogueId": 2,
-              "dialogueText": "Heh, you got a quick tongue but how quick are you with that colt?"
-            },
-            {
-              "dialogueId": 3,
-              "dialogueText": "An attitude like that will get you in trouble missy."
-            }
-
-          ]
-        }
-      ]
-    }
-  ]
-}
+  },
+  {
+    "name": "oldManLandry",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "I can see you got a fire in your eyes, make sure it don't burn too bright now."
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "Heh' oh back in my day I had that look too. I could tell you stories you wouldn't believe."
+          },
+          {
+            "dialogueId": 4,
+            "dialogueText": "Doesn't look like you're quite ready though."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "marthaJean",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 2,
+            "dialogueText": "That cursed gang beat my husband half to death."
+          },
+          {
+            "dialogueId": 4,
+            "dialogueText": "Over this damned ranch. They got to thinking they should take over this whole valley."
+          },
+          {
+            "dialogueId": 5,
+            "dialogueText": "Stubborn as he is, he said his pops built this ranch and he'd die for it."
+          },
+          {
+            "dialogueId": 6,
+            "dialogueText": "I'm worried things will keep escalating. I tried to tell him he's got a family to worry about."
+          },
+          {
+            "dialogueId": 8,
+            "dialogueText": "Sounds like a square deal ..."
+          },
+          {
+            "dialogueId": 10,
+            "dialogueText": "Elyse, I'm Martha, be careful out there, leader of those bastards is a real curly wolf."
+          },
+          {
+            "dialogueId": 12,
+            "dialogueText": "East, cross that rickety bridge."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "antonio",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": " Well, well, well what do we have here? Heard you scheming up there with Martha."
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "You got a quick tongue but how fast are you with that colt"
+          },
+          {
+            "dialogueId": 5,
+            "dialogueText": "We'll see about that."
+          }
+        ]
+      }
+    ]
+  }
+]

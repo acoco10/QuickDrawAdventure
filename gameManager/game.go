@@ -29,6 +29,9 @@ func NewGame() *Game {
 		activeSceneId,
 		&sceneManager.GameLog{},
 	}
+
+	game.gameLog.Mode = sceneManager.Standard
+	//have to set mode or it defaults to 0 value(battleTestMode)
 	sceneMap[activeSceneId].FirstLoad(game.gameLog)
 	return game
 }

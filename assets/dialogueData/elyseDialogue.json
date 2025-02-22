@@ -1,0 +1,118 @@
+[
+  {
+    "name": "jarvis",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": []
+      }
+    ]
+  },
+  {
+    "name": "bethAnne",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 2,
+            "dialogueText": "I'm looking for someone, a Sheriff Briggs. You Heard of him?"
+          },
+          {
+            "dialogueId": 4,
+            "dialogueText": "Heck I'm parched Ma'am, but I'm plumb broke, spent my last dollar getting out here."
+          },
+          {
+            "dialogueId": 5,
+            "dialogueText": "Know any work in town for someone who knows their way round a pistol?"
+          },
+          {
+            "dialogueId": 7,
+            "dialogueText": "Decent ... mostly."
+          },
+          {
+            "dialogueId": 10,
+            "dialogueText": "Thanks I'll go and take a look."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "zeph",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": []
+      }
+    ]
+  },
+  {
+    "name": "oldManLandry",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 2,
+            "dialogueText": "I'm not sure your fire is still burning at all."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "marthaJean",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": true,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "Heard there was some trouble at this ranch?"
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "I'm sorry to hear that. May I ask why?"
+          },
+          {
+            "dialogueId": 7,
+            "dialogueText": "Well I certainly got no family, how about I take care of this gang problem and you give me a couple bucks for a room and some supper."
+          },
+          {
+            "dialogueId": 9,
+            "dialogueText": "Elyse"
+          },
+          {
+            "dialogueId": 11,
+            "dialogueText": "Won't be my first time dealing with some folk like this. Where can I find em?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "antonio",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 2,
+            "dialogueText": "I wouldn't call helping out a struggling family scheming."
+          },
+          {
+            "dialogueId": 4,
+            "dialogueText": "fast enough'"
+          }
+        ]
+      }
+    ]
+  }
+]

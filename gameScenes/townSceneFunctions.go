@@ -7,6 +7,8 @@ import (
 	"github.com/ebitenui/ebitenui/input"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
+	"image/color"
 	"log"
 	"sort"
 )
@@ -163,10 +165,33 @@ func (g *TownScene) DrawCharacters(screen *ebiten.Image) {
 	}
 }
 
-func LockCursorForDialogue() {
-	updater := CreateCursorUpdater(10, 10)
-	updater.MoveToLockedSpecificPosition(1002, 306)
-	input.SetCursorUpdater(updater)
+func (g *TownScene) DrawColliders(screen *ebiten.Image) {
+	for _, collider := range g.MapData.Colliders {
+		vector.StrokeRect(
+			screen,
+			float32(collider.Min.X)*4+float32(g.cam.X)*4,
+			float32(collider.Min.Y)*4+float32(g.cam.Y)*4,
+			float32(collider.Dx())*4,
+			float32(collider.Dy())*4,
+			1.0,
+			color.RGBA{255, 0, 0, 255},
+			false,
+		)
+	}
+}
+
+func LockCursorForDialogue(ui DialogueUI) {
+	if ui.DType == Dialogue {
+		updater := CreateCursorUpdater(10, 10)
+		updater.MoveToLockedSpecificPosition(1002, 306)
+		input.SetCursorUpdater(updater)
+	}
+	if ui.DType == ShowDown {
+		updater := CreateCursorUpdater(10, 10)
+		updater.MoveToLockedSpecificPosition(1002, 720)
+		input.SetCursorUpdater(updater)
+	}
+
 }
 
 func ProcessEvent() {

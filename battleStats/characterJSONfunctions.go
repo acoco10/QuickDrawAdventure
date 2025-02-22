@@ -14,7 +14,7 @@ const (
 	Wolf
 	CowardlyCowboy
 	Sheriff
-	GunSlinger
+	Antonio
 	None
 )
 
@@ -155,8 +155,8 @@ func LoadCharacters() (map[CharacterName]CharacterData, error) {
 		if char.Name == "sheriff" {
 			characters[Sheriff] = char
 		}
-		if char.Name == "gunSlinger" {
-			characters[GunSlinger] = char
+		if char.Name == "antonio" {
+			characters[Antonio] = char
 		}
 
 	}

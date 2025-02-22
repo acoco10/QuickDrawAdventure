@@ -110,7 +110,47 @@
                     "successful": "Sheriff is shaking in his boots!!!",
                     "unsuccessful": "Sheriff: Hard to shoot if you cant keep your eyes open lass"
                 }
+
+            ]
+        },
+        {
+            "name": "antonio",
+            "skills": [
+                {
+                    "type": "insult",
+                    "successful": "Well aint you a bright eyed and bushy tailed greener n your hat horn",
+                    "unsuccessful": "You'se a tender bellied, I mean yellow footed, seven hells you know what I mean"
+                },
+                {
+                    "type": "brag",
+                    "successful": "No ones quicker then me on the draw, I shot everyone who was in the back",
+                    "unsuccessful": "I'm more used to seducing girls like you then killing em"
+                },
+                {
+                    "type": "stareDown",
+                    "successful": "Antonio lights swipes a match against his jacket and lights a cigarette, he knew you weren't gonna draw before you did",
+                    "unsuccessful": "Antonio drops his match and curses loudly"
+                }
+            ],
+            "responses": [
+                {
+                    "type": "insult",
+                    "successful": "Watch yourself now",
+                    "unsuccessful": "I got a fiery temper but that one aint making me feel much"
+                },
+                {
+                    "type": "brag",
+                    "successful": "The Kid does have a nice ring to it",
+                    "unsuccessful": "Well shit I'll take em all"
+                },
+                {
+                    "type": "stareDown",
+                    "successful": "Sheriff is shaking in his boots!!!",
+                    "unsuccessful": "Sheriff: Hard to shoot if you cant keep your eyes open lass"
+                }
+
             ]
         }
+
     ]
 }
