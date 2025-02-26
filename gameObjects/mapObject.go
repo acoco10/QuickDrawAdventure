@@ -55,9 +55,10 @@ func NewTrigger(json ObjectJSON) Trigger {
 }
 
 type MapItem struct {
-	Name string
-	X, Y float64
-	Img  *ebiten.Image
+	State string
+	Name  string
+	X, Y  float64
+	Img   *ebiten.Image
 }
 
 type MapObjectData struct {
@@ -65,9 +66,9 @@ type MapObjectData struct {
 	ExitDoors         map[string]Trigger
 	NpcSpawns         map[string]Spawn
 	Colliders         []image.Rectangle
-	StairTriggers     map[string]*Trigger //pointer because has on/ off setting eg for balcony, not trigger switch
+	StairTriggers     map[string]*Trigger //pointer because has on/ off setting e.g. for balcony, not trigger switch
 	ContextualObjects map[string]*Trigger
-	Items             map[string]*MapItem
+	Items             []MapItem
 	InteractPoints    map[string]MapItem
 	CameraPoints      map[string]Trigger
 	ObjectSpawns      map[string]Spawn
@@ -82,7 +83,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	npcSpawns := make(map[string]Spawn)
 	stairTriggers := make(map[string]*Trigger)
 	contextualObjects := make(map[string]*Trigger)
-	items := make(map[string]*MapItem)
+	var items []MapItem
 	interactPoints := make(map[string]MapItem)
 	cameraPoints := make(map[string]Trigger)
 	objectSpawns := make(map[string]Spawn)
@@ -148,18 +149,20 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					contextualObjects[object.Name] = &contextualObject
 
 				case "itemSpawn":
+					println("loading item:", object.Name)
 					imgPath := fmt.Sprintf("images/items/%s.png", object.Name)
 					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
 					if err != nil {
 						log.Fatal(err)
 					}
 					item := MapItem{
-						Name: object.Name,
-						X:    object.X,
-						Y:    object.Y,
-						Img:  img,
+						Name:  object.Name,
+						X:     object.X,
+						Y:     object.Y,
+						Img:   img,
+						State: "off",
 					}
-					items[object.Name] = &item
+					items = append(items, item)
 
 				case "interactPoint":
 					println("loading interactPoint:", object.Name)

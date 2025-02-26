@@ -1,0 +1,21 @@
+{"skills":[
+  {"name": "insultComeBack",
+    "index": 2,
+    "tension": 0,
+    "effects": [{
+      "type": "buff",
+      "on" : "enemy",
+      "stat": "anger",
+      "amount": 1,
+      "successPer": 80
+    },
+      {"type": "buff",
+        "on": "successfulSelf",
+        "stat": "accuracy",
+        "amount": 1,
+        "successPer": 80
+      }
+    ]
+  }
+  ]
+}

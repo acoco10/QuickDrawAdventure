@@ -2,6 +2,7 @@ package battle
 
 import (
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"log"
 	"math/rand/v2"
@@ -50,6 +51,7 @@ type Battle struct {
 	Tension            int
 	EnemyDrawBonus     bool
 	PlayerDrawBonus    bool
+	DialogueText       string
 }
 
 type Turn struct {
@@ -97,6 +99,13 @@ func NewBattle(player *battleStats.CharacterData, enemy *battleStats.CharacterDa
 	if len(enemy.DialogueSkills) == 0 {
 		battle.BattlePhase = Shooting
 	}
+
+	data, err := assets.Dialogue.ReadFile("dialogueData/battleDialogue.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	battle.DialogueText = string(data)
 
 	return &battle
 }
@@ -433,8 +442,8 @@ func (b *Battle) generateMessageForUsedDialogueSkill(turnTaker battleStats.Chara
 
 	message = append(message, output)
 
-	dialogue := GetSkillDialogue(turnTaker.Name, skill.SkillName, roll)
-	response := GetResponse(opponent.Name, skill.SkillName, roll)
+	dialogue := GetSkillDialogue(turnTaker, skill.SkillName, roll, b.DialogueText)
+	response := GetResponse(turnTaker, opponent, skill.SkillName, roll, b.DialogueText)
 
 	message = append(message, dialogue)
 	message = append(message, response)

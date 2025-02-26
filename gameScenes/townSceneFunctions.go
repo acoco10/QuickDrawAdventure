@@ -8,8 +8,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"image"
 	"image/color"
 	"log"
+	"math"
 	"sort"
 )
 
@@ -208,4 +210,111 @@ type NpcSpawn struct {
 
 func (n *NpcSpawn) TriggerEvent(npcName string) {
 
+}
+
+func (g *TownScene) DrawItems(screen *ebiten.Image) {
+	opts := &ebiten.DrawImageOptions{}
+	for _, item := range g.MapData.Items {
+		if item.Name == "bridgeLeft" || item.Name == "bridgeRight" {
+			itemRect := image.Rect(int(item.X), int(item.Y), int(item.X)+16, int(item.Y)+32)
+			if itemRect.Overlaps(
+				image.Rect(
+					int(g.Player.X),
+					int(g.Player.Y)+28,
+					int(g.Player.X)+16,
+					int(g.Player.Y)+32),
+			) {
+				opts.GeoM.Translate(item.X, item.Y+1)
+				opts.GeoM.Translate(g.cam.X, g.cam.Y)
+				opts.GeoM.Scale(4, 4)
+				opts.GeoM.Rotate(1.5 * math.Pi / 360)
+				screen.DrawImage(item.Img, opts)
+				opts.GeoM.Reset()
+				if item.State == "off" {
+					if g.Player.Dx > 0 || item.Name == "bridgeRight" {
+						g.Player.Y -= 0.05
+					}
+					if g.Player.Dx < 0 || item.Name == "bridgeRight" {
+						g.Player.Y += 0.05
+					}
+					if g.Player.Dx < 0 || item.Name == "bridgeLeft" {
+						g.Player.Y -= 0.05
+					}
+					if g.Player.Dx > 0 || item.Name == "bridgeLeft" {
+						g.Player.Y += 0.05
+					}
+					item.State = "on"
+				}
+			} else {
+				opts.GeoM.Translate(item.X, item.Y+2)
+				opts.GeoM.Translate(g.cam.X, g.cam.Y)
+				opts.GeoM.Scale(4, 4)
+				screen.DrawImage(item.Img, opts)
+				opts.GeoM.Reset()
+			}
+		} else {
+			item.State = "off"
+			opts.GeoM.Reset()
+			opts.GeoM.Translate(item.X*4, item.Y*4-137)
+			opts.GeoM.Translate(g.cam.X*4, g.cam.Y*4)
+			screen.DrawImage(item.Img, opts)
+			opts.GeoM.Reset()
+		}
+	}
+}
+
+func (g *TownScene) DrawObjects(screen *ebiten.Image) {
+	opts := &ebiten.DrawImageOptions{}
+	for _, object := range g.Objects {
+		opts.GeoM.Translate(object.X, object.Y)
+		opts.GeoM.Translate(g.cam.X, g.cam.Y)
+		opts.GeoM.Scale(4, 4)
+
+		objectFrame := 0
+		objectAnimation := object.ActiveAnimation(object.Status)
+
+		if objectAnimation != nil {
+			objectFrame = objectAnimation.Frame()
+		}
+		screen.DrawImage(
+			object.Img.SubImage(
+				object.SpriteSheet.Rect(objectFrame),
+			).(*ebiten.Image),
+			opts,
+		)
+		opts.GeoM.Reset()
+	}
+}
+
+func (g *TownScene) DrawObjectsAbovePlayer(screen *ebiten.Image) {
+	opts := &ebiten.DrawImageOptions{}
+	for _, object := range g.Objects {
+		if object.DrawAbovePlayer && g.Player.Y+6 < object.Y {
+			opts.GeoM.Translate(object.X, object.Y)
+			opts.GeoM.Translate(g.cam.X, g.cam.Y)
+			opts.GeoM.Scale(4, 4)
+
+			objectFrame := 0
+			objectAnimation := object.ActiveAnimation(object.Status)
+
+			if objectAnimation != nil {
+				objectFrame = objectAnimation.Frame()
+			}
+			screen.DrawImage(
+				object.Img.SubImage(
+					object.SpriteSheet.Rect(objectFrame),
+				).(*ebiten.Image),
+				opts,
+			)
+		}
+		opts.GeoM.Reset()
+	}
+}
+
+func DistanceEq(x1, y1, x2, y2 float64) float64 {
+
+	xdis := math.Abs(x1 - x2)
+	ydis := math.Abs(y2 - y2)
+
+	return math.Sqrt(xdis*xdis + ydis*ydis)
 }

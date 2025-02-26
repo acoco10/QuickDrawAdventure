@@ -23,6 +23,7 @@ type CharacterJSON struct {
 	Stats          map[string]int `json:"stats"`
 	CombatSkills   []string       `json:"combat_skills"`
 	DialogueSkills []string       `json:"dialogue_skills"`
+	DialogueSlots  int            `json:"dialogue_slots"`
 	SoundFxType    string         `json:"soundFxType"`
 	Weakness       string         `json:"weakness"`
 }
@@ -116,7 +117,7 @@ func LoadCharacter(characterJSON CharacterJSON) (CharacterData, error) {
 		characterDialogueSkills[skill] = dialogueSkills[skill]
 	}
 
-	character := NewCharacter(characterJSON.Name, characterJSON.Stats, characterCombatSkills, characterDialogueSkills, characterJSON.Weakness, characterJSON.SoundFxType)
+	character := NewCharacter(characterJSON.Name, characterJSON.Stats, characterCombatSkills, characterDialogueSkills, characterJSON.Weakness, characterJSON.SoundFxType, characterJSON.DialogueSlots)
 
 	return character, nil
 

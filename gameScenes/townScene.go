@@ -9,8 +9,10 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
+	"github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image"
 	"log"
@@ -38,7 +40,10 @@ type TownScene struct {
 	dustEffect          *ebiten.Image
 	scene               sceneManager.SceneId
 	gameLog             *sceneManager.GameLog
+	playerMenu          *ui.DialogueSkillEquipMenu
 	enemyCountDown      int
+	wind                bool
+	windCount           int
 }
 
 func NewTownScene() *TownScene {
@@ -144,11 +149,12 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	}
 
 	g.dialogueUi.UpdateTriggerScene(sceneManager.TownSceneID)
+	g.playerMenu = &ui.DialogueSkillEquipMenu{}
+	//g.playerMenu.Load(1512, 918, *g.Player.BattleStats)
 
 }
 
 func (g *TownScene) Update() sceneManager.SceneId {
-
 	sceneUpdate := g.dialogueUi.Update()
 	if sceneUpdate != sceneManager.TownSceneID {
 		g.scene = sceneManager.BattleSceneId
@@ -196,6 +202,15 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	if ebiten.IsKeyPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
 		g.Player.Visible = false
 		g.triggerInteraction = true
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
+		if g.playerMenu.Triggered == false {
+			g.playerMenu.Trigger()
+		} else {
+			g.playerMenu.UnTrigger()
+		}
+
 	}
 
 	//increase players position by their velocity every update
@@ -275,7 +290,17 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	}
 
 	//custom script animation for tavern door (swings forward on entrance)
-	g.npcInProximity = CheckDialoguePopup(*g.Player, g.NPC)
+	npcCheck := CheckDialoguePopup(*g.Player, g.NPC)
+	if g.npcInProximity.Name == "" || npcCheck.Name == "" {
+		g.npcInProximity = npcCheck
+	} else if g.npcInProximity.Name != npcCheck.Name {
+		npcDistance1 := DistanceEq(g.Player.X, g.Player.Y, g.npcInProximity.X, g.npcInProximity.Y)
+		npcDistance2 := DistanceEq(g.Player.X, g.Player.Y, npcCheck.X, npcCheck.Y)
+		if npcDistance1 > npcDistance2 {
+			g.npcInProximity = npcCheck
+		}
+	}
+
 	g.interactInProximity = CheckInteractPopup(*g.Player, g.MapData.InteractPoints)
 	enemyEncounter := battleStats.None
 	if g.Player.Dx > 0 || g.Player.Dy > 0 {
@@ -288,6 +313,8 @@ func (g *TownScene) Update() sceneManager.SceneId {
 		enemyEncounter = battleStats.None
 		g.scene = sceneManager.BattleSceneId
 	}
+
+	g.playerMenu.Update()
 	return g.scene
 
 }
@@ -303,59 +330,9 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, g.MapData.StairTriggers)
 
 	//draw Player
-
-	for _, item := range g.MapData.Items {
-		opts.GeoM.Reset()
-		opts.GeoM.Translate(item.X*4, item.Y*4-137)
-		opts.GeoM.Translate(g.cam.X*4, g.cam.Y*4)
-		screen.DrawImage(item.Img, &opts)
-		opts.GeoM.Reset()
-	}
-	for _, object := range g.Objects {
-		opts.GeoM.Translate(object.X, object.Y)
-		opts.GeoM.Translate(g.cam.X, g.cam.Y)
-		opts.GeoM.Scale(4, 4)
-
-		objectFrame := 0
-		objectAnimation := object.ActiveAnimation(object.Status)
-
-		if objectAnimation != nil {
-			objectFrame = objectAnimation.Frame()
-		}
-		screen.DrawImage(
-			object.Img.SubImage(
-				object.SpriteSheet.Rect(objectFrame),
-			).(*ebiten.Image),
-			&opts,
-		)
-
-		opts.GeoM.Reset()
-	}
-
+	g.DrawItems(screen)
+	g.DrawObjects(screen)
 	g.DrawCharacters(screen)
-	for _, object := range g.Objects {
-		if object.DrawAbovePlayer && g.Player.Y+6 < object.Y {
-			opts.GeoM.Translate(object.X, object.Y)
-			opts.GeoM.Translate(g.cam.X, g.cam.Y)
-			opts.GeoM.Scale(4, 4)
-
-			objectFrame := 0
-			objectAnimation := object.ActiveAnimation(object.Status)
-
-			if objectAnimation != nil {
-				objectFrame = objectAnimation.Frame()
-			}
-			screen.DrawImage(
-				object.Img.SubImage(
-					object.SpriteSheet.Rect(objectFrame),
-				).(*ebiten.Image),
-				&opts,
-			)
-
-		}
-
-		opts.GeoM.Reset()
-	}
 
 	if g.triggerInteraction {
 		opts.GeoM.Translate(g.cam.X, g.cam.Y)
@@ -366,6 +343,7 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	}
 
 	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.StairTriggers)
+	g.DrawObjectsAbovePlayer(screen)
 
 	if g.npcInProximity.Name != "" {
 		DrawPopUp(screen, g.npcInProximity.X, g.npcInProximity.Y, float64(g.npcInProximity.SpriteSheet.SpriteWidth), g.cam)
@@ -380,6 +358,7 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	g.playerMenu.Draw(screen)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 }
 

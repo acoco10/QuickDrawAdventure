@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
-	"github.com/acoco10/QuickDrawAdventure/dialogueData"
+	"github.com/acoco10/QuickDrawAdventure/gameScenes"
 	"math/rand"
 	"testing"
 )
@@ -24,14 +24,25 @@ func MakeTestBattle() *battle.Battle {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "female1")
-	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "female1", 3)
+	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1", 3)
 
 	b := battle.NewBattle(&elyse, &george)
 
 	b.Turns[0] = &testTurn1
 
 	return b
+}
+
+func TestDisEq(t *testing.T) {
+	x1, y1 := 54, 82
+	x2, y2 := 345, 97
+
+	answer := gameScenes.DistanceEq(x1, y1, x2, y2)
+
+	if answer != 291.38634147811 {
+		println(answer)
+	}
 }
 
 func TestShoot(t *testing.T) {
@@ -61,8 +72,8 @@ func TestBattleState(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
-	george := battleStats.NewCharacter("george", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1", 3)
+	george := battleStats.NewCharacter("george", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1", 3)
 
 	b := battle.NewBattle(&elyse, &george)
 
@@ -121,12 +132,6 @@ func TestHowRandWorks(t *testing.T) {
 
 }
 
-func TestDialogueLoading(t *testing.T) {
-	charName := "elyse"
-	skillType := "insult"
-	println(len(battle.GetSkillDialogue(charName, skillType, false)))
-}
-
 func TestLoadCharacter(t *testing.T) {
 	chars, _ := battleStats.LoadCharacters()
 	for skill := range chars[0].DialogueSkills {
@@ -147,7 +152,7 @@ func TestCharacterMethods(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1", 3)
 
 	if elyse.DisplayStat(battleStats.Health) != 4 {
 		t.Fatalf(`method displayCharHealth did not work`)
@@ -174,7 +179,7 @@ func Test_use_stat_Buff(t *testing.T) {
 		"fear":      0,
 	}
 
-	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1")
+	elyse := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1", 3)
 
 	elyse.UpdateStat(battleStats.Anger, 1)
 
@@ -223,8 +228,3 @@ func Test_use_stat_Buff(t *testing.T) {
 
 }
 */
-
-func TestDialogueData(t *testing.T) {
-	dialogue := dialogueData.GetResponse("bethAnne", 1)
-	println(dialogue)
-}

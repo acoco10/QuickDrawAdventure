@@ -9,6 +9,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/graphicEffects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
+	ui2 "github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/input"
 	"github.com/ebitenui/ebitenui/widget"
@@ -132,7 +133,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	rootContainer.AddChild(g.statusBar.MenuContainer)
 
 	//creating menu for skill buttons that can be used by the playerBattleSprite
-	dialogueSkillsContainer := SkillsContainer()
+	dialogueSkillsContainer := ui2.SkillsContainer()
 	drawButton := GenerateDrawButton(g)
 	dialogueSkillsContainer.AddChild(drawButton)
 	g.dialogueMenu.Buttons = append(g.dialogueMenu.Buttons, drawButton)
@@ -140,20 +141,20 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	for index, skillName := range dialogueSkillNames {
 		//makes button with each skill name
 		if skillName != "draw" {
-			dialogueButton := GenerateSkillButtons(skillName, g)
+			dialogueButton := GenerateSkillButton(skillName, g)
 			dialogueButton.Configure(widget.ButtonOpts.TabOrder(index))
 			dialogueSkillsContainer.AddChild(dialogueButton)
 			g.dialogueMenu.Buttons = append(g.dialogueMenu.Buttons, dialogueButton)
 		}
 	}
 
-	dialogueContainer := SkillBoxContainer("Choose Skill")
+	dialogueContainer := ui2.SkillBoxContainer("Choose Skill")
 	dialogueContainer.AddChild(dialogueSkillsContainer)
 	g.dialogueMenu.MenuContainer.AddChild(dialogueContainer)
 	rootContainer.AddChild(g.dialogueMenu.MenuContainer)
 	//defining combat menu
 
-	combatSkillsContainer := SkillsContainer()
+	combatSkillsContainer := ui2.SkillsContainer()
 	for index, skillName := range combatSkillNames {
 		//makes button with each skill name
 		combatButton := GenerateCombatSkillButtons(skillName, g)

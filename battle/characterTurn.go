@@ -2,10 +2,8 @@ package battle
 
 import (
 	"fmt"
-	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/tidwall/gjson"
-	"log"
 	"math"
 	"math/rand/v2"
 )
@@ -94,39 +92,45 @@ func DrawProb(userStats map[battleStats.Stat]int, oppStats map[battleStats.Stat]
 	return 50 + userDS - opponentDS
 }
 
-func GetSkillDialogue(charName string, skillName string, status bool) string {
-	data, err := assets.Dialogue.ReadFile("dialogueData/battleDialogue.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	jsonString := string(data)
+func GetSkillDialogue(char battleStats.CharacterData, skillName string, status bool, data string) string {
+	charName := char.Name
 	var response string
 	if status {
-		query := fmt.Sprintf("characters.#(name==%s).skills.#(type == %s).successful", charName, skillName)
-		results := gjson.Get(jsonString, query)
-		response = results.String()
+		if char.Name == "elyse" {
+			selInt := rand.IntN(3)
+			if skillName == "insult" {
+				query := fmt.Sprintf("insults.#(id = %d).insult", selInt)
+				results := gjson.Get(char.DialogueData, query)
+				response = results.String()
+			}
+			if skillName == "brag" {
+				query := fmt.Sprintf("brags.#(id = %d).brag", selInt)
+				results := gjson.Get(char.DialogueData, query)
+				response = results.String()
+			}
+		} else {
+			query := fmt.Sprintf("characters.#(name==%s).skills.#(type == %s).successful", charName, skillName)
+			results := gjson.Get(data, query)
+			response = results.String()
+		}
 	} else {
 		query := fmt.Sprintf("characters.#(name==%s).skills.#(type == %s).unsuccessful", charName, skillName)
-		results := gjson.Get(jsonString, query)
+		results := gjson.Get(data, query)
 		response = results.String()
 	}
 	return response
 }
 
-func GetResponse(charName string, skillName string, status bool) string {
-	data, err := assets.Dialogue.ReadFile("dialogueData/battleDialogue.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	jsonString := string(data)
+func GetResponse(char battleStats.CharacterData, opponent battleStats.CharacterData, skillName string, status bool, data string) string {
 	var response string
+	oppCharName := opponent.Name
 	if status {
-		query := fmt.Sprintf("characters.#(name==%s).responses.#(type == %s).successful", charName, skillName)
-		results := gjson.Get(jsonString, query)
+		query := fmt.Sprintf("characters.#(name==%s).responses.#(type == %s).successful", oppCharName, skillName)
+		results := gjson.Get(data, query)
 		response = results.String()
 	} else {
-		query := fmt.Sprintf("characters.#(name==%s).responses.#(type == %s).unsuccessful", charName, skillName)
-		results := gjson.Get(jsonString, query)
+		query := fmt.Sprintf("characters.#(name==%s).responses.#(type == %s).unsuccessful", oppCharName, skillName)
+		results := gjson.Get(data, query)
 		response = results.String()
 	}
 	return response
