@@ -8,7 +8,7 @@
 		"anger":     0
     },
     "combat_skills": ["shoot", "focusedShot", "fanShot", "reload"],
-    "dialogue_skills": ["stareDown", "draw", "insult", "brag"],
+    "dialogue_skills": ["stareDown","deadShot", "draw", "comeBack", "mamasGirl"],
       "weakness": "fear",
       "soundFxType": "female1"
 },
@@ -20,7 +20,7 @@
     "accuracy":  0,
     "drawSpeed": 85,
     "fear":      2,
-  "tensionThreshold": 6,
+    "tensionThreshold": 6,
     "anger":     0
 },
 "combat_skills": ["shoot", "focusedShot", "reload"],
@@ -39,7 +39,7 @@
             "anger":     0
         },
         "combat_skills": ["shoot", "focusedShot", "reload", "fanShot"],
-        "dialogue_skills": ["stareDown", "draw", "insult", "brag"],
+        "dialogue_skills": ["stareDown","deadShot", "draw", "comeBack", "shotInTheBack"],
         "weakness": "anger",
   "soundFxType": "male1"
 },

@@ -108,6 +108,9 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	for _, skill := range elyse.DialogueSkills {
 		i := skill.Index
 		dialogueSkillNames[i] = skill.SkillName
+		if skill.SkillName == "" {
+			println("Skill name is empty", skill.Text)
+		}
 	}
 
 	cSkillsLength := len(elyse.CombatSkills)
@@ -140,7 +143,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	for index, skillName := range dialogueSkillNames {
 		//makes button with each skill name
-		if skillName != "draw" {
+		if skillName != "draw" && skillName != "" {
 			dialogueButton := GenerateSkillButton(skillName, g)
 			dialogueButton.Configure(widget.ButtonOpts.TabOrder(index))
 			dialogueSkillsContainer.AddChild(dialogueButton)

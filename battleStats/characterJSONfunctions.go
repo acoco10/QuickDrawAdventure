@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/assets"
 	"log"
 )
 
@@ -34,7 +35,7 @@ type CharactersJSON struct {
 
 func LoadSingleCharacter(charName string) (CharacterData, error) {
 	var char CharacterData
-	contents, err := battleStatsData.ReadFile("data/characters.json")
+	contents, err := assets.Battle.ReadFile("battleData/characters.json")
 
 	if err != nil {
 		log.Fatal(err)
@@ -62,13 +63,13 @@ func LoadSingleCharacter(charName string) (CharacterData, error) {
 func LoadCharacter(characterJSON CharacterJSON) (CharacterData, error) {
 
 	// getting the string keys from all skills to confirm if character json contains valid skills
-	combatSkills, dialogueSkills, err := LoadSkills()
+	combatSkills, dialogueSkills, equipSkills, err := LoadSkills()
 
 	if err != nil {
 		log.Fatal("Error loading skills", err)
 	}
 
-	if len(dialogueSkills) == 0 {
+	if len(equipSkills) == 0 {
 		return CharacterData{}, errors.New("no dialogue skills found")
 	}
 	if len(characterJSON.CombatSkills) == 0 {
@@ -76,6 +77,8 @@ func LoadCharacter(characterJSON CharacterJSON) (CharacterData, error) {
 	}
 
 	dialogueSkillKeys := make([]string, len(dialogueSkills))
+
+	equipSkillKeys := make([]string, len(equipSkills))
 
 	combatSkillKeys := make([]string, len(combatSkills))
 
@@ -90,6 +93,13 @@ func LoadCharacter(characterJSON CharacterJSON) (CharacterData, error) {
 
 	for skillName := range combatSkills {
 		combatSkillKeys[i] = skillName
+		i++
+	}
+
+	i = 0
+
+	for skillName := range equipSkills {
+		equipSkillKeys[i] = skillName
 		i++
 	}
 
@@ -110,11 +120,14 @@ func LoadCharacter(characterJSON CharacterJSON) (CharacterData, error) {
 
 	for _, skill := range characterJSON.DialogueSkills {
 
-		if !StringInSlice(skill, dialogueSkillKeys) {
-			log.Fatalf("character contains invalid skill: %s", skill)
+		if StringInSlice(skill, dialogueSkillKeys) {
+			characterDialogueSkills[skill] = dialogueSkills[skill]
+		} else if StringInSlice(skill, equipSkillKeys) {
+			characterDialogueSkills[skill] = equipSkills[skill]
+		} else {
+			log.Fatalf("character contains invalid dialogue skill: %s", skill)
 		}
 
-		characterDialogueSkills[skill] = dialogueSkills[skill]
 	}
 
 	character := NewCharacter(characterJSON.Name, characterJSON.Stats, characterCombatSkills, characterDialogueSkills, characterJSON.Weakness, characterJSON.SoundFxType, characterJSON.DialogueSlots)
@@ -125,7 +138,7 @@ func LoadCharacter(characterJSON CharacterJSON) (CharacterData, error) {
 
 func LoadCharacters() (map[CharacterName]CharacterData, error) {
 
-	contents, err := battleStatsData.ReadFile("data/characters.json")
+	contents, err := assets.Battle.ReadFile("battleData/characters.json")
 
 	if err != nil {
 		log.Fatal(err)

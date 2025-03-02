@@ -41,11 +41,11 @@ func (s *StartScene) FirstLoad(gameLog *sceneManager.GameLog) {
 		log.Fatal(err)
 	}
 	s.sImg = startImg
-	startSheet := spritesheet.NewSpritesheet(13, 1, 378, 228)
+	startSheet := spritesheet.NewSpritesheet(15, 1, 378, 228)
 
 	s.sheer = startSheet
-
-	startAnimation := animations.NewAnimation(0, 12, 1, 5)
+	s.audioPlayer = audioManagement.NewAudioPlayer()
+	startAnimation := animations.NewAnimation(0, 14, 1, 10)
 
 	s.titleAnimation = startAnimation
 
@@ -66,6 +66,7 @@ func (s *StartScene) OnExit() {
 func (s *StartScene) Update() sceneManager.SceneId {
 	s.musicPlayer.Update()
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		s.audioPlayer.Play(audioManagement.DrawButton)
 		s.animationTriggered = true
 	}
 	if s.animationTriggered {

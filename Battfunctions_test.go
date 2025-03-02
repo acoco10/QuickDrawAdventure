@@ -5,6 +5,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/gameScenes"
+	"log"
 	"math/rand"
 	"testing"
 )
@@ -35,8 +36,9 @@ func MakeTestBattle() *battle.Battle {
 }
 
 func TestDisEq(t *testing.T) {
-	x1, y1 := 54, 82
-	x2, y2 := 345, 97
+	var x1, y1, x2, y2 float64
+	x1, y1 = 54, 82
+	x2, y2 = 345, 97
 
 	answer := gameScenes.DistanceEq(x1, y1, x2, y2)
 
@@ -54,7 +56,6 @@ func TestShoot(t *testing.T) {
 		damage := battle.Shoot(10, 0, 0, 70, damageRange)
 		results += float64(damage)
 	}
-
 }
 
 func TestBattleState(t *testing.T) {
@@ -105,17 +106,14 @@ func TestRoll(t *testing.T) {
 	fmt.Printf("successful rolls:%d, failed rolls: %d", success, fail)
 }
 
-func TestLoadGoodSkillsJSON(t *testing.T) {
-	combatSkills, _, _ := battleStats.LoadSkills()
-	dSkillsLength := len(combatSkills)
-	dialogueSkillNames := make([]string, dSkillsLength)
-	for _, skill := range combatSkills {
-		i := skill.Index
-		dialogueSkillNames[i] = skill.SkillName
+func TestLoadSkillsJSON(t *testing.T) {
+	dialogueSkills, err := battleStats.LoadSkillsFromPath("battleData/equipDialogueSkills.json")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	for _, dialogueSkillName := range dialogueSkillNames {
-		println(dialogueSkillName)
+	for Name, skill := range dialogueSkills {
+		println(Name, skill.Target)
 	}
 }
 

@@ -15,3 +15,6 @@ var Map embed.FS
 
 //go:embed dialogueData
 var Dialogue embed.FS
+
+//go:embed battleData
+var Battle embed.FS

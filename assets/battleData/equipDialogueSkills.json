@@ -1,0 +1,170 @@
+{"skills":[
+  {
+    "id": 0,
+    "name": "comeBack",
+    "tension": 1,
+    "text": "Your banal derisions are over used and worn, just like those rode hard boots",
+    "target": "confidence",
+    "effects": [
+      {
+        "type": "buff",
+        "on": "enemy",
+        "stat": "fear",
+        "amount": 1,
+        "successPer": 100
+      }
+    ]
+  },
+    {"id": 1,
+      "name": "scaredOfGirls",
+      "text": "Whats the matter hun? Never looked a lady in her eye before?",
+      "tension": 3,
+      "target": "confidence",
+      "effects": [
+        { "type": "buff",
+          "on": "enemy",
+          "stat": "anger",
+          "amount": 3,
+          "successPer": 100}
+      ]
+    },
+    {
+    "id": 2,
+      "name" : "dynamiteBrains",
+    "text": "If brains were dynamite you wouldn't have enough to blow your nose",
+      "tension": 3,
+      "target": "intelligence",
+      "effects": [
+        { "type": "buff",
+          "on": "enemy",
+          "stat": "anger",
+          "amount": 3,
+          "successPer": 100}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "iqTest",
+      "text": "You're proof they ought to have a' IQ test for holstering some iron",
+      "tension": 3,
+      "target": "intelligence",
+      "effects":[
+    { "type": "buff",
+      "on": "enemy",
+      "stat": "anger",
+      "amount": 3,
+      "successPer": 100}
+  ]
+    },
+    {
+      "id": 4,
+      "name": "slowPoke",
+      "text": "If your draw is as slow as your wit this won't be much fun at all",
+      "tension": 2,
+      "target": "intelligence",
+      "effects": [
+        {
+          "type": "buff",
+          "on": "enemy",
+          "stat": "anger",
+          "amount": 2,
+          "successPer": 100
+        },
+        {
+          "type": "buff",
+          "on": "enemy",
+          "stat": "drawSpeed",
+          "amount": 10,
+          "successPer": 100
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "theKid",
+      "text": "You aint heard me? I go by the Kid. My posse will be here soon an' all 12 know their way round a Winchester",
+      "tension": 3,
+      "target": "confidence",
+      "effects": [
+        {
+          "type": "buff",
+          "on": "enemy",
+          "stat": "fear",
+          "amount": 3,
+          "successPer": 100
+        }
+        ]
+        },
+     {
+      "id": 6,
+      "name": "deadShot",
+      "text": "I can shoot a puma in the eye running full speed from a mile away",
+      "tension": 2,
+       "target": "confidence",
+      "effects": [
+        {
+          "type": "buff",
+          "on": "enemy",
+          "stat": "fear",
+          "amount": 1,
+          "successPer": 100
+        },
+        {
+          "type": "buff",
+          "on": "self",
+          "stat": "accuracy",
+          "amount": 2,
+          "successPer": 100
+        }
+      ]
+    },
+     {
+       "id": 7,
+       "name": "mamasGirl",
+       "tension": 1,
+       "text": "My Momma was Daisy Derringer, the fastest in the west, an I'm better n' her",
+       "target": "confidence",
+       "effects": [
+         {
+           "type": "buff",
+           "on": "enemy",
+           "stat": "fear",
+           "amount": 1,
+           "successPer": 100
+         },
+         {
+           "type": "buff",
+           "on": "self",
+           "target": "",
+           "stat": "drawSpeed",
+           "amount": 20,
+           "successPer": 100
+         }
+       ]
+     },
+  {
+  "id": 7,
+  "name": "shotInTheBack",
+  "tension": 1,
+  "text": "No one's faster n' me, everyone who was I shot in the back",
+  "target": "confidence",
+  "effects": [
+    {
+      "type": "buff",
+      "on": "enemy",
+      "stat": "fear",
+      "amount": 3,
+      "successPer": 100
+    },
+    {
+      "type": "buff",
+      "on": "self",
+      "target": "",
+      "stat": "drawSpeed",
+      "amount": 10,
+      "successPer": 100
+    }
+  ]
+  }
+      ]
+    }

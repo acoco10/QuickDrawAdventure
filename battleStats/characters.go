@@ -2,8 +2,6 @@ package battleStats
 
 import (
 	"fmt"
-	"github.com/acoco10/QuickDrawAdventure/assets"
-	"log"
 )
 
 type CharacterData struct {
@@ -156,11 +154,6 @@ func NewCharacter(name string, stats map[string]int, combatSkills map[string]Ski
 	}
 
 	if name == "elyse" {
-		data, err := assets.Dialogue.ReadFile("dialogueData/elyseBattleDialogue.json")
-		if err != nil {
-			log.Fatal(err)
-		}
-		char.DialogueData = string(data)
 		char.LearnedInsults = []int{0, 1, 2}
 		char.LearnedBrags = []int{0, 1, 2}
 		char.DialogueSlots = 3
