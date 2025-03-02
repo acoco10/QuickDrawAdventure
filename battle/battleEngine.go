@@ -34,27 +34,30 @@ const (
 )
 
 type Battle struct {
-	EnemyTurn          bool
-	Player             *battleStats.CharacterData
-	Enemy              *battleStats.CharacterData
-	turnInitiative     Initiative
-	nextTurnInitiative Initiative
-	BattlePhase        Phase
-	Turns              map[int]*Turn
-	Turn               int
-	BattleLost         bool
-	BattleWon          bool
-	PlayerAmmo         int
-	EnemyAmmo          int
-	WinningProb        int
-	State              State
-	Tension            int
-	EnemyDrawBonus     bool
-	PlayerDrawBonus    bool
-	DialogueText       string
+	EnemyTurn           bool
+	CharacterBattleData []*CharacterBattleData
+	Enemy               *battleStats.CharacterData
+	turnInitiative      Initiative
+	nextTurnInitiative  Initiative
+	BattlePhase         Phase
+	Turns               map[int]*Turn
+	Turn                int
+	BattleLost          bool
+	BattleWon           bool
+	WinningProb         int
+	State               State
+	Tension             int
+	DialogueText        string
+}
+
+type CharacterBattleData struct {
+	*battleStats.CharacterData
+	Ammo      int
+	DrawBonus bool
 }
 
 type Turn struct {
+	CharacterData          []*CharacterTurnData
 	Phase                  Phase
 	PlayerSkillUsed        battleStats.Skill
 	EnemySkillUsed         battleStats.Skill
@@ -82,16 +85,28 @@ type Turn struct {
 }
 
 func NewBattle(player *battleStats.CharacterData, enemy *battleStats.CharacterData) *Battle {
+	enemyBattleData := CharacterBattleData{
+		CharacterData: enemy,
+		Ammo:          6,
+		DrawBonus:     true,
+	}
+
+	playerBattleData := CharacterBattleData{
+		CharacterData: player,
+		Ammo:          6,
+		DrawBonus:     false,
+	}
+
+	charData := []*CharacterBattleData{&enemyBattleData, &playerBattleData}
+
 	battle := Battle{}
 	battle.EnemyTurn = false
-	battle.Player = player
+	battle.CharacterBattleData = charData
 	battle.Enemy = enemy
 	battle.BattlePhase = Dialogue
 	battle.Turns = make(map[int]*Turn)
 	battle.Turn = 0
 	battle.Turns[0] = &Turn{}
-	battle.PlayerAmmo = 6
-	battle.EnemyAmmo = 6
 	battle.WinningProb = 50
 	battle.turnInitiative = Player
 	battle.State = NotStarted
