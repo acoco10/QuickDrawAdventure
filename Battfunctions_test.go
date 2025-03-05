@@ -11,11 +11,6 @@ import (
 )
 
 func MakeTestBattle() *battle.Battle {
-	testTurn1 := battle.Turn{
-		PlayerMessage:  []string{"foo", "bar", "baz"},
-		EnemyMessage:   []string{"foo", "bar", "baz"},
-		TurnInitiative: battle.Enemy,
-	}
 
 	stats := map[string]int{
 		"health":    4,
@@ -29,8 +24,6 @@ func MakeTestBattle() *battle.Battle {
 	george := battleStats.NewCharacter("elyse", stats, map[string]battleStats.Skill{}, map[string]battleStats.Skill{}, "anger", "male1", 3)
 
 	b := battle.NewBattle(&elyse, &george)
-
-	b.Turns[0] = &testTurn1
 
 	return b
 }
@@ -60,8 +53,7 @@ func TestShoot(t *testing.T) {
 
 func TestBattleState(t *testing.T) {
 	testTurn1 := battle.Turn{
-		PlayerMessage:  []string{"foo", "bar", "baz"},
-		EnemyMessage:   []string{"foo", "bar", "baz"},
+
 		TurnInitiative: battle.Enemy,
 	}
 
@@ -190,6 +182,122 @@ func Test_use_stat_Buff(t *testing.T) {
 	if elyse.DisplayStat(battleStats.Anger) != 0 {
 		t.Fatalf(`method ResetStatusStats() failed to update correctly %d`, elyse.Stats[battleStats.Anger])
 	}
+
+}
+
+func TestLoadCharacters(t *testing.T) {
+	characters, err := battleStats.LoadCharacters()
+	if err != nil {
+		log.Fatal("error loading characters.json error:", err)
+	}
+
+	elyse := characters[battleStats.Elyse]
+	enemy := characters[battleStats.Antonio]
+
+	println("Testing Elyse Dialogue Skills")
+	println("-------------------------------------")
+	for _, skill := range elyse.CombatSkills {
+		println(skill.SkillName)
+	}
+
+	println("Testing Elyse Combat Skills")
+	println("-------------------------------------")
+	for _, skill := range elyse.DialogueSkills {
+		println(skill.SkillName)
+	}
+
+	println("Testing chosen enemy Dialogue Skills")
+	println("-------------------------------------")
+	for _, skill := range enemy.CombatSkills {
+		println(skill.SkillName)
+	}
+
+	println("Testing chosen enemy Combat Skills")
+	println("-------------------------------------")
+	for _, skill := range enemy.DialogueSkills {
+		println(skill.SkillName)
+	}
+
+}
+
+func TestEnemyChooseSkill(t *testing.T) {
+	characters, err := battleStats.LoadCharacters()
+	if err != nil {
+		log.Fatal("error loading characters.json error:", err)
+	}
+
+	elyse := characters[battleStats.Elyse]
+	enemy := characters[battleStats.Antonio]
+
+	testBattle := battle.NewBattle(&elyse, &enemy)
+
+	println("Testing Enemy Choose Dialogue Skills")
+	println("-------------------------------------")
+	for i := 0; i < 10; i++ {
+		_, err := battle.EnemyChooseSkill(*testBattle, enemy.DialogueSkills)
+		if err != nil {
+			log.Fatal("error when choosing skill")
+		}
+	}
+
+	println("Testing Enemy Choose Combat Skills")
+	println("-------------------------------------")
+
+	for i := 0; i < 10; i++ {
+		_, err := battle.EnemyChooseSkill(*testBattle, enemy.CombatSkills)
+		if err != nil {
+			log.Fatal("error when choosing skill")
+		}
+
+	}
+
+	testBattle.Tension = 0
+
+	var drawsChosen = make([]float64, 15)
+	var shotInBackChosen float64
+	var reloadChosen float64
+	index := 1
+	for i := 0; i < 1500; i++ {
+		if i > 100*index {
+			index++
+			testBattle.Tension++
+		}
+		skill, err := battle.EnemyChooseSkill(*testBattle, enemy.DialogueSkills)
+		if err != nil {
+			log.Fatal("error when choosing skill")
+		}
+		if skill.SkillName == "draw" {
+			drawsChosen[index-1]++
+		}
+		if skill.SkillName == "shotInTheBack" {
+			shotInBackChosen++
+		}
+	}
+	testBattle.BattlePhase = battle.Shooting
+	testBattle.CharacterBattleData[battle.Enemy].Ammo = 0
+	for i := 0; i < 100; i++ {
+		skill, err := battle.EnemyChooseSkill(*testBattle, enemy.CombatSkills)
+		if err != nil {
+			log.Fatal("error when choosing skill")
+		}
+		if skill.SkillName == "reload" {
+			reloadChosen++
+		}
+
+	}
+
+	println("Testing Enemy Choose Dialogue Skills Medium Tension")
+	println("-------------------------------------")
+	for i, draw := range drawsChosen {
+		print("tension =", i)
+		fmt.Printf("draw skill chosen %f percent of the time \n", draw/100)
+	}
+
+	fmt.Printf("shotInBack chosen %f percent of the time \n", shotInBackChosen/1000)
+
+	println("Testing Enemy reload 0 ammo")
+	println("-------------------------------------")
+	fmt.Printf("reload chosen %f percent of the time \n", reloadChosen/100)
 
 }
 

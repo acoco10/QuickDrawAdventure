@@ -9,7 +9,7 @@
     },
     "combat_skills": ["shoot", "focusedShot", "fanShot", "reload"],
     "dialogue_skills": ["stareDown","deadShot", "draw", "comeBack", "mamasGirl"],
-      "weakness": "fear",
+      "weakness": "guts",
       "soundFxType": "female1"
 },
 
@@ -24,8 +24,8 @@
     "anger":     0
 },
 "combat_skills": ["shoot", "focusedShot", "reload"],
-"dialogue_skills": ["stareDown", "draw", "insult", "brag"],
-  "weakness": "fear",
+"dialogue_skills": ["stareDown", "draw"],
+  "weakness": "guts",
   "soundFxType": "male1"
 },
 
@@ -40,7 +40,7 @@
         },
         "combat_skills": ["shoot", "focusedShot", "reload", "fanShot"],
         "dialogue_skills": ["stareDown","deadShot", "draw", "comeBack", "shotInTheBack"],
-        "weakness": "anger",
+        "weakness": "vanity",
   "soundFxType": "male1"
 },
   {"name": "sheriff",
@@ -55,8 +55,8 @@
 
     },
     "combat_skills": ["shoot", "focusedShot", "fanShot","reload"],
-    "dialogue_skills": ["stareDown", "draw", "insult", "brag"],
-    "weakness": "anger",
+    "dialogue_skills": ["stareDown", "draw"],
+    "weakness": "pride",
     "soundFxType": "male1"
   },
   {"name": "wolf",

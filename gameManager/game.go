@@ -77,7 +77,7 @@ func NewBattleTestGame() *Game {
 	}
 
 	activeSceneId := sceneManager.StartSceneId
-	glog := &sceneManager.GameLog{EnemyEncountered: battleStats.Sheriff,
+	glog := &sceneManager.GameLog{EnemyEncountered: battleStats.Antonio,
 		PlayerStats: &elyseStats,
 		Mode:        sceneManager.BattleTest,
 	}

@@ -2,6 +2,7 @@
     {"name": "stareDown",
         "index": 2,
         "tension": 2,
+        "text": "char specific",
         "effects": [{
             "type": "buff",
             "on" : "enemy",
@@ -17,44 +18,9 @@
             }
             ]
     },
-    {"name": "brag",
-        "index": 0,
-        "tension":1,
-        "effects": [
-            {
-                "type": "buff",
-                "on": "enemy",
-                "stat": "fear",
-                "amount": 2,
-                "successPer": 75
-            },
-            {
-                "type": "buff",
-                "on": "unsuccessfulSelf",
-                "stat": "fear",
-                "amount": 2,
-                "successPer": 65
-            }
-        ]
-    },
-
-    {"name": "insult",
-        "index": 1,
-        "tension": 2,
-    "effects": [
-        {
-            "type": "buff",
-            "on": "enemy",
-            "stat": "anger",
-            "amount": 3,
-            "successPer": 60
-        }
-    ]
-    },
-
-
     {"name": "draw",
         "index": 3,
+        "text": "char specific",
     "effects": [{
         "type": "draw",
         "stat": "na",

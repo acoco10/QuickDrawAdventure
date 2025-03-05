@@ -4,6 +4,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/audioManagement"
+	"github.com/acoco10/QuickDrawAdventure/battle"
 	"github.com/acoco10/QuickDrawAdventure/ui"
 	eimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
@@ -382,14 +383,14 @@ func GenerateStatusBarButton(g *BattleScene) (button *widget.Button) {
 }
 
 func DialogueSkillButtonEvent(g *BattleScene, text string) {
-	g.battle.GenerateTurn(g.battle.Player.DialogueSkills[text])
+	g.battle.GenerateTurn(g.battle.CharacterBattleData[battle.Player].DialogueSkills[text])
 	g.changeEvent(HideSkillMenu, 15)
 	g.inMenu = false
 	g.KeepCursorPressed()
 }
 
 func CombatSkillButtonEvent(g *BattleScene, text string) {
-	g.battle.TakeCombatTurn(g.battle.Player.CombatSkills[text])
+	g.battle.TakeCombatTurn(g.battle.CharacterBattleData[battle.Player].CombatSkills[text])
 	g.changeEvent(HideCombatMenu, 15)
 	g.inMenu = false
 	g.KeepCursorPressed()
@@ -398,7 +399,7 @@ func CombatSkillButtonEvent(g *BattleScene, text string) {
 func DrawSkillButtonEvent(g *BattleScene, text string) {
 	g.audioPlayer.Play(audioManagement.DrawButton)
 	g.TextPrinter.ResetTP()
-	g.battle.GenerateTurn(g.battle.Player.DialogueSkills["draw"])
+	g.battle.GenerateTurn(g.battle.CharacterBattleData[battle.Player].DialogueSkills["draw"])
 	g.TextPrinter.NextMessage = true
 	g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
 	g.changeEvent(HideSkillMenu, 15)

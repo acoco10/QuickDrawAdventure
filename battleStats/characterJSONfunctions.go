@@ -19,6 +19,15 @@ const (
 	None
 )
 
+type Weakness uint8
+
+const (
+	Vanity Weakness = iota
+	Pride
+	Guts
+	Brains
+)
+
 type CharacterJSON struct {
 	Name           string         `json:"name"`
 	Stats          map[string]int `json:"stats"`

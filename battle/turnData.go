@@ -10,17 +10,26 @@ type CharacterTurnData struct {
 	EffectsTriggered bool
 	Roll             bool
 	SecondaryRoll    bool
-	Damage           []int
-	Ammo             int
+	DamageOutput     []int
+	DamageTaken      []int
+	EventTriggered   bool
+	Completed        bool
 }
 
-func (c *CharacterTurnData) UpdateAmmo() {
+type CharacterBattleData struct {
+	*battleStats.CharacterData
+	Ammo      int
+	DrawBonus bool
+	*CharacterTurnData
+}
 
-	if c.SkillUsed.SkillName == "reload" {
-		c.Ammo = 6
+func (cb *CharacterBattleData) UpdateAmmo() {
+
+	if cb.SkillUsed.SkillName == "reload" {
+		cb.Ammo = 6
 	}
 
-	for _, effect := range c.SkillUsed.Effects {
-		c.Ammo -= effect.NShots
+	for _, effect := range cb.SkillUsed.Effects {
+		cb.Ammo -= effect.NShots
 	}
 }

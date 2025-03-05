@@ -13,7 +13,7 @@ type CharacterData struct {
 	DialogueSlots   int
 	SoundFxType     string
 	DialogueData    string
-	Weakness        Stat
+	Weakness        string
 	LearnedInsults  []int
 	LearnedBrags    []int
 	EquippedInsults []string
@@ -108,7 +108,6 @@ func (pc *CharacterData) ResetHealth() {
 }
 
 func NewCharacter(name string, stats map[string]int, combatSkills map[string]Skill, dialogueSkills map[string]Skill, Weakness string, soundFx string, dialogueSlots int) CharacterData {
-	var weakness Stat
 	charStats := map[Stat]int{}
 	for key, stat := range stats {
 		if key == "health" {
@@ -135,20 +134,13 @@ func NewCharacter(name string, stats map[string]int, combatSkills map[string]Ski
 		charStatsCopy[key] = stat
 	}
 
-	if Weakness == "fear" {
-		weakness = Fear
-	}
-	if Weakness == "anger" {
-		weakness = Anger
-	}
-
 	char := CharacterData{
 		Name:           name,
 		Stats:          charStats,
 		baselineStats:  charStatsCopy,
 		CombatSkills:   combatSkills,
 		DialogueSkills: dialogueSkills,
-		Weakness:       weakness,
+		Weakness:       Weakness,
 		SoundFxType:    soundFx,
 		DialogueSlots:  dialogueSlots,
 	}
@@ -174,7 +166,7 @@ func StringToStat(s string) (Stat, error) {
 	if s == "fear" {
 		return Fear, nil
 	}
-	if s == "DrawSpeed" {
+	if s == "drawSpeed" {
 		return DrawSpeed, nil
 	}
 	if s == "TensionThreshold" {

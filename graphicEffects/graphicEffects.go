@@ -23,6 +23,7 @@ type GraphicEffect interface {
 	Draw(screen *ebiten.Image, depth int)
 	Update()
 	AccessImage() *ebiten.Image
+
 	Trigger()
 	CheckState() EffectState
 	UnTrigger()

@@ -54,7 +54,7 @@ func (os *OnScreenStatsUI) LoadEffects() error {
 }
 func (os *OnScreenStatsUI) ProcessTension(bs BattleScene) {
 
-	enemyTensionThreshHold := bs.battle.Enemy.DisplayStat(battleStats.TensionThreshold)
+	enemyTensionThreshHold := bs.battle.CharacterBattleData[battle.Enemy].DisplayStat(battleStats.TensionThreshold)
 
 	if float32(bs.battle.Tension) >= float32(enemyTensionThreshHold/2) && bs.battle.Tension < enemyTensionThreshHold {
 		if os.tensionMeter.Frame() == 0 {
@@ -132,7 +132,7 @@ func (os *OnScreenStatsUI) Draw(gameBattle battle.Battle, screen *ebiten.Image) 
 	if gameBattle.BattlePhase == battle.Shooting {
 		os.ammoEffect.MakeVisible()
 		screen.DrawImage(os.healthBar, &opts)
-		health := float32(gameBattle.Player.DisplayStat(battleStats.Health)) / float32(gameBattle.Player.DisplayBaselineStat(battleStats.Health))
+		health := float32(gameBattle.CharacterBattleData[battle.Player].DisplayStat(battleStats.Health)) / float32(gameBattle.CharacterBattleData[battle.Player].DisplayBaselineStat(battleStats.Health))
 		vector.DrawFilledRect(screen, float32(116), float32(75), float32(64*4*health), float32(15), clr, false)
 	}
 

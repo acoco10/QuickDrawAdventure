@@ -55,11 +55,11 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.backGround = *backGroundImg
 
 	playerBS := LoadPlayerBattleSprite()
-	playerBS.LoadEffect(*g.battle.Player)
+	playerBS.LoadEffect(*g.battle.CharacterBattleData[battle.Player].CharacterData)
 	g.playerBattleSprite = &playerBS
 
 	enemyBS := LoadEnemyBattleSprite(enemy)
-	enemyBS.LoadEffect(*g.battle.Enemy)
+	enemyBS.LoadEffect(*g.battle.CharacterBattleData[battle.Enemy].CharacterData)
 	g.enemyBattleSprite = &enemyBS
 
 	g.onScreenStatsUI = &OnScreenStatsUI{}
@@ -106,8 +106,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	dialogueSkillNames := make([]string, dSkillsLength)
 
 	for _, skill := range elyse.DialogueSkills {
-		i := skill.Index
-		dialogueSkillNames[i] = skill.SkillName
+		dialogueSkillNames = append(dialogueSkillNames, skill.SkillName)
 		if skill.SkillName == "" {
 			println("Skill name is empty", skill.Text)
 		}
@@ -331,7 +330,7 @@ func (g *BattleScene) Draw(screen *ebiten.Image) {
 	g.onScreenStatsUI.Draw(*g.battle, screen)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 	//PrintStatus(g, screen)
-	//debugTextPrint(screen, g)
+	debugTextPrint(screen, g)
 	if g.battle.BattlePhase == battle.Dialogue {
 		PrintOnlyDrawProb(g, screen)
 	}
@@ -359,12 +358,12 @@ func PrintStatus(g *BattleScene, screen *ebiten.Image) {
 
 	dp := g.battle.WinningProb
 
-	playerAmmo := fmt.Sprintf("Player Ammo:%d", g.battle.PlayerAmmo)
-	enemyAmmo := fmt.Sprintf("Enemy Ammo :%d", g.battle.EnemyAmmo)
+	playerAmmo := fmt.Sprintf("Player Ammo:%d", g.battle.CharacterBattleData[battle.Player].Ammo)
+	enemyAmmo := fmt.Sprintf("Enemy Amoo:%d", g.battle.CharacterBattleData[battle.Enemy].Ammo)
 
 	winningProbText := fmt.Sprintf("Probability of Winning ReadyDraw:%d", dp)
-	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.Player.DisplayStat(battleStats.Health))
-	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.Enemy.DisplayStat(battleStats.Health))
+	playerHealth := fmt.Sprintf("Player Health:%d", g.battle.CharacterBattleData[battle.Player].DisplayStat(battleStats.Health))
+	enemyHealth := fmt.Sprintf("Enemy Health:%d", g.battle.CharacterBattleData[battle.Enemy].DisplayStat(battleStats.Health))
 	tensionMeter := fmt.Sprintf("Tension:%d", g.battle.Tension)
 
 	dopts := text.DrawOptions{}
