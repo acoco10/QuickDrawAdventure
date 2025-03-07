@@ -84,13 +84,13 @@ func (t *TextPrinter) textWrapper(text string) string {
 	if t.charactersPerLine < 10 {
 		log.Fatalf(`line length too small: %d\n`, t.charactersPerLine)
 	}
-	if len(text) <= t.charactersPerLine+1 {
+	if len(text) <= t.charactersPerLine {
 		return text
 	}
 	letters := strings.Split(text, "")
-	letter := letters[t.charactersPerLine+1]
-	i := t.charactersPerLine + 1
-	for letter != " " {
+	letter := letters[t.charactersPerLine]
+	i := t.charactersPerLine
+	for letter != " " && letter != "." {
 		letter = letters[i]
 		i--
 	}
@@ -106,11 +106,12 @@ func (t *TextPrinter) MessageWrapperToLines(text string) (output []string) {
 	for _ = range nLines {
 		wrappedLine := t.textWrapper(text)
 		//[0:10]
-		output = append(output, strings.TrimSpace(wrappedLine))
+		if wrappedLine != "" {
+			output = append(output, strings.TrimSpace(wrappedLine))
+		}
 		//len [9:]
 		text = text[len(wrappedLine):]
 	}
-
 	return output
 }
 
@@ -118,6 +119,7 @@ func (t *TextPrinter) PrintText() (output string) {
 	characters := strings.Split(t.lines[t.lineCounter], "")
 	if t.stringPosition > len(characters) {
 	}
+
 	return strings.Join(characters[:t.stringPosition], "")
 }
 

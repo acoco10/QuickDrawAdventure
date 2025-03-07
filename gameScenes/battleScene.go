@@ -219,7 +219,6 @@ func (g *BattleScene) Layout(outsideWidth int, outsideHeight int) (int, int) {
 // Update implements gameScenes.
 func (g *BattleScene) Update() sceneManager.SceneId {
 	g.battle.UpdateState()
-	turn := g.battle.GetTurn()
 	g.UpdateOutputDuringNonTurn()
 	g.musicPlayer.Update()
 	g.TextPrinter.countDownUpdate()
@@ -294,10 +293,11 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 		g.changeEvent(NoEvent, 0)
 	}
 
-	g.PlayerDialogueTurn(turn)
-	g.EnemyDialogueTurn(turn)
-	g.PlayerShootingTurn(turn)
-	g.EnemyShootingTurn(turn)
+	//	g.PlayerDialogueTurn(turn)
+	//g.EnemyDialogueTurn(turn)
+	//g.PlayerShootingTurn(turn)
+	//g.EnemyShootingTurn(turn)
+	g.UpdateTurn()
 	g.CheckAndEndBattle()
 	g.UpdateSceneChangeCountdown()
 

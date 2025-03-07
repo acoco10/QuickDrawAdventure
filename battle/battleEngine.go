@@ -34,7 +34,6 @@ const (
 )
 
 type Battle struct {
-	EnemyTurn           bool
 	CharacterBattleData map[Initiative]*CharacterBattleData
 	turnInitiative      Initiative
 	nextTurnInitiative  Initiative
@@ -55,9 +54,7 @@ type Turn struct {
 	WinProbAfterPlayerTurn int
 	WinProbAfterEnemyTurn  int
 	TurnInitiative         Initiative
-	PlayerIndex            int
 	EnemyIndex             int
-	PlayerTurnCompleted    bool
 	EnemyTurnCompleted     bool
 }
 
@@ -65,7 +62,7 @@ func NewBattle(player *battleStats.CharacterData, enemy *battleStats.CharacterDa
 	enemyBattleData := CharacterBattleData{
 		CharacterData:     enemy,
 		Ammo:              6,
-		DrawBonus:         true,
+		DrawBonus:         false,
 		CharacterTurnData: &CharacterTurnData{},
 	}
 
@@ -82,7 +79,6 @@ func NewBattle(player *battleStats.CharacterData, enemy *battleStats.CharacterDa
 	charData[Player] = &playerBattleData
 
 	battle := Battle{}
-	battle.EnemyTurn = false
 	battle.CharacterBattleData = charData
 	battle.BattlePhase = Dialogue
 	battle.Turns = make(map[int]*Turn)
@@ -111,20 +107,21 @@ func (b *Battle) GetTurn() *Turn {
 }
 
 func (b *Battle) UpdateState() {
-	turn := b.GetTurn()
+	player := b.CharacterBattleData[Player]
+	enemy := b.CharacterBattleData[Enemy]
 	if b.turnInitiative == Player && len(b.CharacterBattleData[Player].Message) > 0 {
-		if !turn.PlayerTurnCompleted {
+		if !player.Completed {
 			b.State = PlayerTurn
-		} else if !turn.EnemyTurnCompleted {
+		} else if !enemy.Completed {
 			b.State = EnemyTurn
 		} else {
 			b.State = NextTurn
 		}
 	}
 	if b.turnInitiative == Enemy && len(b.CharacterBattleData[Enemy].Message) > 0 {
-		if !turn.EnemyTurnCompleted {
+		if !enemy.Completed {
 			b.State = EnemyTurn
-		} else if !turn.PlayerTurnCompleted {
+		} else if !player.Completed {
 			b.State = PlayerTurn
 		} else {
 			b.State = NextTurn
@@ -200,25 +197,37 @@ func (b *Battle) DamageCharacter(charDamaged Initiative, attacker Initiative) {
 	}
 }
 
-func (b *Battle) UpdateChar(char *CharacterBattleData, enemy *CharacterBattleData, skillUsed battleStats.Skill) {
+func (b *Battle) UpdateChar(char *CharacterBattleData, enemy *CharacterBattleData) {
 	char.EffectsTriggered = false
 	char.EventTriggered = false
 	char.Completed = false
 	char.WeaknessTargeted = false
-	char.SkillUsed = skillUsed
-	char.Roll = Roll(skillUsed.Effects[0].SuccessPer)
-	if len(skillUsed.Effects) > 1 {
-		char.SecondaryRoll = Roll(skillUsed.Effects[1].SuccessPer)
+	char.Index = 0
+	char.DrawBonus = false
+	char.Roll = Roll(char.SkillUsed.Effects[0].SuccessPer)
+	if char.Stunned {
+		char.Message = []string{fmt.Sprintf("%s is so flabergasted by %s's come back they don't know what to say", char.Name, enemy.Name)}
+		char.SkillUsed = battleStats.Skill{}
+		char.Stunned = false
+	} else {
+		if len(char.SkillUsed.Effects) > 1 {
+			char.SecondaryRoll = Roll(char.SkillUsed.Effects[1].SuccessPer)
+		}
+		CheckWeakness(char, enemy)
+		switch char.SkillUsed.SkillName {
+		case "draw":
+			drawMSG := b.DrawFunction(char, enemy)
+			char.Message = drawMSG
+		case "comeBack":
+			char.Message = []string{fmt.Sprintf("%s thinks of a good come back", char.Name)}
+		default:
+			char.Message = b.generateMessageForUsedDialogueSkill(*char, *enemy)
+		}
 	}
-	CheckWeakness(char, enemy)
-	if skillUsed.SkillName != "draw" {
-		char.Message = b.generateMessageForUsedDialogueSkill(*char, *enemy)
-	}
-	if skillUsed.SkillName == "draw" {
-		drawMSG := b.DrawFunction(char, enemy)
-		char.Message = drawMSG
-	}
+}
 
+func (b *Battle) ComeBackSkill(char *CharacterBattleData) {
+	char.ComeBackEquipped = true
 }
 
 func CheckWeakness(char *CharacterBattleData, enemy *CharacterBattleData) {
@@ -229,16 +238,7 @@ func CheckWeakness(char *CharacterBattleData, enemy *CharacterBattleData) {
 	}
 }
 
-func DrawInitiative(player *CharacterBattleData, enemy *CharacterBattleData) Initiative {
-	battleInitiative := ReadyDraw(player.DisplayStats(), enemy.DisplayStats())
-	if battleInitiative {
-		return Player
-	} else {
-		return Enemy
-	}
-}
-
-func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
+func (b *Battle) DialogueTurn(playerSkill battleStats.Skill) {
 	if b.turnInitiative != b.nextTurnInitiative && b.BattlePhase != Dialogue { //no idea how but we were getting into this loop during the shooting phase sometimes
 		fmt.Printf("battle.go:81: changing turn initiative from:%d to:%d", b.turnInitiative, b.nextTurnInitiative)
 		b.UpdateInitiative(b.nextTurnInitiative)
@@ -253,7 +253,7 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 	for _, char := range b.CharacterBattleData {
 		println("updating character:", char.Name)
 		if char.Name == "elyse" {
-			b.UpdateChar(char, b.CharacterBattleData[Enemy], playerSkill)
+			b.UpdateChar(char, b.CharacterBattleData[Enemy])
 		} else {
 			skillUsed, err := EnemyChooseSkill(*b, char.DialogueSkills)
 			if err != nil {
@@ -261,13 +261,13 @@ func (b *Battle) GenerateTurn(playerSkill battleStats.Skill) {
 			}
 
 			println("enemy chose:", skillUsed.SkillName)
-			b.UpdateChar(char, b.CharacterBattleData[Player], skillUsed)
+			b.UpdateChar(char, b.CharacterBattleData[Player])
 		}
 	}
 }
 
 func (b *Battle) DrawFunction(user *CharacterBattleData, opponent *CharacterBattleData) []string {
-	dInitiative := DrawInitiative(b.CharacterBattleData[Player], b.CharacterBattleData[Enemy])
+	dInitiative := ReadyDraw(b.CharacterBattleData[Player].DisplayStats(), b.CharacterBattleData[Enemy].DisplayStats())
 	drawSkillDialogue := b.GenDrawMessage(*user, *opponent, dInitiative)
 	b.nextTurnInitiative = dInitiative
 	return drawSkillDialogue
@@ -281,7 +281,13 @@ func (b *Battle) SetDrawBonus() {
 	}
 }
 
-func (b *Battle) EnactEffects(skill battleStats.Skill, user *battleStats.CharacterData, opponent *battleStats.CharacterData, roll bool, secondaryRoll bool) {
+func (b *Battle) EnactEffects(skill battleStats.Skill, user *CharacterBattleData, opponent *CharacterBattleData, roll bool, secondaryRoll bool) {
+	if skill.SkillName == "" {
+		return
+	}
+	if skill.SkillName == "comeBack" {
+		b.ComeBackSkill(user)
+	}
 	b.Tension = b.Tension + skill.Tension
 	SkillEffectOne := skill.Effects[0]
 	var skillEffectTwo battleStats.Effect
@@ -289,28 +295,36 @@ func (b *Battle) EnactEffects(skill battleStats.Skill, user *battleStats.Charact
 	if len(skill.Effects) > 1 {
 		skillEffectTwo = skill.Effects[1]
 	}
-
-	if roll {
-		if SkillEffectOne.On == "enemy" {
-			b.Buff(opponent, SkillEffectOne, skill.Target)
-		}
-		if SkillEffectOne.On == "self" {
-			b.Buff(user, SkillEffectOne, skill.Target)
-		}
-	}
-
-	if secondaryRoll {
-		if skillEffectTwo.On == "enemy" {
-			b.Buff(opponent, SkillEffectOne, skill.Target)
-		}
-
-		if skillEffectTwo.On == "unsuccessfulSelf" && !roll {
-			b.Buff(user, skillEffectTwo, skill.Target)
-		}
-		if skillEffectTwo.On == "successfulSelf" && roll {
-			b.Buff(user, skillEffectTwo, skill.Target)
+	if skill.Effects[0].On == "enemy" && opponent.ComeBackEquipped {
+		opponent.ComeBackEquipped = false
+		user.Stunned = true
+		var Effects = make([]battleStats.Effect, 1)
+		copy(Effects, skill.Effects)
+		Effects[0].Amount = Effects[0].Amount * 2
+		b.Buff(user.CharacterData, skill.Effects[0], skill.Target)
+	} else {
+		if roll {
+			if SkillEffectOne.On == "enemy" {
+				b.Buff(opponent.CharacterData, SkillEffectOne, skill.Target)
+			}
+			if SkillEffectOne.On == "self" {
+				b.Buff(user.CharacterData, SkillEffectOne, skill.Target)
+			}
 		}
 
+		if secondaryRoll {
+			if skillEffectTwo.On == "enemy" {
+				b.Buff(opponent.CharacterData, SkillEffectOne, skill.Target)
+			}
+
+			if skillEffectTwo.On == "unsuccessfulSelf" && !roll {
+				b.Buff(user.CharacterData, skillEffectTwo, skill.Target)
+			}
+			if skillEffectTwo.On == "successfulSelf" && roll {
+				b.Buff(user.CharacterData, skillEffectTwo, skill.Target)
+			}
+
+		}
 	}
 }
 
@@ -326,15 +340,16 @@ func (b *Battle) GenDrawMessage(turnTaker CharacterBattleData, opponent Characte
 			drawMessage = append(drawMessage, fmt.Sprintf("%s draws a second faster!", opponent.Name))
 			return drawMessage
 		}
-	}
-	if battleInitiative == Enemy {
-		drawMessage = append(drawMessage, fmt.Sprintf("%s reaches for their gun", turnTaker.Name))
-		drawMessage = append(drawMessage, fmt.Sprintf("He's a second faster!"))
-		return drawMessage
 	} else {
-		drawMessage = append(drawMessage, fmt.Sprintf("%s reaches for their gun!", turnTaker.Name))
-		drawMessage = append(drawMessage, fmt.Sprintf("Elyse is a second faster!"))
-		return drawMessage
+		if battleInitiative == Enemy {
+			drawMessage = append(drawMessage, fmt.Sprintf("%s reaches for their gun", turnTaker.Name))
+			drawMessage = append(drawMessage, fmt.Sprintf("He's a second faster!"))
+			return drawMessage
+		} else {
+			drawMessage = append(drawMessage, fmt.Sprintf("%s reaches for their gun!", turnTaker.Name))
+			drawMessage = append(drawMessage, fmt.Sprintf("Elyse is a second faster!"))
+			return drawMessage
+		}
 	}
 }
 
@@ -349,14 +364,17 @@ func (b *Battle) generateMessageForUsedDialogueSkill(turnTaker CharacterBattleDa
 	dialogue := turnTaker.SkillUsed.Text
 	message = append(message, dialogue)
 
-	if !turnTaker.Roll {
+	if skill.Effects[0].On == "enemy" && opponent.ComeBackEquipped {
+		comeBackDialogue := opponent.DialogueSkills["comeBack"].Text
+		message = append(message, comeBackDialogue)
+		message = append(message, fmt.Sprintf("%s's %s increased by %d", turnTaker.Name, skill.Effects[0].Stat, skill.Effects[0].Amount*2))
+
+	} else if !turnTaker.Roll {
 		message = append(message, fmt.Sprintf("%s is ineffective", skillName))
 		if turnTaker.SecondaryRoll && skill.Effects[0].On == "unsuccessfulSelf" {
 			message = append(message, fmt.Sprintf("%s's %s increased by %d", name, skill.Effects[1].Stat, skill.Effects[1].Amount))
 		}
-	}
-
-	if turnTaker.Roll {
+	} else if turnTaker.Roll {
 		message = append(message, fmt.Sprintf("%s is effective", skillName))
 
 		if skill.Effects[0].On == "self" {
@@ -399,59 +417,70 @@ func (b *Battle) UpdateCharCombat(char *CharacterBattleData, enemy *CharacterBat
 	char.Completed = false
 	char.WeaknessTargeted = false
 	char.SkillUsed = skillUsed
+	char.Index = 0
 	char.Roll = Roll(skillUsed.Effects[0].SuccessPer)
 	if len(skillUsed.Effects) > 1 {
 		char.SecondaryRoll = Roll(skillUsed.Effects[1].SuccessPer)
 	}
-	CheckWeakness(char, enemy)
-
-	currentAmmo := char.Ammo
-	var effectedStat battleStats.Stat
-	var oneTurnBuffAmount int
-	for _, effect := range char.SkillUsed.Effects {
-
-		if effect.EffectType == "buff" {
-			if effect.On == "self" {
-
-				effStat, err := battleStats.StringToStat(effect.Stat)
-
-				if err != nil {
-					log.Fatal(err)
-				}
-				effectedStat = effStat
-
-				oneTurnBuffAmount = effect.Amount
-				b.Buff(char.CharacterData, effect, char.SkillUsed.Target)
-			}
-			if effect.On == "enemy" {
-				b.Buff(enemy.CharacterData, effect, char.SkillUsed.Target)
-			}
-		}
-
-		if effect.EffectType == "shot" {
-			for shot := 0; shot < effect.NShots; shot++ {
-				if currentAmmo > 0 {
-					currentAmmo--
-					damage := Shoot(char.DisplayStat(battleStats.Accuracy), char.DisplayStat(battleStats.Fear), char.DisplayStat(battleStats.Anger), effect.SuccessPer, effect.DamageRange)
-					enemy.DamageTaken = append(enemy.DamageTaken, damage)
-				} else {
-					enemy.DamageTaken = append(enemy.DamageTaken, -1)
-				}
-			}
-		}
-		if effect.EffectType == "reload" {
-			char.Ammo = 6
-		}
-	}
-
-	if oneTurnBuffAmount > 0 {
-		fmt.Printf("battle line 350: Resetting %s one turn buff from: %d ", char.Name, char.DisplayStat(effectedStat))
-		char.UpdateStat(effectedStat, -oneTurnBuffAmount)
-		fmt.Printf("to: %d\n buff amount was: %d\n", char.DisplayStat(effectedStat), oneTurnBuffAmount)
-	}
-	message := b.GenerateMessageForUsedCombatSkill(char.Name, char.SkillUsed.SkillName, enemy.DamageTaken)
+	b.CombatSkill(char, enemy)
+	message := b.GenerateMessageForUsedCombatSkill(char.Name, char.SkillUsed.SkillName, char.DamageOutput)
 	char.Message = message
+}
 
+func (b *Battle) CombatSkill(char *CharacterBattleData, enemy *CharacterBattleData) {
+	for _, effect := range char.SkillUsed.Effects {
+		switch effect.EffectType {
+		case "buff":
+			b.BattleBuff(char, enemy, effect)
+		case "shot":
+			b.GenDamageOutput(char, effect)
+		case "reload":
+			char.Ammo = 6
+			char.DamageOutput = []int{}
+		}
+
+		b.TempBuffReset(char, char.SkillUsed.Effects)
+	}
+}
+
+func (b *Battle) TempBuffReset(char *CharacterBattleData, effects []battleStats.Effect) {
+	for _, effect := range effects {
+		if effect.EffectType == "buff" {
+			effStat, err := battleStats.StringToStat(effect.Stat)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			char.UpdateStat(effStat, -effect.Amount)
+		}
+	}
+}
+
+func (b *Battle) BattleBuff(char *CharacterBattleData, enemy *CharacterBattleData, effect battleStats.Effect) {
+	if effect.On == "self" {
+		b.Buff(char.CharacterData, effect, char.SkillUsed.Target)
+	}
+	if effect.On == "enemy" {
+		b.Buff(enemy.CharacterData, effect, char.SkillUsed.Target)
+	}
+}
+
+func (b *Battle) GenDamageOutput(char *CharacterBattleData, effect battleStats.Effect) {
+
+	var totalDamage []int
+	currentAmmo := char.Ammo
+	for shot := 0; shot < effect.NShots; shot++ {
+		if currentAmmo > 0 {
+			currentAmmo--
+			damage := Shoot(char.DisplayStat(battleStats.Accuracy), char.DisplayStat(battleStats.Fear), char.DisplayStat(battleStats.Anger), effect.SuccessPer, effect.DamageRange)
+			println("Appending Damage to char damage output", damage)
+			totalDamage = append(totalDamage, damage)
+		} else {
+			totalDamage = append(totalDamage, -1)
+		}
+	}
+	char.DamageOutput = totalDamage
 }
 
 func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
@@ -466,13 +495,13 @@ func (b *Battle) TakeCombatTurn(playerSkill battleStats.Skill) {
 	for _, char := range b.CharacterBattleData {
 		println("updating character:", char.Name)
 		if char.Name == "elyse" {
-			b.UpdateCharCombat(char, b.CharacterBattleData[Player], playerSkill)
+			b.UpdateCharCombat(char, b.CharacterBattleData[Enemy], playerSkill)
 		} else {
 			skillUsed, err := EnemyChooseSkill(*b, char.CombatSkills)
 			if err != nil {
 				log.Fatal(err)
 			}
-			b.UpdateCharCombat(char, b.CharacterBattleData[Enemy], skillUsed)
+			b.UpdateCharCombat(char, b.CharacterBattleData[Player], skillUsed)
 		}
 	}
 }

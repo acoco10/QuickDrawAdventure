@@ -11,9 +11,10 @@ type CharacterTurnData struct {
 	Roll             bool
 	SecondaryRoll    bool
 	DamageOutput     []int
-	DamageTaken      []int
 	EventTriggered   bool
 	Completed        bool
+	ComeBackEquipped bool
+	Stunned          bool
 }
 
 type CharacterBattleData struct {
@@ -31,5 +32,8 @@ func (cb *CharacterBattleData) UpdateAmmo() {
 
 	for _, effect := range cb.SkillUsed.Effects {
 		cb.Ammo -= effect.NShots
+		if cb.Ammo < 0 {
+			cb.Ammo = 0
+		}
 	}
 }

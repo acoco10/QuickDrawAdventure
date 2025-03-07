@@ -34,11 +34,12 @@ func GenerateSkillButton(text string, g *BattleScene) (button *widget.Button) {
 		widget.ButtonOpts.Image(buttonImage),
 		// add a handler that reacts to clicking the button
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			DialogueSkillButtonEvent(g, text)
+			DialogueSkillButtonEvent(g, text, button)
 
 		}),
 		widget.ButtonOpts.Text(buttonText, face, &widget.ButtonTextColor{
-			Idle: color.RGBA{R: 102, G: 57, B: 48, A: 255},
+			Idle:     color.RGBA{R: 102, G: 57, B: 48, A: 255},
+			Disabled: color.NRGBA{R: 0, G: 100, B: 100, A: 255},
 		}),
 
 		widget.ButtonOpts.TextProcessBBCode(true),
@@ -119,8 +120,7 @@ func StatusTextInput(textType string) *widget.TextInput {
 			}),
 		),
 		widget.TextInputOpts.Image(&widget.TextInputImage{
-			Idle:     eimage.NewNineSliceColor(color.NRGBA{R: 100, G: 100, B: 100, A: 0}),
-			Disabled: eimage.NewNineSliceColor(color.NRGBA{R: 0, G: 100, B: 100, A: 0}),
+			Idle: eimage.NewNineSliceColor(color.NRGBA{R: 100, G: 100, B: 100, A: 0}),
 		}),
 		widget.TextInputOpts.Face(face),
 
@@ -332,7 +332,8 @@ func GenerateCombatSkillButtons(text string, g *BattleScene) (button *widget.But
 			CombatSkillButtonEvent(g, text)
 		}),
 		widget.ButtonOpts.Text(buttonText, face, &widget.ButtonTextColor{
-			Idle: color.RGBA{R: 102, G: 57, B: 48, A: 255},
+			Idle:     color.RGBA{R: 102, G: 57, B: 48, A: 255},
+			Disabled: color.RGBA{R: 102, G: 100, B: 255, A: 255},
 		}),
 
 		widget.ButtonOpts.TextProcessBBCode(true),
@@ -382,11 +383,19 @@ func GenerateStatusBarButton(g *BattleScene) (button *widget.Button) {
 	return statusButton
 }
 
-func DialogueSkillButtonEvent(g *BattleScene, text string) {
-	g.battle.GenerateTurn(g.battle.CharacterBattleData[battle.Player].DialogueSkills[text])
+func DialogueSkillButtonEvent(g *BattleScene, text string, button *widget.Button) {
+	player := g.battle.CharacterBattleData[battle.Player]
+	enemy := g.battle.CharacterBattleData[battle.Enemy]
+	enemy.EventTriggered = false
+	player.EventTriggered = false
+	player.SkillUsed = g.battle.CharacterBattleData[battle.Player].DialogueSkills[text]
+	g.battle.UpdateChar(player, enemy)
 	g.changeEvent(HideSkillMenu, 15)
 	g.inMenu = false
 	g.KeepCursorPressed()
+	if text == "comeBack" {
+		button.GetWidget().Disabled = true
+	}
 }
 
 func CombatSkillButtonEvent(g *BattleScene, text string) {
@@ -399,7 +408,7 @@ func CombatSkillButtonEvent(g *BattleScene, text string) {
 func DrawSkillButtonEvent(g *BattleScene, text string) {
 	g.audioPlayer.Play(audioManagement.DrawButton)
 	g.TextPrinter.ResetTP()
-	g.battle.GenerateTurn(g.battle.CharacterBattleData[battle.Player].DialogueSkills["draw"])
+	g.battle.DialogueTurn(g.battle.CharacterBattleData[battle.Player].DialogueSkills["draw"])
 	g.TextPrinter.NextMessage = true
 	g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
 	g.changeEvent(HideSkillMenu, 15)

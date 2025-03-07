@@ -71,9 +71,9 @@ func SkillRandomizer(skills map[string]battleStats.Skill) (skill battleStats.Ski
 	return skills[skillKeys[randSkillInt]]
 }
 
-func ReadyDraw(userStats map[battleStats.Stat]int, oppStats map[battleStats.Stat]int) bool {
+func ReadyDraw(userStats map[battleStats.Stat]int, oppStats map[battleStats.Stat]int) Initiative {
 
-	initiative := true
+	initiative := Player
 
 	userDS := float64(userStats[battleStats.DrawSpeed]) - float64(userStats[battleStats.Anger])*5 - float64(userStats[battleStats.Fear])*5
 	opponentDS := float64(oppStats[battleStats.DrawSpeed]) - float64(oppStats[battleStats.Anger])*5 - float64(oppStats[battleStats.Fear])*5
@@ -81,7 +81,7 @@ func ReadyDraw(userStats map[battleStats.Stat]int, oppStats map[battleStats.Stat
 	fmt.Printf("enemyDS: %d, enemy fear: %d, enemy anger: %d", oppStats[battleStats.DrawSpeed], oppStats[battleStats.Anger], oppStats[battleStats.Fear])
 
 	if float64(rand.IntN(101)) > 50+userDS-opponentDS {
-		initiative = false
+		initiative = Enemy
 	}
 	return initiative
 }
