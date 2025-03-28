@@ -283,7 +283,7 @@ func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x
 func (bs *BattleSprite) LoadEffect(char battleStats.CharacterData) {
 	effects := make(map[graphicEffects.EffectType]graphicEffects.GraphicEffect, 0)
 	basePath := "images/characters/battleSprites/" + char.Name + "/" + char.Name
-	if len(char.DialogueSkills) > 0 {
+	if len(char.EquippedDialogueSkills) > 0 {
 		starePath := basePath + "StareEffect.png"
 		stareSpriteSheet := spritesheet.NewSpritesheet(7, 1, 320, 180)
 		stareDownImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, starePath)

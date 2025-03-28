@@ -31,6 +31,7 @@ const (
 	DialogueMusic
 	BattleMusic
 	BlowingSmoke
+	HorseWinny
 )
 
 var audioContext = audio.NewContext(44100)
@@ -91,6 +92,11 @@ func GameSFXLoader() *resource.Loader {
 		log.Fatal("cannot load blowing.wav")
 	}
 
+	horseWinny, err := combatSFX.ReadFile("sounds/combatSFX/horseWinny.wav")
+	if err != nil {
+		log.Fatal("cannot load horse.wav")
+	}
+
 	var SoundData = map[string][]byte{
 		"sounds/combatSFX/gunShot.wav":         gunShot,
 		"sounds/combatSFX/whizz.wav":           miss,
@@ -103,6 +109,7 @@ func GameSFXLoader() *resource.Loader {
 		"sounds/combatSFX/noAmmo.wav":          noAmmo,
 		"sounds/combatSFX/reload.wav":          reload,
 		"sounds/combatSFX/blowingSmoke.wav":    victoryBlow,
+		"sounds/combatSFX/horseWinny.wav":      horseWinny,
 	}
 
 	l := resource.NewLoader(audioContext)
@@ -123,6 +130,7 @@ func GameSFXLoader() *resource.Loader {
 		NoAmmo:          {Path: "sounds/combatSFX/noAmmo.wav", Volume: 0.2},
 		Reload:          {Path: "sounds/combatSFX/reload.wav", Volume: 0.0},
 		BlowingSmoke:    {Path: "sounds/combatSFX/blowingSmoke.wav", Volume: 0.2},
+		HorseWinny:      {Path: "sounds/combatSFX/horseWinny.wav", Volume: 0.2},
 	})
 
 	return l

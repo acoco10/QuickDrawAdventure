@@ -5,7 +5,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.Camera, screen *ebiten.Image, stairTriggers map[string]*Trigger) {
+func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.Camera, screen *ebiten.Image, dark bool) {
 	opts := ebiten.DrawImageOptions{}
 	for _, layer := range tileMapJson.Layers {
 		if layer.Type == "objectgroup" {
@@ -45,6 +45,9 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 
 			opts.GeoM.Translate(cam.X, cam.Y)
 			opts.GeoM.Scale(4, 4)
+
+			opts.ColorScale.ScaleAlpha(1)
+
 			screen.DrawImage(img, &opts)
 
 			// reset the opts for the next tile
@@ -55,19 +58,20 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 
 }
 
-func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.Camera, screen *ebiten.Image, player Character, stairTriggers map[string]*Trigger) {
+func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.Camera, screen *ebiten.Image, player Character, Triggers map[string]*Trigger, dark bool) {
 	opts := ebiten.DrawImageOptions{}
 	for _, layer := range tileMapJSON.Layers {
 		if layer.Type == "objectgroup" {
 			continue
 		}
 		if layer.Class == "trigger" {
-			stairCheck := layer.Properties[0]
-			if stairTriggers[stairCheck.Value].Triggered {
+			Check := layer.Properties[0]
+			if Triggers[Check.Value].Triggered {
+				//in this case triggered being true means the player walked over this spot, meaning we want to draw the map below them but not above
+				//so the trigger is true (on) but the layer is off
 				continue
 			}
 		}
-
 		gids := make([]int, len(tilesets))
 		for i := range gids {
 			gids[i] = tilesets[i].Gid()

@@ -4,7 +4,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
-	"github.com/ebitenui/ebitenui/input"
+	ui2 "github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -15,74 +15,121 @@ import (
 	"sort"
 )
 
-func (g *TownScene) UpdateDoors() {
-	for _, object := range g.Objects {
-		objectAnimation := object.ActiveAnimation(object.Status)
-		if objectAnimation != nil {
-			if object.Type == gameObjects.EntryDoor || object.Type == gameObjects.ExitDoor {
-				if object.Status == gameObjects.Entering {
-					objectAnimation.Update()
+func (g *TownScene) NoTravelDoor(object *gameObjects.DoorObject) {
+	objectAnimation := object.ActiveAnimation()
+	if objectAnimation != nil {
+		if objectAnimation.Frame() == objectAnimation.LastF {
+			objectAnimation.Update()
+			object.StopAnimation()
+			objectAnimation.Reset()
+		}
+		if object.State == gameObjects.Entering {
+			objectAnimation.Update()
+		}
+		if object.State == gameObjects.On {
+			objectAnimation.Update()
+		}
+	}
 
-					if objectAnimation.Frame() == objectAnimation.LastF-3 {
-						println("making player not visible for entering building effect")
-						//remove sprite on last frame before they are shown inside the building
-						g.Player.Visible = false
-						objectAnimation.Update()
-					}
+}
 
-					if objectAnimation.Frame() == objectAnimation.LastF {
-						g.cam.UpdateState(camera.Inside)
-						g.cam.SetIndoorCameraBounds(g.MapData.CameraPoints[object.Name].Rect)
-						println("changing player location to building interior")
-						g.Player.Visible = true
-						x, y := gameObjects.GetDoorCoord(g.MapData.ExitDoors, object.Name, "up")
-						g.Player.X = x
-						g.Player.Y = y
-						objectAnimation.Update()
-						object.StopAnimation()
-						objectAnimation.Reset()
-						g.Player.InAnimation = false
-					}
-				}
+func (g *TownScene) ExitDoor(fromDoor *gameObjects.DoorObject, toDoor *gameObjects.DoorObject) {
+	objectAnimation := fromDoor.ActiveAnimation()
+	if objectAnimation != nil {
+		if fromDoor.State == gameObjects.Leaving {
+			if objectAnimation.Frame() == objectAnimation.FirstF {
+				g.cam.UpdateState(camera.Outside)
+				x, y := gameObjects.GetDoorCoord(toDoor, fromDoor.Dir)
+				g.Player.X = x
+				g.Player.Y = y
+				g.Player.ExitShadow()
+				objectAnimation.Update()
 
-				if object.Status == gameObjects.Leaving {
-
-					if objectAnimation.Frame() == objectAnimation.FirstF {
-						g.cam.UpdateState(camera.Outside)
-						x, y := gameObjects.GetDoorCoord(g.MapData.EntryDoors, object.Name, "down")
-						g.Player.X = x
-						g.Player.Y = y
-						g.Player.InAnimation = false
-						g.Player.ExitShadow()
-						objectAnimation.Update()
-
-					} else if objectAnimation.Frame() == objectAnimation.LastF {
-						object.StopAnimation()
-						objectAnimation.Reset()
-
-					} else {
-
-						objectAnimation.Update()
-					}
-				}
-			}
-
-			if object.Type == gameObjects.ContextualObject {
-				if objectAnimation.Frame() == objectAnimation.LastF {
-					objectAnimation.Update()
-					object.StopAnimation()
-					objectAnimation.Reset()
-				}
-				if object.Status == gameObjects.Entering {
-					objectAnimation.Update()
-				}
-				if object.Status == gameObjects.On {
-					objectAnimation.Update()
-				}
-
+			} else if objectAnimation.Frame() == objectAnimation.LastF {
+				fromDoor.StopAnimation()
+				fromDoor.Triggered = false
+				fromDoor.State = gameObjects.NotTriggered
+				objectAnimation.Reset()
+			} else {
+				objectAnimation.Update()
 			}
 		}
+	}
+}
 
+func (g *TownScene) EnterDoor(fromDoor *gameObjects.DoorObject, toDoor *gameObjects.DoorObject) {
+	fromDoorAnimation := fromDoor.ActiveAnimation()
+	println("triggering function for enter door:", fromDoor.Name)
+	if fromDoor.State == gameObjects.Entering {
+		g.Player.InAnimation = true
+		fromDoorAnimation.Update()
+		if fromDoorAnimation.Frame() == fromDoorAnimation.LastF-3 {
+			println("making player not visible for entering building effect")
+			//remove sprite on last frame before they are shown inside the building
+			g.Player.Visible = false
+			fromDoorAnimation.Update()
+		}
+		if fromDoorAnimation.Frame() == fromDoorAnimation.LastF {
+			g.cam.UpdateState(camera.Inside)
+			g.cam.SetIndoorCameraBounds(g.MapData.CameraPoints[fromDoor.CameraPoint].Rect)
+			if fromDoor.Name == "cave" {
+				g.dark = true
+			}
+			println("changing player location to building interior")
+			g.Player.Visible = true
+			x, y := gameObjects.GetDoorCoord(toDoor, fromDoor.Dir)
+			g.Player.X = x
+			g.Player.Y = y
+			fromDoorAnimation.Update()
+			fromDoor.StopAnimation()
+			fromDoorAnimation.Reset()
+			g.Player.InAnimation = false
+			fromDoor.Triggered = false
+			fromDoor.State = gameObjects.NotTriggered
+		}
+	}
+}
+func (g *TownScene) InsideDoor(fromDoor *gameObjects.DoorObject, toDoor *gameObjects.DoorObject) {
+	fromDoorAnimation := fromDoor.ActiveAnimation()
+	x, y := gameObjects.GetDoorCoord(toDoor, fromDoor.Dir)
+	if fromDoor.State == gameObjects.Leaving {
+		g.cam.SetIndoorCameraBounds(g.MapData.CameraPoints[fromDoor.CameraPoint].Rect)
+		if fromDoorAnimation.Frame() == fromDoorAnimation.FirstF {
+			g.Player.X = x
+			g.Player.Y = y
+			fromDoor.StopAnimation()
+			fromDoorAnimation.Reset()
+			fromDoor.Triggered = false
+			fromDoor.State = gameObjects.NotTriggered
+		}
+	}
+}
+
+func FindDoor(fromDoor *gameObjects.DoorObject, doors []*gameObjects.DoorObject) *gameObjects.DoorObject {
+	for _, door := range doors {
+		if door.Name == fromDoor.Name && door.Trigger != fromDoor.Trigger {
+			return door
+		}
+	}
+	return nil
+}
+
+func (g *TownScene) UpdateDoors() {
+	for _, object := range g.MapData.Doors {
+		if object.Triggered {
+			switch object.Type {
+			case gameObjects.EntryDoor:
+				g.EnterDoor(object, FindDoor(object, g.MapData.Doors))
+			case gameObjects.ExitDoor:
+				g.ExitDoor(object, FindDoor(object, g.MapData.Doors))
+			case gameObjects.ContextualObject:
+				g.NoTravelDoor(object)
+			case gameObjects.InsideDoor:
+				g.InsideDoor(object, FindDoor(object, g.MapData.Doors))
+			default:
+				continue
+			}
+		}
 	}
 }
 
@@ -144,7 +191,7 @@ func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam c
 
 	}
 	if character.Shadow {
-		opts.ColorScale.Scale(0.5, 0.5, 0.5, 255)
+		opts.ColorScale.Scale(0.5, 0.5, 0.5, 1)
 	}
 	if character.Visible {
 		screen.DrawImage(
@@ -182,16 +229,13 @@ func (g *TownScene) DrawColliders(screen *ebiten.Image) {
 	}
 }
 
-func LockCursorForDialogue(ui DialogueUI) {
+func SetCursorForDialogue(ui DialogueUI, cursor *ui2.CursorUpdater) {
 	if ui.DType == Dialogue {
-		updater := CreateCursorUpdater(10, 10)
-		updater.MoveToLockedSpecificPosition(1002, 306)
-		input.SetCursorUpdater(updater)
+		cursor.MoveToLockedSpecificPosition(1002, 306, 306)
+
 	}
 	if ui.DType == ShowDown {
-		updater := CreateCursorUpdater(10, 10)
-		updater.MoveToLockedSpecificPosition(1002, 720)
-		input.SetCursorUpdater(updater)
+		cursor.MoveToLockedSpecificPosition(1002, 720, 720)
 	}
 
 }
@@ -265,13 +309,13 @@ func (g *TownScene) DrawItems(screen *ebiten.Image) {
 
 func (g *TownScene) DrawObjects(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
-	for _, object := range g.Objects {
+	for _, object := range g.MapData.Doors {
 		opts.GeoM.Translate(object.X, object.Y)
 		opts.GeoM.Translate(g.cam.X, g.cam.Y)
 		opts.GeoM.Scale(4, 4)
 
 		objectFrame := 0
-		objectAnimation := object.ActiveAnimation(object.Status)
+		objectAnimation := object.ActiveAnimation()
 
 		if objectAnimation != nil {
 			objectFrame = objectAnimation.Frame()
@@ -295,7 +339,7 @@ func (g *TownScene) DrawObjectsAbovePlayer(screen *ebiten.Image) {
 			opts.GeoM.Scale(4, 4)
 
 			objectFrame := 0
-			objectAnimation := object.ActiveAnimation(object.Status)
+			objectAnimation := object.ActiveAnimation()
 
 			if objectAnimation != nil {
 				objectFrame = objectAnimation.Frame()
@@ -314,7 +358,27 @@ func (g *TownScene) DrawObjectsAbovePlayer(screen *ebiten.Image) {
 func DistanceEq(x1, y1, x2, y2 float64) float64 {
 
 	xdis := math.Abs(x1 - x2)
-	ydis := math.Abs(y2 - y2)
+	ydis := math.Abs(y1 - y2)
 
 	return math.Sqrt(xdis*xdis + ydis*ydis)
+}
+
+func (g *TownScene) ActivateTriggerCollidersVertical(trigger string) {
+	gameObjects.CheckCollisionVertical(g.Player.Sprite, g.MapData.TriggerColliders[trigger], g.NPC)
+}
+
+func (g *TownScene) ActivateTriggerCollidersHorizontal(trigger string) {
+	gameObjects.CheckCollisionHorizontal(g.Player.Sprite, g.MapData.TriggerColliders[trigger], g.NPC)
+}
+
+func (g *TownScene) UpdateTriggerColliders(way string) {
+	for key, trig := range g.MapData.LayerTriggers {
+		if trig.Triggered {
+			if way == "vert" {
+				g.ActivateTriggerCollidersVertical(key)
+			} else if way == "horizontal" {
+				g.ActivateTriggerCollidersHorizontal(key)
+			}
+		}
+	}
 }

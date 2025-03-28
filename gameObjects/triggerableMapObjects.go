@@ -11,40 +11,6 @@ type Door struct {
 	Coord image.Rectangle
 }
 
-func NewDoor(obj ObjectJSON) (door Door) {
-	door =
-		Door{
-			Key: obj.Name,
-			Coord: image.Rect(
-				int(obj.X),
-				int(obj.Y)-20,
-				int(obj.Width+obj.X),
-				int(obj.Y)-10,
-			),
-		}
-
-	return door
-}
-
-func CheckDoor(player *Character, entDoors map[string]Trigger) map[string]bool {
-	returnMap := make(map[string]bool)
-	for _, door := range entDoors {
-		if door.Rect.Overlaps(
-			image.Rect(
-				int(player.X),
-				int(player.Y)+28,
-				int(player.X)+16,
-				int(player.Y)+31),
-		) {
-			player.EnterShadow()
-			returnMap[door.Name] = true
-		} else {
-			returnMap[door.Name] = false
-		}
-	}
-	return returnMap
-}
-
 func CheckContextualTriggers(player *Character, contextTriggers map[string]*Trigger) map[string]ObjectState {
 	playerRect := image.Rect(
 		int(player.X),
@@ -82,26 +48,27 @@ func CheckEnemyTrigger(player *Character, enemySpawn map[string]Trigger, countDo
 	return battleStats.None
 }
 
-func GetDoorCoord(doors map[string]Trigger, key string, direction string) (float64, float64) {
+func GetDoorCoord(door *DoorObject, direction Direction) (float64, float64) {
+	//direction determines if player is walking north or south coming out of the destination door
 	x := 0.0
 	y := 0.0
 
-	if direction == "up" {
-		x = float64(doors[key].Rect.Dx()/2+doors[key].Rect.Min.X) - 8
-		y = float64(doors[key].Rect.Min.Y) - 32
+	if direction == Up {
+		x = float64(door.Rect.Dx()/2+door.Rect.Min.X) - 8
+		y = float64(door.Rect.Min.Y) - 32
 	}
-	if direction == "down" {
-		x = float64(doors[key].Rect.Dx()/2+doors[key].Rect.Min.X) - 8
-		y = float64(doors[key].Rect.Max.Y) - 16
+	if direction == Down {
+		x = float64(door.Rect.Dx()/2+door.Rect.Min.X) - 8
+		y = float64(door.Rect.Max.Y) - 16
 	}
 
 	return x, y
 
 }
 
-func CheckStairs(player *Character, stairTriggers map[string]*Trigger) {
-	for _, stair := range stairTriggers {
-		if stair.Rect.Overlaps(
+func CheckTriggers(player *Character, triggers []*Trigger) {
+	for _, trigger := range triggers {
+		if trigger.Rect.Overlaps(
 			image.Rect(
 				int(player.X),
 				int(player.Y)+28,
@@ -109,10 +76,33 @@ func CheckStairs(player *Character, stairTriggers map[string]*Trigger) {
 				int(player.Y)+31),
 		) {
 			if player.Dy < 0 {
-				stair.Triggered = true
+				if trigger.Dir == Up {
+					println("setting up trigger to true")
+					trigger.Triggered = true
+					continue
+				} else {
+					trigger.Triggered = false
+				}
+			} else if player.Dy > 0 {
+				if trigger.Dir == Down {
+					trigger.Triggered = true
+				} else {
+					trigger.Triggered = false
+				}
 			}
-			if player.Dy > 0 {
-				stair.Triggered = false
+			if player.Dx < 0 {
+				if trigger.Dir == Left {
+					trigger.Triggered = true
+				} else {
+					trigger.Triggered = false
+				}
+			} else if player.Dx > 0 {
+				if trigger.Dir == Right {
+					trigger.Triggered = true
+					return
+				} else {
+					trigger.Triggered = false
+				}
 			}
 		}
 	}

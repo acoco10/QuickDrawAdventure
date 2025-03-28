@@ -5,19 +5,18 @@ import (
 )
 
 type CharacterData struct {
-	Name            string
-	Stats           map[Stat]int
-	baselineStats   map[Stat]int
-	CombatSkills    map[string]Skill
-	DialogueSkills  map[string]Skill
-	DialogueSlots   int
-	SoundFxType     string
-	DialogueData    string
-	Weakness        string
-	LearnedInsults  []int
-	LearnedBrags    []int
-	EquippedInsults []string
-	EquippedBrags   []string
+	Name                   string
+	Stats                  map[Stat]int
+	baselineStats          map[Stat]int
+	CombatSkills           map[string]Skill
+	EquippedDialogueSkills map[string]Skill
+	DialogueSlots          int
+	SoundFxType            string
+	DialogueData           string
+	Weakness               string
+	LearnedDialogueSkills  map[string]Skill
+	EquippedInsults        []string
+	EquippedBrags          []string
 }
 
 type Stat uint8
@@ -134,20 +133,22 @@ func NewCharacter(name string, stats map[string]int, combatSkills map[string]Ski
 		charStatsCopy[key] = stat
 	}
 
+	var equippedDialogueSkills = make(map[string]Skill)
+	equippedDialogueSkills["draw"] = dialogueSkills["draw"]
+
 	char := CharacterData{
-		Name:           name,
-		Stats:          charStats,
-		baselineStats:  charStatsCopy,
-		CombatSkills:   combatSkills,
-		DialogueSkills: dialogueSkills,
-		Weakness:       Weakness,
-		SoundFxType:    soundFx,
-		DialogueSlots:  dialogueSlots,
+		Name:                   name,
+		Stats:                  charStats,
+		baselineStats:          charStatsCopy,
+		CombatSkills:           combatSkills,
+		EquippedDialogueSkills: equippedDialogueSkills,
+		LearnedDialogueSkills:  dialogueSkills,
+		Weakness:               Weakness,
+		SoundFxType:            soundFx,
+		DialogueSlots:          dialogueSlots,
 	}
 
 	if name == "elyse" {
-		char.LearnedInsults = []int{0, 1, 2}
-		char.LearnedBrags = []int{0, 1, 2}
 		char.DialogueSlots = 3
 	}
 	return char

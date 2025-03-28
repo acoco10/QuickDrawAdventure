@@ -12,13 +12,14 @@ import (
 )
 
 type ObjectJSON struct {
-	Name   string  `json:"name"`
-	Height float64 `json:"height"`
-	Width  float64 `json:"width"`
-	X      float64 `json:"x"`
-	Y      float64 `json:"Y"`
-	Class  string  `json:"class"`
-	Type   string  `json:"type"`
+	Name       string           `json:"name"`
+	Height     float64          `json:"height"`
+	Width      float64          `json:"width"`
+	X          float64          `json:"x"`
+	Y          float64          `json:"Y"`
+	Class      string           `json:"class"`
+	Type       string           `json:"type"`
+	Properties []PropertiesJSON `json:"properties"`
 }
 
 type ObjectType uint8
@@ -26,6 +27,7 @@ type ObjectType uint8
 const (
 	EntryDoor ObjectType = iota
 	ExitDoor
+	InsideDoor
 	StairTrigger
 	ContextualObject
 	Collider
@@ -39,10 +41,14 @@ type Spawn struct {
 }
 
 type Trigger struct {
-	Name      string
-	Type      ObjectType
-	Rect      image.Rectangle
-	Triggered bool
+	Name        string
+	Type        ObjectType
+	Rect        image.Rectangle
+	Triggered   bool
+	Dir         Direction
+	CameraPoint string
+	Animation   string
+	Sprite      string
 }
 
 func NewTrigger(json ObjectJSON) Trigger {
@@ -51,7 +57,25 @@ func NewTrigger(json ObjectJSON) Trigger {
 	rect := image.Rect(int(json.X), int(json.Y), int(json.X+json.Width), int(json.Y+json.Height))
 	newTrigger.Rect = rect
 	newTrigger.Triggered = false
+	newTrigger.Rect.Min.Y = newTrigger.Rect.Min.Y - 32
+	newTrigger.Rect.Max.Y = newTrigger.Rect.Max.Y - 32
+	loadProperties(json.Properties, newTrigger)
 	return *newTrigger
+}
+
+func loadProperties(props []PropertiesJSON, newTrigger *Trigger) {
+	for _, prop := range props {
+		switch prop.Name {
+		case "direction":
+			newTrigger.Dir = LoadDirection(prop.Value)
+		case "cameraPoint":
+			newTrigger.CameraPoint = prop.Value
+		case "animation":
+			newTrigger.Animation = prop.Value
+		case "sprite":
+			newTrigger.Sprite = prop.Value
+		}
+	}
 }
 
 type MapItem struct {
@@ -62,32 +86,56 @@ type MapItem struct {
 }
 
 type MapObjectData struct {
-	EntryDoors        map[string]Trigger
-	ExitDoors         map[string]Trigger
-	NpcSpawns         map[string]Spawn
-	Colliders         []image.Rectangle
-	StairTriggers     map[string]*Trigger //pointer because has on/ off setting e.g. for balcony, not trigger switch
-	ContextualObjects map[string]*Trigger
-	Items             []MapItem
-	InteractPoints    map[string]MapItem
-	CameraPoints      map[string]Trigger
-	ObjectSpawns      map[string]Spawn
-	EnemySpawns       map[string]Trigger
+	NpcSpawns        map[string]Spawn
+	Colliders        []image.Rectangle
+	Items            []MapItem
+	InteractPoints   map[string]MapItem
+	CameraPoints     map[string]Trigger
+	ObjectSpawns     map[string]Spawn
+	EnemySpawns      map[string]Trigger
+	LayerTriggers    map[string]*Trigger
+	TriggerColliders map[string][]image.Rectangle
+	Triggers         []*Trigger
+	Doors            []*DoorObject
+}
+
+// edit map load to store layer triggers and colldier in same place
+type LayerTrigger struct {
+	Trigger   *Trigger
+	Colliders map[string][]image.Rectangle
+}
+
+func LoadDirection(dir string) Direction {
+	switch dir {
+	case "down":
+		return Down
+	case "up":
+		return Up
+	case "left":
+		return Left
+	case "right":
+		return Right
+	}
+	return None
 }
 
 func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 
 	colliders := []image.Rectangle{}
-	entDoors := make(map[string]Trigger)
-	exDoors := make(map[string]Trigger)
+	entDoors := make(map[string]*Trigger)
+	exDoors := make(map[string]*Trigger)
+	var insideDoors []*Trigger
 	npcSpawns := make(map[string]Spawn)
-	stairTriggers := make(map[string]*Trigger)
 	contextualObjects := make(map[string]*Trigger)
 	var items []MapItem
+	layerTriggers := make(map[string]*Trigger)
 	interactPoints := make(map[string]MapItem)
 	cameraPoints := make(map[string]Trigger)
 	objectSpawns := make(map[string]Spawn)
 	enemies := make(map[string]Trigger)
+	var allTrig []*Trigger
+	triggerColliders := make(map[string][]image.Rectangle)
+
 	for _, layer := range tilemapJSON.Layers {
 		if layer.Name == "colliders" {
 			for _, object := range layer.Objects {
@@ -97,6 +145,17 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					int(object.Width+object.X),
 					int(object.Y+object.Height)-32)
 				colliders = append(colliders, rect)
+			}
+		}
+		if layer.Name == "triggerColliders" {
+			for _, object := range layer.Objects {
+				rect := image.Rect(
+					int(object.X),
+					int(object.Y)-32,
+					int(object.Width+object.X),
+					int(object.Y+object.Height)-32)
+				triggerColliders[object.Name] = append(triggerColliders[object.Name], rect)
+				println("loaded Collision trigger:", object.Name)
 			}
 		}
 		if layer.Name == "npcSpawns" {
@@ -122,31 +181,30 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					println("loading entranceDoor:", object.Name)
 					door := NewTrigger(object)
 					door.Type = EntryDoor
-					door.Rect.Min.Y = door.Rect.Min.Y - 32
-					door.Rect.Max.Y = door.Rect.Max.Y - 32
-					entDoors[object.Name] = door
+					entDoors[object.Name] = &door
+					allTrig = append(allTrig, &door)
 				case "exitDoor":
 					println("loading exitDoor:", object.Name)
 					door := NewTrigger(object)
 					door.Type = ExitDoor
-					exDoors[object.Name] = door
-				case "stairTrigger":
-					stair := NewTrigger(object)
-					stair.Type = StairTrigger
-					stairTriggers[object.Name] = &stair
-
+					exDoors[object.Name] = &door
+					allTrig = append(allTrig, &door)
+				case "insideDoor":
+					println("loading insideDoor:", object.Name)
+					door := NewTrigger(object)
+					door.Type = InsideDoor
+					insideDoors = append(insideDoors, &door)
+					allTrig = append(allTrig, &door)
 				case "objectSpawn":
 					println("loading objectSpawn:", object.Name)
 					objSpawn := Spawn{object.Name, object.X, object.Y - 32, true}
 					objectSpawns[object.Name] = objSpawn
-
 				case "contextualObject":
 					println("loading contextualObject:", object.Name)
 					contextualObject := NewTrigger(object)
 					contextualObject.Type = ContextualObject
-					contextualObject.Rect.Min.Y = contextualObject.Rect.Min.Y - 32
-					contextualObject.Rect.Max.Y = contextualObject.Rect.Max.Y - 32
 					contextualObjects[object.Name] = &contextualObject
+					allTrig = append(allTrig, &contextualObject)
 
 				case "itemSpawn":
 					println("loading item:", object.Name)
@@ -181,43 +239,111 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 				case "cameraPoint":
 					println("loading camera point:", object.Name)
 					camPoint := NewTrigger(object)
-					camPoint.Rect.Min.Y = camPoint.Rect.Min.Y - 32
-					camPoint.Rect.Max.Y = camPoint.Rect.Max.Y - 32
 					cameraPoints[object.Name] = camPoint
 				case "enemySpawn":
 					println("loading enemy spawn:", object.Name)
 					enemySpawn := NewTrigger(object)
 					enemies[object.Name] = enemySpawn
+				case "layerTrigger":
+					println("loading layer trigger", object.Name)
+					layerTrigger := NewTrigger(object)
+					layerTriggers[object.Name] = &layerTrigger
+					allTrig = append(allTrig, &layerTrigger)
 				}
 			}
 		}
 	}
 
 	mapObjects := MapObjectData{}
-	mapObjects.EntryDoors = entDoors
-	mapObjects.ExitDoors = exDoors
 	mapObjects.NpcSpawns = npcSpawns
-	mapObjects.StairTriggers = stairTriggers
 	mapObjects.Colliders = colliders
-	mapObjects.ContextualObjects = contextualObjects
 	mapObjects.Items = items
 	mapObjects.InteractPoints = interactPoints
 	mapObjects.CameraPoints = cameraPoints
 	mapObjects.ObjectSpawns = objectSpawns
 	mapObjects.EnemySpawns = enemies
+	mapObjects.LayerTriggers = layerTriggers
+	mapObjects.TriggerColliders = triggerColliders
+	mapObjects.Triggers = allTrig
+	doors, err := LoadMapObjects(entDoors, exDoors, insideDoors, contextualObjects, objectSpawns)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	mapObjects.Doors = doors
 
 	return mapObjects, nil
 }
 
-func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
+func LoadDoor(object ObjectJSON) *DoorObject {
+	door := NewTrigger(object)
+
+	switch object.Type {
+	case "entranceDoor":
+		println("loading entranceDoor:", object.Name)
+		door.Type = EntryDoor
+	case "exitDoor":
+		println("loading exitDoor:", object.Name)
+		door.Type = ExitDoor
+	case "insideDoor":
+		println("loading insideDoor:", object.Name)
+		door.Type = InsideDoor
+	}
+
+	spriteSheet, animation := GetAnimation(door.Animation)
+
+	doorObject, err := NewObject(
+		ebiten.NewImage(10, 10),
+		spriteSheet,
+		animation,
+		animation,
+		&door,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return doorObject
+}
+
+func GetAnimation(doorType string) (spritesheet.SpriteSheet, *animations.Animation) {
+	tavernDoorSpriteSheet := spritesheet.NewSpritesheet(2, 3, 20, 21)
+	tavernDoorAnimation := animations.NewAnimation(0, 6, 1, 10.0)
+
+	standardDoorAnimation := animations.NewAnimation(0, 3, 1, 10.0)
+	standardDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 23)
+	BigDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 24, 38)
+
+	switch doorType {
+	case "big":
+		return *BigDoorSpriteSheet, standardDoorAnimation
+	case "tavern":
+		return *tavernDoorSpriteSheet, tavernDoorAnimation
+	default:
+		return *standardDoorSpriteSheet, standardDoorAnimation
+	}
+}
+
+func LoadMapObjects(entryDoors, exitDoors map[string]*Trigger, insideDoors []*Trigger, contextualObjects map[string]*Trigger, objSpawn map[string]Spawn) ([]*DoorObject, error) {
 
 	objects := make([]*DoorObject, 0)
-
-	tavernDoorSpriteSheet := spritesheet.NewSpritesheet(2, 3, 20, 21)
+	//customDoorAnimations
 	tavernDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/tavernDoorSpriteSheet.png")
 	if err != nil {
 		log.Fatal(err)
 	}
+	tavernDoorSpriteSheet := spritesheet.NewSpritesheet(2, 3, 20, 21)
+	standardDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 23)
+	standardDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/sunriseInn/sideBuildingDoor.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	standardDoorAnimation := animations.NewAnimation(0, 3, 1, 10.0)
+
+	BigDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 24, 38)
 
 	tavernDoorAnimation := animations.NewAnimation(0, 6, 1, 10.0)
 	tavernDoorObject, _ := NewObject(
@@ -225,39 +351,51 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 		*tavernDoorSpriteSheet,
 		tavernDoorAnimation,
 		tavernDoorAnimation,
-		mapObjectData.EntryDoors["rose"],
+		entryDoors["rose"],
 	)
+	interiorDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 24)
+	beadedCurtainImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/beadedCurtain.png")
+	interiorDoorAnimation := animations.NewAnimation(0, 3, 1, 10.0)
 
-	sunRiseDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 24, 38)
 	sunriseDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/sunriseInn/sunriseInnDoor.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	standardDoorAnimation := animations.NewAnimation(0, 3, 1, 10.0)
 	sunriseDoor, err := NewObject(
 		sunriseDoorImg,
-		*sunRiseDoorSpriteSheet,
+		*BigDoorSpriteSheet,
 		standardDoorAnimation,
 		standardDoorAnimation,
-		mapObjectData.EntryDoors["sunRise"],
+		entryDoors["sunRise"],
 	)
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	sunRiseSideDoorSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 23)
-	sideDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/sunriseInn/sideBuildingDoor.png")
+
+	beadedCurtain, err := NewObject(
+		beadedCurtainImg,
+		*interiorDoorSpriteSheet,
+		interiorDoorAnimation,
+		interiorDoorAnimation,
+		contextualObjects["beadedCurtain1"],
+	)
+
+	beadedCurtain.X = objSpawn["beadedCurtain"].X
+	beadedCurtain.Y = objSpawn["beadedCurtain"].Y
+
+	beadedCurtain.DrawAbovePlayer = true
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	sideDoor, err := NewObject(
-		sideDoorImg,
-		*sunRiseSideDoorSpriteSheet,
+		standardDoorImg,
+		*standardDoorSpriteSheet,
 		standardDoorAnimation,
 		standardDoorAnimation,
-		mapObjectData.EntryDoors["door3"],
+		entryDoors["sideDoor"],
 	)
 
 	if err != nil {
@@ -265,44 +403,77 @@ func LoadMapObjects(mapObjectData MapObjectData) ([]*DoorObject, error) {
 	}
 
 	generalStoreDoor, err := NewObject(
-		sideDoorImg,
-		*sunRiseSideDoorSpriteSheet,
+		standardDoorImg,
+		*standardDoorSpriteSheet,
 		standardDoorAnimation,
 		standardDoorAnimation,
-		mapObjectData.EntryDoors["generalStore"],
+		entryDoors["generalStore"],
 	)
 
 	farmCabinDoor, err := NewObject(
-		sideDoorImg,
-		*sunRiseSideDoorSpriteSheet,
+		standardDoorImg,
+		*standardDoorSpriteSheet,
 		standardDoorAnimation,
 		standardDoorAnimation,
-		mapObjectData.EntryDoors["farmCabin"],
+		entryDoors["farmCabin"],
 	)
 
-	beadedCurtainSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 24)
-	beadedCurtainImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/beadedCurtain.png")
+	caveDoor, err := NewObject(
+		ebiten.NewImage(10, 10),
+		*standardDoorSpriteSheet,
+		standardDoorAnimation,
+		standardDoorAnimation,
+		entryDoors["cave"],
+	)
+
+	sunRiseRoof, err := NewObject(
+		ebiten.NewImage(10, 10),
+		*standardDoorSpriteSheet,
+		standardDoorAnimation,
+		standardDoorAnimation,
+		entryDoors["sunRiseRoof"],
+	)
+
+	sunRiseOutsideBalcony, err := NewObject(
+		ebiten.NewImage(10, 10),
+		*standardDoorSpriteSheet,
+		standardDoorAnimation,
+		standardDoorAnimation,
+		entryDoors["sunRiseOutsideBalcony"],
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	beadedCurtainAnimation := animations.NewAnimation(0, 3, 1, 10.0)
-
-	beadedCurtain, err := NewObject(
-		beadedCurtainImg,
-		*beadedCurtainSpriteSheet,
-		beadedCurtainAnimation,
-		beadedCurtainAnimation,
-		*mapObjectData.ContextualObjects["beadedCurtain1"],
-	)
-
-	beadedCurtain.X = mapObjectData.ObjectSpawns["beadedCurtain"].X
-	beadedCurtain.Y = mapObjectData.ObjectSpawns["beadedCurtain"].Y
-
-	beadedCurtain.DrawAbovePlayer = true
-	if err != nil {
-		log.Fatal(err)
+	for _, insideDoor := range insideDoors {
+		door, err := NewObject(
+			ebiten.NewImage(10, 10),
+			*standardDoorSpriteSheet,
+			standardDoorAnimation,
+			standardDoorAnimation,
+			insideDoor,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		objects = append(objects, door)
 	}
-	objects = append(objects, tavernDoorObject, sunriseDoor, sideDoor, beadedCurtain, generalStoreDoor, farmCabinDoor)
+
+	for _, exitDoor := range exitDoors {
+		door, err := NewObject(
+			ebiten.NewImage(10, 10),
+			*standardDoorSpriteSheet,
+			standardDoorAnimation,
+			standardDoorAnimation,
+			exitDoor,
+		)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		objects = append(objects, door)
+	}
+
+	objects = append(objects, tavernDoorObject, sunriseDoor, sideDoor, beadedCurtain, generalStoreDoor, farmCabinDoor, caveDoor, sunRiseRoof, sunRiseOutsideBalcony)
 	return objects, err
 }

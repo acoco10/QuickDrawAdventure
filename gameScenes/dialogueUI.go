@@ -287,7 +287,7 @@ func (d *DialogueUI) Reset() {
 	d.triggered = false
 }
 
-func (d *DialogueUI) Update() sceneManager.SceneId {
+func (d *DialogueUI) Update() (scene sceneManager.SceneId, completed bool) {
 	if d.triggered {
 		d.ui.Update()
 		textInput := d.TextPrinter.TextInput
@@ -334,12 +334,12 @@ func (d *DialogueUI) Update() sceneManager.SceneId {
 			if d.State == Completed {
 				d.Reset()
 				d.ButtonEvent = false
-				return d.triggerScene
+				return d.triggerScene, true
 			}
 
 		}
 	}
-	return sceneManager.TownSceneID
+	return sceneManager.TownSceneID, false
 }
 
 func (d *DialogueUI) Draw(screen *ebiten.Image) error {

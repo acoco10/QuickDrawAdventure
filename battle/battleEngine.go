@@ -88,7 +88,7 @@ func NewBattle(player *battleStats.CharacterData, enemy *battleStats.CharacterDa
 	battle.turnInitiative = Player
 	battle.State = NotStarted
 
-	if len(enemy.DialogueSkills) == 0 {
+	if len(enemy.EquippedDialogueSkills) == 0 {
 		battle.BattlePhase = Shooting
 	}
 
@@ -204,8 +204,13 @@ func (b *Battle) UpdateChar(char *CharacterBattleData, enemy *CharacterBattleDat
 	char.WeaknessTargeted = false
 	char.Index = 0
 	char.DrawBonus = false
-	char.Roll = Roll(char.SkillUsed.Effects[0].SuccessPer)
+
+	if len(char.SkillUsed.Effects) > 0 {
+		char.Roll = Roll(char.SkillUsed.Effects[0].SuccessPer)
+	}
+
 	if char.Stunned {
+		println(char.Name, "is stunned")
 		char.Message = []string{fmt.Sprintf("%s is so flabergasted by %s's come back they don't know what to say", char.Name, enemy.Name)}
 		char.SkillUsed = battleStats.Skill{}
 		char.Stunned = false
@@ -255,7 +260,7 @@ func (b *Battle) DialogueTurn(playerSkill battleStats.Skill) {
 		if char.Name == "elyse" {
 			b.UpdateChar(char, b.CharacterBattleData[Enemy])
 		} else {
-			skillUsed, err := EnemyChooseSkill(*b, char.DialogueSkills)
+			skillUsed, err := EnemyChooseSkill(*b, char.EquippedDialogueSkills)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -295,7 +300,7 @@ func (b *Battle) EnactEffects(skill battleStats.Skill, user *CharacterBattleData
 	if len(skill.Effects) > 1 {
 		skillEffectTwo = skill.Effects[1]
 	}
-	if skill.Effects[0].On == "enemy" && opponent.ComeBackEquipped {
+	if skill.Type == "insult" && opponent.ComeBackEquipped {
 		opponent.ComeBackEquipped = false
 		user.Stunned = true
 		var Effects = make([]battleStats.Effect, 1)
@@ -364,8 +369,8 @@ func (b *Battle) generateMessageForUsedDialogueSkill(turnTaker CharacterBattleDa
 	dialogue := turnTaker.SkillUsed.Text
 	message = append(message, dialogue)
 
-	if skill.Effects[0].On == "enemy" && opponent.ComeBackEquipped {
-		comeBackDialogue := opponent.DialogueSkills["comeBack"].Text
+	if skill.Type == "insult" && opponent.ComeBackEquipped {
+		comeBackDialogue := opponent.EquippedDialogueSkills["comeBack"].Text
 		message = append(message, comeBackDialogue)
 		message = append(message, fmt.Sprintf("%s's %s increased by %d", turnTaker.Name, skill.Effects[0].Stat, skill.Effects[0].Amount*2))
 

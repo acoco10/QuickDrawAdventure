@@ -9,12 +9,12 @@ type Inventory struct {
 }
 
 type Item struct {
-	name         string
-	inventoryImg ebiten.Image
-	examineImg   ebiten.Image
-	description  string
+	Name         string
+	InventoryImg ebiten.Image
+	ExamineImg   ebiten.Image
+	Description  string
 }
 
 func (i *Item) Examine() string {
-	return i.description
+	return i.Description
 }

@@ -92,7 +92,7 @@
     ]
   },
   {
-    "name": "marthaJean",
+    "name": "marthaFelten",
     "dialogues": [
       {
         "storyPoint": 1,
@@ -112,7 +112,7 @@
           },
           {
             "dialogueId": 6,
-            "dialogueText": "I'm worried things will keep escalating. I tried to tell him he's got a family to worry about."
+            "dialogueText": "I'm worried things will keep getting worse and worse. I tried to tell him he's got a family to worry about."
           },
           {
             "dialogueId": 8,
@@ -125,6 +125,10 @@
           {
             "dialogueId": 12,
             "dialogueText": "East, cross that rickety bridge."
+          },
+          {
+            "dialogueId": 13,
+            "dialogueText": "Feel free to grab whatever supplies you need from inside."
           }
         ]
       }
@@ -143,11 +147,95 @@
           },
           {
             "dialogueId": 3,
-            "dialogueText": "You got a quick tongue but how fast are you with that colt"
+            "dialogueText": "You got a quick tongue but how fast are you with that colt?"
           },
           {
             "dialogueId": 5,
             "dialogueText": "We'll see about that."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "boneMan",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": " Want to buy some bones."
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "Got any bones for sale?"
+          },
+          {
+            "dialogueId": 5,
+            "dialogueText": "Come see me if you find any bones"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "georgeFelten",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "Martha, is that you?"
+          },
+          {
+            "dialogueId": 2,
+            "dialogueText": "Don't tell them about the silver Martha."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "adahFelten",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "I'm keeping watch over my poppa!"
+          },
+          {
+            "dialogueId": 2,
+            "dialogueText": "Don't try anything."
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "I'm so bored."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "storeOwner",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "You out of towners always come in, shoot the place up and leave. Not in my goddamn store you hear."
+          },
+          {
+            "dialogueId": 2,
+            "dialogueText": "What can I do for you?"
           }
         ]
       }

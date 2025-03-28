@@ -102,10 +102,10 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 		),
 	)
 
-	dSkillsLength := len(elyse.DialogueSkills)
+	dSkillsLength := len(elyse.EquippedDialogueSkills)
 	dialogueSkillNames := make([]string, dSkillsLength)
 
-	for _, skill := range elyse.DialogueSkills {
+	for _, skill := range elyse.EquippedDialogueSkills {
 		dialogueSkillNames = append(dialogueSkillNames, skill.SkillName)
 		if skill.SkillName == "" {
 			println("Skill name is empty", skill.Text)
@@ -150,7 +150,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 		}
 	}
 
-	dialogueContainer := ui2.SkillBoxContainer("Choose Skill")
+	dialogueContainer := ui2.SkillBoxContainerBattle("Choose Skill")
 	dialogueContainer.AddChild(dialogueSkillsContainer)
 	g.dialogueMenu.MenuContainer.AddChild(dialogueContainer)
 	rootContainer.AddChild(g.dialogueMenu.MenuContainer)
@@ -182,7 +182,7 @@ func (g *BattleScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.TextPrinter.StatusText[2] = statusTextLine3
 
 	//making input be controlled by arrowKeys through cursorHandling code
-	g.Cursor = CreateCursorUpdater(g.resolutionWidth, g.resolutionHeight)
+	g.Cursor = ui2.CreateCursorUpdater(g.resolutionWidth, g.resolutionHeight)
 	input.SetCursorUpdater(g.Cursor)
 
 	// Ebiten setup
@@ -243,10 +243,6 @@ func (g *BattleScene) Update() sceneManager.SceneId {
 	}
 	if g.graphicalEffectManager.GameEffects != nil {
 		g.graphicalEffectManager.GameEffects.Update()
-	}
-
-	if g.Cursor.countdown > 0 {
-		g.Cursor.countdown--
 	}
 
 	if g.eventCountDown > 0 {

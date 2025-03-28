@@ -23,23 +23,20 @@ type Object interface {
 
 type DoorObject struct {
 	*Sprite
-	Trigger
+	*Trigger
 	Animation         map[ObjectState]*animations.Animation
 	AnimationActive   bool
 	AnimationComplete bool
-	Status            ObjectState
+	State             ObjectState
 	SpriteSheet       spritesheet.SpriteSheet
 	DrawAbovePlayer   bool
 }
 
-func (do *DoorObject) ActiveAnimation(objectState ObjectState) *animations.Animation {
-	if do.Type == EntryDoor || do.Type == ExitDoor {
-		return do.Animation[objectState]
+func (do *DoorObject) ActiveAnimation() *animations.Animation {
+	if do.State == NotTriggered {
+		return nil
 	}
-	if do.Type == ContextualObject {
-		return do.Animation[objectState]
-	}
-	return nil
+	return do.Animation[do.State]
 }
 
 func (do *DoorObject) PlayAnimation() {
@@ -48,10 +45,10 @@ func (do *DoorObject) PlayAnimation() {
 
 func (do *DoorObject) StopAnimation() {
 	do.AnimationActive = false
-	do.Status = NotTriggered
+	do.State = NotTriggered
 }
 
-func NewObject(pImg *ebiten.Image, sheet spritesheet.SpriteSheet, enteringAnimation *animations.Animation, leavingAnimation *animations.Animation, trigger Trigger) (*DoorObject, error) {
+func NewObject(pImg *ebiten.Image, sheet spritesheet.SpriteSheet, enteringAnimation *animations.Animation, leavingAnimation *animations.Animation, trigger *Trigger) (*DoorObject, error) {
 	objHeight := sheet.SpriteHeight
 
 	object := &DoorObject{
@@ -67,7 +64,7 @@ func NewObject(pImg *ebiten.Image, sheet spritesheet.SpriteSheet, enteringAnimat
 		},
 		AnimationActive:   false,
 		AnimationComplete: false,
-		Status:            NotTriggered,
+		State:             NotTriggered,
 		SpriteSheet:       sheet,
 		Trigger:           trigger,
 		DrawAbovePlayer:   false,

@@ -38,6 +38,7 @@ const (
 	StareDownEffect
 	TensionIncrease
 	WolfBite
+	HorseWinny
 )
 
 var audioContext = audio.NewContext(44100)
@@ -114,6 +115,11 @@ func GameSFXLoader() *resource.Loader {
 		log.Fatal("cannot load wolfBite")
 	}
 
+	horseWinny, err := combatSFX.ReadFile("sounds/combatSFX/horseWinny.wav")
+	if err != nil {
+		log.Fatal("cannot load horse.wav")
+	}
+
 	var SoundData = map[string][]byte{
 		"sounds/combatSFX/gunShot.wav":                    gunShot,
 		"sounds/combatSFX/whizz.wav":                      miss,
@@ -129,6 +135,7 @@ func GameSFXLoader() *resource.Loader {
 		"sounds/combatSFX/stareDownSoundEffect.wav":       stareDownEffect,
 		"sounds/combatSFX/tensionIncrease.wav":            tensionIncrease,
 		"sounds/combatSFX/wolfBite.wav":                   wolfBite,
+		"sounds/combatSFX/horseWinny.wav":                 horseWinny,
 	}
 
 	l := resource.NewLoader(audioContext)
@@ -152,6 +159,7 @@ func GameSFXLoader() *resource.Loader {
 		StareDownEffect: {Path: "sounds/combatSFX/stareDownSoundEffect.wav", Volume: 0.1},
 		TensionIncrease: {Path: "sounds/combatSFX/tensionIncrease.wav", Volume: 0.2},
 		WolfBite:        {Path: "sounds/combatSFX/wolfBite.wav", Volume: 0.2},
+		HorseWinny:      {Path: "sounds/combatSFX/horseWinny.wav", Volume: 0.2},
 	})
 
 	return l

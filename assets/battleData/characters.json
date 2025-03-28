@@ -8,7 +8,7 @@
 		"anger":     0
     },
     "combat_skills": ["shoot", "focusedShot", "fanShot", "reload"],
-    "dialogue_skills": ["stareDown","deadShot", "draw", "comeBack", "mamasGirl"],
+    "dialogue_skills": ["stareDown","deadShot", "draw", "comeBack", "mamasGirl", "slowPoke"],
       "weakness": "guts",
       "soundFxType": "female1"
 },

@@ -5,10 +5,18 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"image/color"
 	"log"
 )
+
+type TriggerMenu interface {
+	Trigger()
+	UnTrigger()
+	Update()
+	Draw(screen *ebiten.Image)
+}
 
 type Menu struct {
 	MenuContainer    *widget.Container
@@ -87,7 +95,7 @@ func LoadSlotButtonImage() *widget.ButtonImage {
 	}
 }
 
-func SkillBoxContainer(headerText string) *widget.Container {
+func SkillBoxContainerBattle(headerText string) *widget.Container {
 	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/menuBackground.png")
 	if err != nil {
 	}
@@ -100,6 +108,100 @@ func SkillBoxContainer(headerText string) *widget.Container {
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionStart,
 				HorizontalPosition: widget.AnchorLayoutPositionCenter,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+			}),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(250, 50)),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Spacing(20),
+		),
+		),
+	)
+
+	face, err := assetManagement.LoadFont(24, assetManagement.November)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//Container to orient Header Label
+
+	headerContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionStart,
+				HorizontalPosition: widget.AnchorLayoutPositionCenter,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+			}),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(100, 10)),
+		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+	)
+
+	headerLbl := widget.NewText(
+		widget.TextOpts.Text(headerText, face, color.RGBA{R: 102, G: 57, B: 48, A: 255}),
+		widget.TextOpts.Position(widget.TextPositionStart, widget.TextPositionStart),
+		widget.TextOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionStart,
+				HorizontalPosition: widget.AnchorLayoutPositionStart,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+			}),
+		),
+		widget.TextOpts.Insets(widget.Insets{
+			Left:   30,
+			Right:  10,
+			Top:    20,
+			Bottom: 0,
+		}),
+	)
+
+	//Horizontally organized container for skills buttons
+
+	headerContainer.AddChild(headerLbl)
+	vertContainer.AddChild(headerContainer)
+
+	return vertContainer
+}
+
+func SkillsContainer() *widget.Container {
+	skillContainer := widget.NewContainer(
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(
+				widget.Insets{Right: 0, Left: 0, Top: 0, Bottom: 20}),
+			widget.RowLayoutOpts.Spacing(5),
+		)),
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionStart,
+				HorizontalPosition: widget.AnchorLayoutPositionStart,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+			}),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(100, 50)),
+	)
+
+	return skillContainer
+}
+
+func SkillBoxContainerEquipUi(headerText string) *widget.Container {
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/menuAssets/menuBackground.png")
+	if err != nil {
+	}
+
+	nineSliceImage := image.NewNineSlice(img, [3]int{12, 600 - 24, 12}, [3]int{12, 200 - 24, 12})
+	//Container to vertically Dialogue with a header
+	vertContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(nineSliceImage),
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionStart,
+				HorizontalPosition: widget.AnchorLayoutPositionStart,
 				StretchHorizontal:  false,
 				StretchVertical:    false,
 			}),
@@ -157,26 +259,4 @@ func SkillBoxContainer(headerText string) *widget.Container {
 	vertContainer.AddChild(headerContainer)
 
 	return vertContainer
-}
-
-func SkillsContainer() *widget.Container {
-	skillContainer := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-			widget.RowLayoutOpts.Padding(
-				widget.Insets{Right: 0, Left: 0, Top: 0, Bottom: 20}),
-			widget.RowLayoutOpts.Spacing(5),
-		)),
-		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-				VerticalPosition:   widget.AnchorLayoutPositionStart,
-				HorizontalPosition: widget.AnchorLayoutPositionCenter,
-				StretchHorizontal:  false,
-				StretchVertical:    false,
-			}),
-		),
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(100, 50)),
-	)
-
-	return skillContainer
 }

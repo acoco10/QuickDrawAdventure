@@ -20,6 +20,7 @@
       "text": "Whats the matter hun? Never looked a lady in her eye before?",
       "tension": 3,
       "target": "vanity",
+      "type": "insult",
       "effects": [
         { "type": "buff",
           "on": "enemy",
@@ -34,6 +35,7 @@
     "text": "If brains were dynamite you wouldn't have enough to blow your nose.",
       "tension": 3,
       "target": "brains",
+      "type": "insult",
       "effects": [
         { "type": "buff",
           "on": "enemy",
@@ -48,6 +50,7 @@
       "text": "You're proof they ought to have a' IQ test for holstering some iron.",
       "tension": 3,
       "target": "brains",
+      "type": "insult",
       "effects":[
     { "type": "buff",
       "on": "enemy",
@@ -62,6 +65,7 @@
       "text": "If your draw is as slow as your wit this won't be much fun at all.",
       "tension": 2,
       "target": "brains",
+      "type": "insult",
       "effects": [
         {
           "type": "buff",
@@ -85,6 +89,7 @@
       "text": "You aint heard me? I go by the Kid. My posse will be here soon an' all 12 know their way round a Winchester.",
       "tension": 3,
       "target": "pride",
+      "type": "brag",
       "effects": [
         {
           "type": "buff",
@@ -100,7 +105,7 @@
       "name": "deadShot",
       "text": "I can shoot a puma in the eye running full speed from a mile away.",
       "tension": 2,
-       "target": "pride",
+       "target": "guts",
       "effects": [
         {
           "type": "buff",

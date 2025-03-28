@@ -35,7 +35,7 @@ type BattleScene struct {
 	musicPlayer                       *audioManagement.DJ
 	TextPrinter                       *TextPrinter
 	SkillUsed                         string
-	Cursor                            *BattleMenuCursorUpdater
+	Cursor                            *ui.CursorUpdater
 	battle                            *battle.Battle
 	playerBattleSprite                *gameObjects.BattleSprite
 	enemyBattleSprite                 *gameObjects.BattleSprite
@@ -172,7 +172,7 @@ func (g *BattleScene) ShowCombatMenu() {
 }
 
 func (g *BattleScene) KeepCursorPressed() {
-	g.Cursor.keepPressed(15)
+	g.Cursor.KeepPressed(15)
 }
 
 func LoadPlayerBattleSprite() gameObjects.BattleSprite {
@@ -370,14 +370,13 @@ func (g *BattleScene) UpdateTurn() {
 	}
 	if g.battle.State == battle.EnemyTurn && g.battle.BattlePhase == battle.Dialogue {
 		if !enemy.EventTriggered {
-			enemySkillUsed, err := battle.EnemyChooseSkill(*g.battle, enemy.DialogueSkills)
+			enemySkillUsed, err := battle.EnemyChooseSkill(*g.battle, enemy.LearnedDialogueSkills)
 			if err != nil {
 				log.Fatal(err)
 			}
 			enemy.SkillUsed = enemySkillUsed
 			g.battle.UpdateChar(enemy, player)
 		}
-		println("Triggering enemy turn")
 		g.DialogueTurn(g.battle.CharacterBattleData[battle.Enemy], g.battle.CharacterBattleData[battle.Player])
 
 	}

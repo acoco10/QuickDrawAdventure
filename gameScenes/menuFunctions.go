@@ -388,7 +388,7 @@ func DialogueSkillButtonEvent(g *BattleScene, text string, button *widget.Button
 	enemy := g.battle.CharacterBattleData[battle.Enemy]
 	enemy.EventTriggered = false
 	player.EventTriggered = false
-	player.SkillUsed = g.battle.CharacterBattleData[battle.Player].DialogueSkills[text]
+	player.SkillUsed = g.battle.CharacterBattleData[battle.Player].EquippedDialogueSkills[text]
 	g.battle.UpdateChar(player, enemy)
 	g.changeEvent(HideSkillMenu, 15)
 	g.inMenu = false
@@ -408,7 +408,7 @@ func CombatSkillButtonEvent(g *BattleScene, text string) {
 func DrawSkillButtonEvent(g *BattleScene, text string) {
 	g.audioPlayer.Play(audioManagement.DrawButton)
 	g.TextPrinter.ResetTP()
-	g.battle.DialogueTurn(g.battle.CharacterBattleData[battle.Player].DialogueSkills["draw"])
+	g.battle.DialogueTurn(g.battle.CharacterBattleData[battle.Player].EquippedDialogueSkills["draw"])
 	g.TextPrinter.NextMessage = true
 	g.playerBattleSprite.DialogueButtonAnimationTrigger("draw")
 	g.changeEvent(HideSkillMenu, 15)

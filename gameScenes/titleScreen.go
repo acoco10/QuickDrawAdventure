@@ -71,6 +71,9 @@ func (s *StartScene) Update() sceneManager.SceneId {
 	}
 	if s.animationTriggered {
 		s.titleAnimation.Update()
+		if s.titleAnimation.Frame() == 7 {
+			s.audioPlayer.Play(audioManagement.HorseWinny)
+		}
 		if s.titleAnimation.Frame() == s.titleAnimation.LastF {
 			if s.gameLog.Mode == sceneManager.BattleTest {
 				s.musicPlayer.Stop()

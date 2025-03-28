@@ -8,9 +8,9 @@
  "margin":0,
  "name":"SunriseInn",
  "spacing":0,
- "tilecount":8,
+ "tilecount":10,
  "tiledversion":"1.11.0",
- "tileheight":225,
+ "tileheight":258,
  "tiles":[
         {
          "id":0,
@@ -57,8 +57,20 @@
         {
          "id":7,
          "image":"..\/..\/images\/buildings\/sunriseInn\/sunRiseBalconyRailing.png",
-         "imageheight":14,
+         "imageheight":17,
          "imagewidth":222
+        }, 
+        {
+         "id":8,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseSecondFloor.png",
+         "imageheight":258,
+         "imagewidth":290
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunRiseSign.png",
+         "imageheight":58,
+         "imagewidth":176
         }],
  "tilewidth":337,
  "type":"tileset",

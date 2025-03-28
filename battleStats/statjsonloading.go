@@ -24,6 +24,7 @@ type Skill struct {
 	Index     int      `json:"index"`
 	SkillName string   `json:"name"`
 	Text      string   `json:"text"`
+	Type      string   `json:"type"`
 	Target    string   `json:"target"`
 	Tension   int      `json:"tension"`
 	Effects   []Effect `json:"effects"`

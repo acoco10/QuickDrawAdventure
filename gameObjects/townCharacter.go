@@ -5,16 +5,18 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type CharState uint8
+type Direction uint8
 
 const (
-	Down CharState = iota
+	Down Direction = iota
 	Up
 	Left
 	Right
+	None
 	MapIdle
 )
 
@@ -28,7 +30,7 @@ const (
 type Character struct {
 	Name string
 	*Sprite
-	Animations  map[CharState]*animations.Animation
+	Animations  map[Direction]*animations.Animation
 	SpriteSheet spritesheet.SpriteSheet
 	CharType    CharType
 	Spawned     bool
@@ -67,7 +69,7 @@ func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType Char
 	imgPath := "images/characters/npc/townFolk/" + spawnPoint.Name + ".png"
 	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
 	if err != nil {
-		return nil, err
+		img = ebiten.NewImage(10, 10)
 	}
 	character := &Character{
 		Sprite: &Sprite{
@@ -83,12 +85,12 @@ func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType Char
 		CharType:    charType,
 	}
 	if charType == NonPlayer {
-		character.Animations = map[CharState]*animations.Animation{
+		character.Animations = map[Direction]*animations.Animation{
 			MapIdle: animations.NewAnimation(0, 2, 1, 60),
 		}
 	}
 	if charType == Player {
-		character.Animations = map[CharState]*animations.Animation{
+		character.Animations = map[Direction]*animations.Animation{
 			Down:  animations.NewAnimation(0, 20, 4, 10),
 			Up:    animations.NewAnimation(2, 22, 4, 12),
 			Left:  animations.NewAnimation(3, 23, 4, 10.0),
@@ -97,8 +99,17 @@ func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType Char
 		inv := Inventory{
 			items:          make([]Item, 0),
 			ammo:           24,
-			weaponEquipped: "Colt 1851",
+			weaponEquipped: "Colt1851",
 		}
+
+		bloodyNote := Item{
+			Name:         "BloodyNote",
+			InventoryImg: *ebiten.NewImage(10, 10),
+			Description:  "Your only clue to you Momma's whereabouts",
+			ExamineImg:   *ebiten.NewImage(10, 10),
+		}
+
+		inv.items = append(inv.items, bloodyNote)
 		character.Inventory = &inv
 		charStats, err := battleStats.LoadSingleCharacter(spawnPoint.Name)
 

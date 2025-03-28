@@ -124,10 +124,10 @@ func TestHowRandWorks(t *testing.T) {
 
 func TestLoadCharacter(t *testing.T) {
 	chars, _ := battleStats.LoadCharacters()
-	for skill := range chars[0].DialogueSkills {
+	for skill := range chars[0].EquippedDialogueSkills {
 		println(skill)
 	}
-	for skill := range chars[0].DialogueSkills {
+	for skill := range chars[0].EquippedDialogueSkills {
 		println(skill)
 	}
 }
@@ -202,7 +202,7 @@ func TestLoadCharacters(t *testing.T) {
 
 	println("Testing Elyse Combat Skills")
 	println("-------------------------------------")
-	for _, skill := range elyse.DialogueSkills {
+	for _, skill := range elyse.EquippedDialogueSkills {
 		println(skill.SkillName)
 	}
 
@@ -214,7 +214,7 @@ func TestLoadCharacters(t *testing.T) {
 
 	println("Testing chosen enemy Combat Skills")
 	println("-------------------------------------")
-	for _, skill := range enemy.DialogueSkills {
+	for _, skill := range enemy.EquippedDialogueSkills {
 		println(skill.SkillName)
 	}
 
@@ -234,7 +234,7 @@ func TestEnemyChooseSkill(t *testing.T) {
 	println("Testing Enemy Choose Dialogue Skills")
 	println("-------------------------------------")
 	for i := 0; i < 10; i++ {
-		_, err := battle.EnemyChooseSkill(*testBattle, enemy.DialogueSkills)
+		_, err := battle.EnemyChooseSkill(*testBattle, enemy.EquippedDialogueSkills)
 		if err != nil {
 			log.Fatal("error when choosing skill")
 		}
@@ -262,7 +262,7 @@ func TestEnemyChooseSkill(t *testing.T) {
 			index++
 			testBattle.Tension++
 		}
-		skill, err := battle.EnemyChooseSkill(*testBattle, enemy.DialogueSkills)
+		skill, err := battle.EnemyChooseSkill(*testBattle, enemy.EquippedDialogueSkills)
 		if err != nil {
 			log.Fatal("error when choosing skill")
 		}

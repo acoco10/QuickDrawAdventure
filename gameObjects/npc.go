@@ -9,7 +9,7 @@ type NPC struct {
 	Name string
 	*Sprite
 	FollowsEnemy bool
-	Animations   map[CharState]*animations.Animation
+	Animations   map[Direction]*animations.Animation
 }
 
 func (e *NPC) ActiveAnimation(dX, dY int) *animations.Animation {
@@ -37,7 +37,7 @@ func NewNPC(eImg *ebiten.Image, npcSpawn Spawn) (*NPC, error) {
 			Y:       npcSpawn.Y,
 			Visible: true,
 		},
-		Animations: map[CharState]*animations.Animation{
+		Animations: map[Direction]*animations.Animation{
 			Down:  animations.NewAnimation(0, 4, 4, 22.0),
 			Up:    animations.NewAnimation(2, 6, 4, 22.0),
 			Left:  animations.NewAnimation(1, 10, 4, 11.0),

@@ -1,5 +1,6 @@
-package gameScenes
+package ui
 
+import "C"
 import (
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/ebitenui/ebitenui/input"
@@ -11,7 +12,14 @@ import (
 	"log"
 )
 
-type BattleMenuCursorUpdater struct {
+type EventName uint8
+
+const (
+	KeepPressedOff EventName = iota
+	noEvent
+)
+
+type CursorUpdater struct {
 	currentPosition image.Point
 	systemPosition  image.Point
 	statusX         int
@@ -27,8 +35,8 @@ type BattleMenuCursorUpdater struct {
 	Event           EventName
 }
 
-func CreateCursorUpdater(resWidth int, resHeight int) *BattleMenuCursorUpdater {
-	cu := BattleMenuCursorUpdater{}
+func CreateCursorUpdater(resWidth int, resHeight int) *CursorUpdater {
+	cu := CursorUpdater{}
 	X, Y := ebiten.CursorPosition()
 	X1, Y1 := int(0.66*float64(resWidth)), int(0.75*float64(resHeight))
 	cu.statusX = X1
@@ -47,35 +55,42 @@ func CreateCursorUpdater(resWidth int, resHeight int) *BattleMenuCursorUpdater {
 	return &cu
 }
 
-func (cu *BattleMenuCursorUpdater) MoveToLockedSpecificPosition(x, y int) {
+func (cu *CursorUpdater) MoveToLockedSpecificPosition(x, y, maxY int) {
 	cu.minX = x
 	cu.minY = y
-	cu.maxY = y
+	cu.maxY = maxY
 }
 
-func (cu *BattleMenuCursorUpdater) MoveCursorToSkillMenu() {
+func (cu *CursorUpdater) MoveCursorToSkillMenu() {
 	cu.minX = 138
 	cu.minY = 564
-	cu.maxY = 564 + 35 + 35 + 35
+	cu.maxY = 564 + 35 + 35 + 35 + 35
 }
 
-func (cu *BattleMenuCursorUpdater) MoveCursorToStatusBar() {
+func (cu *CursorUpdater) MoveCursorToStatusBar() {
 	cu.minX = cu.statusX
 	cu.minY = cu.statusY
 	cu.maxY = cu.statusY
 }
 
-const (
-	KeepPressedOff EventName = iota
-	noEvent
-)
-
-func (cu *BattleMenuCursorUpdater) changeEvent(name EventName, timer int) {
+func (cu *CursorUpdater) ChangeEvent(name EventName, timer int) {
 	cu.Event = name
 	cu.countdown = timer
 }
 
-func (cu *BattleMenuCursorUpdater) TriggerEvent(name EventName) {
+func (cu *CursorUpdater) SetSkillMenuEquip() {
+	cu.currentPosition.X = 147
+	cu.currentPosition.Y = 300
+	cu.MoveToLockedSpecificPosition(147, 300, 400)
+}
+
+func (cu *CursorUpdater) SetSkillMenuSelect() {
+	cu.currentPosition.X = 135
+	cu.currentPosition.Y = 525
+	cu.MoveToLockedSpecificPosition(135, 525, 700)
+}
+
+func (cu *CursorUpdater) TriggerEvent(name EventName) {
 
 	if name == KeepPressedOff {
 		cu.PressedOff()
@@ -84,18 +99,18 @@ func (cu *BattleMenuCursorUpdater) TriggerEvent(name EventName) {
 
 }
 
-func (cu *BattleMenuCursorUpdater) keepPressed(timer int) {
+func (cu *CursorUpdater) KeepPressed(timer int) {
 	cu.pressed = true
-	cu.changeEvent(KeepPressedOff, timer)
+	cu.ChangeEvent(KeepPressedOff, timer)
 
 }
 
-func (cu *BattleMenuCursorUpdater) PressedOff() {
+func (cu *CursorUpdater) PressedOff() {
 	cu.pressed = false
 	cu.countdown = 0
 }
 
-func (cu *BattleMenuCursorUpdater) MoveCursorToCombatMenu() {
+func (cu *CursorUpdater) MoveCursorToCombatMenu() {
 	cu.minX = 138
 	cu.minY = 564
 	cu.maxY = 564 + 35 + 35 + 35
@@ -104,7 +119,11 @@ func (cu *BattleMenuCursorUpdater) MoveCursorToCombatMenu() {
 // Called every Update call from Ebiten
 // Note that before this is called the current cursor shape is reset to DEFAULT every cycle
 
-func (cu *BattleMenuCursorUpdater) Update() {
+func (cu *CursorUpdater) Update() {
+
+	if cu.countdown > 0 {
+		cu.countdown--
+	}
 
 	X, Y := ebiten.CursorPosition()
 
@@ -148,19 +167,19 @@ func (cu *BattleMenuCursorUpdater) Update() {
 	cu.systemPosition = image.Point{X, Y}
 
 }
-func (cu *BattleMenuCursorUpdater) Draw(screen *ebiten.Image) {
+func (cu *CursorUpdater) Draw(screen *ebiten.Image) {
 }
-func (cu *BattleMenuCursorUpdater) AfterDraw(screen *ebiten.Image) {
+func (cu *CursorUpdater) AfterDraw(screen *ebiten.Image) {
 }
 
 // MouseButtonPressed returns whether mouse button b is currently pressed.
-func (cu *BattleMenuCursorUpdater) MouseButtonPressed(b ebiten.MouseButton) bool {
+func (cu *CursorUpdater) MouseButtonPressed(b ebiten.MouseButton) bool {
 	return ebiten.IsMouseButtonPressed(b) || ebiten.IsKeyPressed(ebiten.KeyEnter) || cu.pressed
 }
 
 // MouseButtonJustPressed returns whether mouse button b has just been pressed.
 // It only returns true during the first frame that the button is pressed.
-func (cu *BattleMenuCursorUpdater) MouseButtonJustPressed(b ebiten.MouseButton) bool {
+func (cu *CursorUpdater) MouseButtonJustPressed(b ebiten.MouseButton) bool {
 	return inpututil.IsMouseButtonJustPressed(b) || inpututil.IsKeyJustPressed(ebiten.KeyEnter)
 }
 
@@ -168,7 +187,7 @@ func (cu *BattleMenuCursorUpdater) MouseButtonJustPressed(b ebiten.MouseButton) 
 // If you define a CursorPosition that doesn't align with a system cursor you will need to
 // set the CursorDrawMode to Custom. This is because ebiten doesn't have a way to set the
 // cursor location manually
-func (cu *BattleMenuCursorUpdater) CursorPosition() (int, int) {
+func (cu *CursorUpdater) CursorPosition() (int, int) {
 	return cu.currentPosition.X, cu.currentPosition.Y
 }
 
@@ -178,13 +197,13 @@ func (cu *BattleMenuCursorUpdater) CursorPosition() (int, int) {
 //	"EWResize"
 //	"NSResize"
 //	"Default"
-func (cu *BattleMenuCursorUpdater) GetCursorImage(name string) *ebiten.Image {
+func (cu *CursorUpdater) GetCursorImage(name string) *ebiten.Image {
 	return cu.cursorImages[name]
 }
 
 // GetCursorOffset Returns how far from the CursorPosition to offset the cursor image.
 // This is best used with cursors such as resizing.
-func (cu *BattleMenuCursorUpdater) GetCursorOffset(name string) image.Point {
+func (cu *CursorUpdater) GetCursorOffset(name string) image.Point {
 	return image.Point{}
 }
 
