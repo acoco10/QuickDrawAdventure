@@ -66,44 +66,53 @@ func GetDoorCoord(door *DoorObject, direction Direction) (float64, float64) {
 
 }
 
-func CheckTriggers(player *Character, triggers []*Trigger) {
-	for _, trigger := range triggers {
-		if trigger.Rect.Overlaps(
-			image.Rect(
-				int(player.X),
-				int(player.Y)+28,
-				int(player.X)+16,
-				int(player.Y)+31),
-		) {
-			if player.Dy < 0 {
-				if trigger.Dir == Up {
-					println("setting up trigger to true")
-					trigger.Triggered = true
-					continue
-				} else {
-					trigger.Triggered = false
-				}
-			} else if player.Dy > 0 {
-				if trigger.Dir == Down {
-					trigger.Triggered = true
-				} else {
-					trigger.Triggered = false
-				}
+func CheckDoors(player *Character, doors []*DoorObject) {
+	for _, door := range doors {
+		CheckTrigger(player, door.Trigger)
+	}
+}
+
+func CheckTrigger(player *Character, trigger *Trigger) {
+	if trigger.Rect.Overlaps(
+		image.Rect(
+			int(player.X),
+			int(player.Y)+28,
+			int(player.X)+16,
+			int(player.Y)+31),
+	) {
+		if player.Dy < 0 {
+			if trigger.Dir == Up {
+				println("setting up trigger to true")
+				trigger.Triggered = true
+			} else {
+				trigger.Triggered = false
 			}
-			if player.Dx < 0 {
-				if trigger.Dir == Left {
-					trigger.Triggered = true
-				} else {
-					trigger.Triggered = false
-				}
-			} else if player.Dx > 0 {
-				if trigger.Dir == Right {
-					trigger.Triggered = true
-					return
-				} else {
-					trigger.Triggered = false
-				}
+		} else if player.Dy > 0 {
+			if trigger.Dir == Down {
+				trigger.Triggered = true
+			} else {
+				trigger.Triggered = false
 			}
 		}
+		if player.Dx < 0 {
+			if trigger.Dir == Left {
+				trigger.Triggered = true
+			} else {
+				trigger.Triggered = false
+			}
+		} else if player.Dx > 0 {
+			if trigger.Dir == Right {
+				trigger.Triggered = true
+				return
+			} else {
+				trigger.Triggered = false
+			}
+		}
+	}
+}
+
+func CheckTriggers(player *Character, triggers []*Trigger) {
+	for _, trigger := range triggers {
+		CheckTrigger(player, trigger)
 	}
 }

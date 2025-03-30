@@ -3,6 +3,7 @@ package gameObjects
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/acoco10/QuickDrawAdventure/animations"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"image"
 	"log"
@@ -67,18 +68,29 @@ func (u *UniformTileset) Img(id int) *ebiten.Image {
 }
 
 type TileJSON struct {
-	Id     int    `json:"id"`
-	Path   string `json:"image"`
-	Width  int    `json:"imagewidth"`
-	Height int    `json:"imageheight"`
-	Name   string `json:"name"`
+	Id        int      `json:"id"`
+	Animation []string `json:"animation"`
+	Path      string   `json:"image"`
+	Width     int      `json:"imagewidth"`
+	Height    int      `json:"imageheight"`
+	Name      string   `json:"name"`
 }
 
-type DynTilesetJSON struct {
-	Tiles      []*TileJSON `json:"tiles"`
-	Name       string      `json:"name"`
-	TileHeight int         `json:"tileheight"`
-	TileWidth  int         `json:"tilewidth"`
+type AnimatedTileSet struct {
+	Tiles            []*TileJSON `json:"tiles"`
+	Name             string      `json:"name"`
+	TileHeight       int         `json:"tileheight"`
+	TileWidth        int         `json:"tilewidth"`
+	Animation        animations.Animation
+	OffsetX, OffsetY int
+}
+
+type DynTileSetJSON struct {
+	Tiles      []*TileJSON      `json:"tiles"`
+	Name       string           `json:"name"`
+	TileHeight int              `json:"tileheight"`
+	TileWidth  int              `json:"tilewidth"`
+	Properties []PropertiesJSON `json:"properties"`
 }
 
 // DynTileset struct for tiles or objects of different sizes like buildings or fauna
@@ -105,6 +117,9 @@ func (d *DynTileset) Name() string {
 func (d *DynTileset) Img(id int) *ebiten.Image {
 
 	id -= d.gid
+	if id >= len(d.imgs) {
+		println(d.name, "has error in id values for tiles")
+	}
 	img := d.imgs[id]
 
 	if img == nil {
@@ -113,60 +128,56 @@ func (d *DynTileset) Img(id int) *ebiten.Image {
 	return img
 }
 
-func NewTileSet(path string, gid int) (Tileset, error) {
-	//interactions file contents
+func NewDynamicTileSet(path string, gid int) (Tileset, error) {
 	contents, err := assets.Map.ReadFile(path)
 	fmt.Println(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to interactions file %s: %w", path, err)
 	}
-
-	var checkDynTileSetJSON DynTilesetJSON
-	err = json.Unmarshal(contents, &checkDynTileSetJSON)
+	var dynTileSetJSON DynTileSetJSON
+	err = json.Unmarshal(contents, &dynTileSetJSON)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal dyn tileset JSON: %w", err)
 	}
 
-	if len(checkDynTileSetJSON.Tiles) > 0 {
-		//return dyn tileset
-		var dynTileSetJSON DynTilesetJSON
-		err = json.Unmarshal(contents, &dynTileSetJSON)
+	//create the tileset
+	dynTileset := DynTileset{}
+	dynTileset.name = dynTileSetJSON.Name
+	dynTileset.gid = gid
+	dynTileset.imgs = make([]*ebiten.Image, 0)
+	//change back to ebiten image
+	//loop over tile data and load image for each
+	for _, tileJSON := range dynTileSetJSON.Tiles {
+
+		// clean and convert tileset relative path to root relative path
+		tileJsonPath := tileJSON.Path
+		tileJsonPath = filepath.Clean(tileJsonPath)
+		tileJsonPath = strings.ReplaceAll(tileJsonPath, "\\", "/")
+		tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
+		tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
+		tileJsonPath = filepath.Clean(tileJsonPath)
+
+		fmt.Printf("Loading dyn tileset image from: %s\n", tileJsonPath)
+
+		img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, tileJsonPath)
+
 		if err != nil {
-
-			return nil, fmt.Errorf("failed to unmarshal dyn tileset JSON: %w", err)
+			return nil, fmt.Errorf("failed to load dyntileset image from %s: %w", tileJsonPath, err)
 		}
 
-		//create the tileset
-		dynTileset := DynTileset{}
-		dynTileset.gid = gid
-		dynTileset.imgs = make([]*ebiten.Image, 0)
-		//change back to ebiten image
-		//loop over tile data and load image for each
-		for _, tileJSON := range dynTileSetJSON.Tiles {
+		dynTileset.imgs = append(dynTileset.imgs, img)
 
-			// clean and convert tileset relative path to root relative path
-			tileJsonPath := tileJSON.Path
-			tileJsonPath = filepath.Clean(tileJsonPath)
-			tileJsonPath = strings.ReplaceAll(tileJsonPath, "\\", "/")
-			tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
-			tileJsonPath = strings.TrimPrefix(tileJsonPath, "../")
-			tileJsonPath = filepath.Clean(tileJsonPath)
-
-			fmt.Printf("Loading dyn tileset image from: %s\n", tileJsonPath)
-
-			img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, tileJsonPath)
-
-			if err != nil {
-				return nil, fmt.Errorf("failed to load dyntileset image from %s: %w", tileJsonPath, err)
-			}
-
-			dynTileset.imgs = append(dynTileset.imgs, img)
-
-		}
-		dynTileset.width = dynTileSetJSON.TileWidth
-		dynTileset.height = dynTileSetJSON.TileHeight
-		return &dynTileset, nil
 	}
+	dynTileset.width = dynTileSetJSON.TileWidth
+	dynTileset.height = dynTileSetJSON.TileHeight
+
+	println(dynTileset.name)
+
+	return &dynTileset, nil
+}
+
+func NewUniformTileSet(path string, gid int) (Tileset, error) {
+	contents, err := assets.Map.ReadFile(path)
 	var uniformTilesetJSON UniformTilesetJSON
 	err = json.Unmarshal(contents, &uniformTilesetJSON)
 
@@ -174,7 +185,7 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 		return nil, err
 	}
 
-	uniformTileset := UniformTileset{}
+	uniformTileSet := UniformTileset{}
 
 	//clean and convert tileset relative path to root relative path
 	tileJsonPath := uniformTilesetJSON.Path
@@ -191,12 +202,57 @@ func NewTileSet(path string, gid int) (Tileset, error) {
 	if err != nil {
 		return nil, err
 	}
-	uniformTileset.img = img
-	uniformTileset.gid = gid
-	uniformTileset.name = uniformTilesetJSON.Name
-	uniformTileset.tilesetWidth = uniformTilesetJSON.Width
+	uniformTileSet.img = img
+	uniformTileSet.gid = gid
+	uniformTileSet.name = uniformTilesetJSON.Name
+	uniformTileSet.tilesetWidth = uniformTilesetJSON.Width
+	return &uniformTileSet, nil
+}
 
-	return &uniformTileset, nil
+func NewTileSet(path string, gid int) (Tileset, error) {
+	//interactions file contents
+	contents, err := assets.Map.ReadFile(path)
+	fmt.Println(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to interactions file %s: %w", path, err)
+	}
+
+	var checkType map[string]interface{}
+
+	err = json.Unmarshal(contents, &checkType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal dyn tileset JSON: %w", err)
+	}
+
+	properties, ok := checkType["properties"].([]interface{})
+	if !ok {
+		log.Fatal()
+	}
+	propValues, ok := properties[0].(map[string]interface{})
+	if !ok {
+		log.Fatal()
+	}
+
+	switch propValues["value"] {
+
+	case "animated":
+		println("skipping animated tile set")
+		return nil, nil
+	case "dynamic":
+		tileSet, err := NewDynamicTileSet(path, gid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return tileSet, nil
+	case "uniform":
+		tileSet, err := NewUniformTileSet(path, gid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return tileSet, nil
+	}
+
+	return nil, nil
 }
 
 func DetermineTileSet(tiles []int, tilesetgids []int) int {

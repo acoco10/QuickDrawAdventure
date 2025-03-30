@@ -1,0 +1,102 @@
+{
+    "automappingRulesFile": "",
+    "commands": [
+    ],
+    "compatibilityVersion": 1100,
+    "extensionsPath": "extensions",
+    "folders": [
+        "."
+    ],
+    "properties": [
+    ],
+    "propertyTypes": [
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 1,
+            "members": [
+                {
+                    "name": "cameraPoint",
+                    "type": "string",
+                    "value": "none"
+                },
+                {
+                    "name": "direction",
+                    "type": "string",
+                    "value": "down"
+                },
+                {
+                    "name": "sprite",
+                    "type": "string",
+                    "value": "none"
+                }
+            ],
+            "name": "exitDoor",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 2,
+            "members": [
+                {
+                    "name": "cameraPoint",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "direction",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "sprite",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "insideDoor",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 3,
+            "members": [
+                {
+                    "name": "animation ",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "image",
+                    "type": "string",
+                    "value": ""
+                }
+            ],
+            "name": "interactPoint",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
+        }
+    ]
+}

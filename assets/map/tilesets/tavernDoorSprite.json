@@ -1,0 +1,57 @@
+{
+  "columns": 2,
+  "image": "../../images/buildings/tavernDoorSpriteSheet.png",
+  "imageheight": 63,
+  "imagewidth": 40,
+  "margin": 0,
+  "name": "tavernDoorSpriteSheet",
+  "properties": [
+    {
+      "name": "tileSetType",
+      "type": "string",
+      "value": "animated"
+    }
+  ],
+  "spacing": 0,
+  "tilecount": 6,
+  "tiledversion": "1.11.0",
+  "tileheight": 21,
+  "tileoffset": {
+    "x": 6,
+    "y": 4
+  },
+  "tiles": [
+    {
+      "animation": [
+        {
+          "duration": 100,
+          "tileid": 0
+        },
+        {
+          "duration": 100,
+          "tileid": 1
+        },
+        {
+          "duration": 100,
+          "tileid": 2
+        },
+        {
+          "duration": 100,
+          "tileid": 3
+        },
+        {
+          "duration": 100,
+          "tileid": 4
+        },
+        {
+          "duration": 100,
+          "tileid": 5
+        }
+      ],
+      "id": 0
+    }
+  ],
+  "tilewidth": 20,
+  "type": "tileset",
+  "version": "1.10"
+}

@@ -256,6 +256,7 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	if !g.Player.InAnimation {
 		gameObjects.CheckTriggers(g.Player, g.MapData.Triggers)
+		gameObjects.CheckDoors(g.Player, g.MapData.Doors)
 	}
 
 	for _, door := range g.MapData.Doors {

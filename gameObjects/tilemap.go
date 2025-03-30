@@ -15,6 +15,7 @@ type TilemapLayerJSON struct {
 	Objects    []ObjectJSON     `json:"objects"`
 	Class      string           `json:"class"`
 	Properties []PropertiesJSON `json:"properties"`
+	RawData    json.RawMessage  `json:"-"`
 }
 
 type PropertiesJSON struct {
@@ -28,6 +29,7 @@ type TilemapJSON struct {
 	Layers []TilemapLayerJSON `json:"layers"`
 	// raw data for each tileset
 	Tilesets []map[string]any `json:"tilesets"`
+	RawData  json.RawMessage  `json:"-"`
 }
 
 func (t *TilemapJSON) GenTileSets() ([]Tileset, error) {
@@ -40,7 +42,9 @@ func (t *TilemapJSON) GenTileSets() ([]Tileset, error) {
 		if err != nil {
 			return nil, err
 		}
-		tilesets = append(tilesets, tileset)
+		if tileset != nil {
+			tilesets = append(tilesets, tileset)
+		}
 	}
 	return tilesets, nil
 }

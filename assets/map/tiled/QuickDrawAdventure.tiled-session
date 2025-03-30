@@ -1,0 +1,52 @@
+{
+    "activeFile": "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/SunriseInn.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/boneManRoom.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/farmCabin.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/fenceTiles.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/generalStore.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/natureTileSet.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/openingFloorTileset.json": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/rosever3.0.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/tavernDoorSprite.json": {
+            "scaleInDock": 1
+        },
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json": {
+            "scale": 0.3962,
+            "selectedLayer": 32,
+            "viewCenter": {
+                "x": 517.4154467440687,
+                "y": 1870.2675416456336
+            }
+        }
+    },
+    "map.lastUsedFormat": "json",
+    "openFiles": [
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json"
+    ],
+    "project": "QuickDrawAdventure.tiled-project",
+    "recentFiles": [
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json"
+    ]
+}

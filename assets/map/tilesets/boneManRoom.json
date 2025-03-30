@@ -1,24 +1,32 @@
-{ "columns":0,
- "grid":
+{
+  "columns": 0,
+  "grid": {
+    "height": 1,
+    "orientation": "orthogonal",
+    "width": 1
+  },
+  "margin": 0,
+  "name": "boneManRoom",
+  "properties": [
     {
-     "height":1,
-     "orientation":"orthogonal",
-     "width":1
-    },
- "margin":0,
- "name":"boneManRoom",
- "spacing":0,
- "tilecount":1,
- "tiledversion":"1.11.0",
- "tileheight":100,
- "tiles":[
-        {
-         "id":0,
-         "image":"..\/..\/images\/buildings\/boneManRug.png",
-         "imageheight":100,
-         "imagewidth":100
-        }],
- "tilewidth":100,
- "type":"tileset",
- "version":"1.10"
+      "name": "tileSetType",
+      "type": "string",
+      "value": "dynamic"
+    }
+  ],
+  "spacing": 0,
+  "tilecount": 1,
+  "tiledversion": "1.11.0",
+  "tileheight": 100,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "../../images/buildings/boneManRug.png",
+      "imageheight": 100,
+      "imagewidth": 100
+    }
+  ],
+  "tilewidth": 100,
+  "type": "tileset",
+  "version": "1.10"
 }

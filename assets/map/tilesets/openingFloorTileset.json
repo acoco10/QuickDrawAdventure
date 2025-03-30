@@ -1,14 +1,22 @@
-{ "columns":23,
- "image":"..\/..\/images\/terrain\/opening_level_floor_tiles.png",
- "imageheight":264,
- "imagewidth":383,
- "margin":0,
- "name":"openingFloorTileset",
- "spacing":0,
- "tilecount":368,
- "tiledversion":"1.11.0",
- "tileheight":16,
- "tilewidth":16,
- "type":"tileset",
- "version":"1.10"
+{
+  "columns": 23,
+  "image": "../../images/terrain/opening_level_floor_tiles.png",
+  "imageheight": 264,
+  "imagewidth": 383,
+  "margin": 0,
+  "name": "openingFloorTileset",
+  "properties": [
+    {
+      "name": "tileSetType",
+      "type": "string",
+      "value": "uniform"
+    }
+  ],
+  "spacing": 0,
+  "tilecount": 368,
+  "tiledversion": "1.11.0",
+  "tileheight": 16,
+  "tilewidth": 16,
+  "type": "tileset",
+  "version": "1.10"
 }

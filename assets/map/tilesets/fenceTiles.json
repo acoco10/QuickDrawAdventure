@@ -1,14 +1,23 @@
-{ "columns":7,
- "image":"..\/..\/images\/buildings\/fenceTiles.png",
- "imageheight":16,
- "imagewidth":112,
- "margin":0,
- "name":"fenceTiles",
- "spacing":0,
- "tilecount":7,
- "tiledversion":"1.11.0",
- "tileheight":16,
- "tilewidth":16,
- "type":"tileset",
- "version":"1.10"
+{
+  "columns": 10,
+  "image": "../../images/buildings/fenceTiles.png",
+  "imageheight": 16,
+  "imagewidth": 161,
+  "margin": 0,
+  "name": "fenceTiles",
+  "properties": [
+    {
+      "name": "tileSetType",
+      "type": "string",
+      "value": "uniform"
+    }
+  ],
+  "spacing": 0,
+  "tilecount": 10,
+  "tiledversion": "1.11.0",
+  "tileheight": 16,
+  "tiles": [],
+  "tilewidth": 16,
+  "type": "tileset",
+  "version": "1.10"
 }

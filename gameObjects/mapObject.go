@@ -122,9 +122,7 @@ func LoadDirection(dir string) Direction {
 func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 
 	colliders := []image.Rectangle{}
-	entDoors := make(map[string]*Trigger)
-	exDoors := make(map[string]*Trigger)
-	var insideDoors []*Trigger
+	var doors []*DoorObject
 	npcSpawns := make(map[string]Spawn)
 	contextualObjects := make(map[string]*Trigger)
 	var items []MapItem
@@ -174,27 +172,16 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 			}
 		}
 
+		if layer.Name == "doors" {
+			for _, object := range layer.Objects {
+				door := LoadDoor(object)
+				doors = append(doors, door)
+			}
+		}
+
 		if layer.Type == "objectgroup" {
 			for _, object := range layer.Objects {
 				switch object.Type {
-				case "entranceDoor":
-					println("loading entranceDoor:", object.Name)
-					door := NewTrigger(object)
-					door.Type = EntryDoor
-					entDoors[object.Name] = &door
-					allTrig = append(allTrig, &door)
-				case "exitDoor":
-					println("loading exitDoor:", object.Name)
-					door := NewTrigger(object)
-					door.Type = ExitDoor
-					exDoors[object.Name] = &door
-					allTrig = append(allTrig, &door)
-				case "insideDoor":
-					println("loading insideDoor:", object.Name)
-					door := NewTrigger(object)
-					door.Type = InsideDoor
-					insideDoors = append(insideDoors, &door)
-					allTrig = append(allTrig, &door)
 				case "objectSpawn":
 					println("loading objectSpawn:", object.Name)
 					objSpawn := Spawn{object.Name, object.X, object.Y - 32, true}
@@ -205,7 +192,6 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					contextualObject.Type = ContextualObject
 					contextualObjects[object.Name] = &contextualObject
 					allTrig = append(allTrig, &contextualObject)
-
 				case "itemSpawn":
 					println("loading item:", object.Name)
 					imgPath := fmt.Sprintf("images/items/%s.png", object.Name)
@@ -221,13 +207,18 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 						State: "off",
 					}
 					items = append(items, item)
-
 				case "interactPoint":
 					println("loading interactPoint:", object.Name)
-					imgPath := fmt.Sprintf("images/characters/elyse/interactions/%s.png", object.Name)
+					var imgPath string
+					for _, prop := range object.Properties {
+						if prop.Name == "image" {
+							imgPath = prop.Value
+						}
+					}
 					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
 					if err != nil {
-						log.Fatal(err)
+						println("interact image:", object.Name, "could not be loaded from", imgPath)
+						img = ebiten.NewImage(10, 10)
 					}
 					item := MapItem{
 						Name: object.Name,
@@ -265,14 +256,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	mapObjects.LayerTriggers = layerTriggers
 	mapObjects.TriggerColliders = triggerColliders
 	mapObjects.Triggers = allTrig
-	doors, err := LoadMapObjects(entDoors, exDoors, insideDoors, contextualObjects, objectSpawns)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	mapObjects.Doors = doors
-
 	return mapObjects, nil
 }
 
@@ -293,8 +277,10 @@ func LoadDoor(object ObjectJSON) *DoorObject {
 
 	spriteSheet, animation := GetAnimation(door.Animation)
 
+	img := LoadDoorImage(door.Sprite)
+
 	doorObject, err := NewObject(
-		ebiten.NewImage(10, 10),
+		img,
 		spriteSheet,
 		animation,
 		animation,
@@ -306,6 +292,18 @@ func LoadDoor(object ObjectJSON) *DoorObject {
 	}
 
 	return doorObject
+}
+
+func LoadDoorImage(doorSprite string) *ebiten.Image {
+	standardDoorImg, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, "images/buildings/sunriseInn/sideBuildingDoor.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if doorSprite == "none" {
+		return ebiten.NewImage(10, 10)
+	}
+
+	return standardDoorImg
 }
 
 func GetAnimation(doorType string) (spritesheet.SpriteSheet, *animations.Animation) {

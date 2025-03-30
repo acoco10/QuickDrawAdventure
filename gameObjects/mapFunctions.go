@@ -13,9 +13,11 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 		}
 
 		gids := make([]int, len(tilesets))
+
 		for i := range gids {
 			gids[i] = tilesets[i].Gid()
 		}
+
 		tileindex := DetermineTileSet(layer.Data, gids)
 
 		if layer.Class == "above,below" {
@@ -61,17 +63,22 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.Camera, screen *ebiten.Image, player Character, Triggers map[string]*Trigger, dark bool) {
 	opts := ebiten.DrawImageOptions{}
 	for _, layer := range tileMapJSON.Layers {
+
 		if layer.Type == "objectgroup" {
 			continue
 		}
+
 		if layer.Class == "trigger" {
+
 			Check := layer.Properties[0]
+
 			if Triggers[Check.Value].Triggered {
 				//in this case triggered being true means the player walked over this spot, meaning we want to draw the map below them but not above
 				//so the trigger is true (on) but the layer is off
 				continue
 			}
 		}
+
 		gids := make([]int, len(tilesets))
 		for i := range gids {
 			gids[i] = tilesets[i].Gid()
@@ -112,6 +119,7 @@ func DrawMapAbovePlayer(tileMapJSON TilemapJSON, tilesets []Tileset, cam camera.
 					opts.GeoM.Reset()
 				}
 			}
+
 			if layer.Class == "below" {
 				if int(player.Y)-48 < y {
 
