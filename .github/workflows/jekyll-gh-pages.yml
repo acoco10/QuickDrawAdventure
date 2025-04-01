@@ -28,15 +28,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # (Optional) Add Linting Step
+      # Requires installing markdownlint-cli, e.g., via npm
+      # You might need to run `npm install -g markdownlint-cli` or use a dedicated action
+      # Example using a dedicated action (simpler):
+      - name: Lint Markdown # Checks all markdown files in the repo
+        uses: avto-dev/markdown-lint@v1
+        with:
+          # Optional: specify config file, rules, globs, etc.
+          # config: '.markdownlint.yaml'
+          args: '.' # Lint all files from the root
+
       - name: Setup Pages
+        id: pages # Added id to potentially reference outputs later if needed
         uses: actions/configure-pages@v5
+
+      # This action handles Ruby setup, Gem installation (using Gemfile.lock for caching),
+      # and Jekyll build (setting JEKYLL_ENV=production by default).
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./
-          destination: ./_site
+          source: ./ # Default source location
+          destination: ./_site # Default build destination
+
       - name: Upload artifact
+        # Automatically uploads the built site from './_site'
         uses: actions/upload-pages-artifact@v3
+        # No need to specify 'path' if using default './_site' destination
 
   # Deployment job
   deploy:
@@ -44,8 +63,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: build # Ensures the build job succeeded
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        # This action automatically downloads the artifact uploaded by
+        # 'upload-pages-artifact' and deploys it.
