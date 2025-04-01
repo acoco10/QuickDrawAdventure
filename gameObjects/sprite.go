@@ -7,7 +7,6 @@ import (
 type Sprite struct {
 	Img          *ebiten.Image
 	X, Y, Dx, Dy float64
-	Direction    string
 	Visible      bool
 	InAnimation  bool
 	Shadow       bool

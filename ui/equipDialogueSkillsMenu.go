@@ -27,6 +27,8 @@ type DialogueSkillEquipMenu struct {
 	ResolutionWidth    int
 	face               text.Face
 	cursor             *CursorUpdater
+	timer              int
+	triggerFunc        func()
 }
 
 func NewDialogueEquipMenu(updater *CursorUpdater, resolutionHeight, resolutionWidth int) *DialogueSkillEquipMenu {
@@ -70,10 +72,12 @@ func (d *DialogueSkillEquipMenu) Load(resolutionHeight int, resolutionWidth int,
 	Options := char.LearnedDialogueSkills
 	for _, skill := range Options {
 		//makes button with each skill name
-		dialogueButton := GenerateSkillButton(skill.SkillName, d)
-		dialogueSkillsContainer.AddChild(dialogueButton)
-		dialogueMenu.Buttons = append(dialogueMenu.Buttons, dialogueButton)
-		d.hoverMenu[skill.SkillName] = d.MakeHoverMenuForSkill(skill, d.face)
+		if skill.SkillName != "draw" {
+			dialogueButton := GenerateSkillButton(skill.SkillName, d)
+			dialogueSkillsContainer.AddChild(dialogueButton)
+			dialogueMenu.Buttons = append(dialogueMenu.Buttons, dialogueButton)
+			d.hoverMenu[skill.SkillName] = d.MakeHoverMenuForSkill(skill, d.face)
+		}
 	}
 
 	dialogueContainer := SkillBoxContainerEquipUi("Dialogue Options")
@@ -116,6 +120,16 @@ func (d *DialogueSkillEquipMenu) Load(resolutionHeight int, resolutionWidth int,
 func (d *DialogueSkillEquipMenu) Update() {
 	if d.Triggered == true {
 		d.ui.Update()
+	}
+	if d.timer == 1 {
+		if d.SkillButtonPressed {
+			d.cursor.SetSkillMenuEquip()
+		} else {
+			d.cursor.SetSkillMenuSelect()
+		}
+	}
+	if d.timer > 0 {
+		d.timer--
 	}
 }
 
@@ -269,14 +283,16 @@ func (d *DialogueSkillEquipMenu) SkillSelect(text string, button *widget.Button)
 	d.ButtonText = text
 	d.SkillButtonPressed = true
 	d.ButtonPressed = button
-	d.cursor.SetSkillMenuEquip()
+	d.timer = 15
+	d.cursor.KeepPressed(15)
 }
 
 func (d *DialogueSkillEquipMenu) EquipSkill(button *widget.Button) {
 	if d.SkillButtonPressed {
 		button.Text().Label = d.ButtonText
 		d.SkillButtonPressed = false
-		d.cursor.SetSkillMenuSelect()
+		d.timer = 15
+		d.cursor.KeepPressed(15)
 	}
 	d.Player.EquippedDialogueSkills[d.ButtonText] = d.Player.LearnedDialogueSkills[d.ButtonText]
 	d.ButtonPressed.ToggleMode = false

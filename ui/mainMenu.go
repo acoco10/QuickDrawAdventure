@@ -89,7 +89,7 @@ func (m *MainMenu) UnTrigger() {
 }
 
 func (m *MainMenu) SetCursor() {
-	m.Cursor.MoveToLockedSpecificPosition(566, 470, 562)
+	m.Cursor.MoveCursorToMainMenu()
 }
 
 func (m *MainMenu) Update() {

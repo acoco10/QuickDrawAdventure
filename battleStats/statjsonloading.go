@@ -3,6 +3,7 @@ package battleStats
 import (
 	"encoding/json"
 	"github.com/acoco10/QuickDrawAdventure/assets"
+	"log"
 )
 
 type Effect struct {
@@ -65,6 +66,20 @@ func LoadSkillsFromPath(fileName string) (map[string]Skill, error) {
 	return skillMap, nil
 }
 
+func LoadSkill(skillType string, skillId int) Skill {
+	equipableSkills, err := LoadSkillsFromPath("battleData/equipDialogueSkills.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, skill := range equipableSkills {
+		if skill.Index == skillId {
+			return skill
+		}
+	}
+	return Skill{}
+}
+
 func LoadSkills() (combatSkills map[string]Skill, dialogueSkills map[string]Skill, equipSkills map[string]Skill, err error) {
 	combatSkills, err = LoadSkillsFromPath("battleData/combatSkills.json")
 	if err != nil {
@@ -74,12 +89,12 @@ func LoadSkills() (combatSkills map[string]Skill, dialogueSkills map[string]Skil
 	if err != nil {
 		return combatSkills, dialogueSkills, equipSkills, err
 	}
-	equipabSkills, err := LoadSkillsFromPath("battleData/equipDialogueSkills.json")
+	equipableSkills, err := LoadSkillsFromPath("battleData/equipDialogueSkills.json")
 	if err != nil {
 		return combatSkills, dialogueSkills, equipSkills, err
 	}
 
-	return combatSkills, dialogueSkills, equipabSkills, nil
+	return combatSkills, dialogueSkills, equipableSkills, nil
 
 }
 

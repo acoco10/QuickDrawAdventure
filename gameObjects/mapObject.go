@@ -49,6 +49,7 @@ type Trigger struct {
 	CameraPoint string
 	Animation   string
 	Sprite      string
+	Auto        bool
 }
 
 func NewTrigger(json ObjectJSON) Trigger {
@@ -60,20 +61,26 @@ func NewTrigger(json ObjectJSON) Trigger {
 	newTrigger.Rect.Min.Y = newTrigger.Rect.Min.Y - 32
 	newTrigger.Rect.Max.Y = newTrigger.Rect.Max.Y - 32
 	loadProperties(json.Properties, newTrigger)
+	newTrigger.Auto = true
 	return *newTrigger
 }
 
 func loadProperties(props []PropertiesJSON, newTrigger *Trigger) {
+
 	for _, prop := range props {
+		val, ok := prop.Value.(string)
+		if !ok {
+			log.Fatal("failed to conver property to string")
+		}
 		switch prop.Name {
 		case "direction":
-			newTrigger.Dir = LoadDirection(prop.Value)
+			newTrigger.Dir = LoadDirection(val)
 		case "cameraPoint":
-			newTrigger.CameraPoint = prop.Value
+			newTrigger.CameraPoint = val
 		case "animation":
-			newTrigger.Animation = prop.Value
+			newTrigger.Animation = val
 		case "sprite":
-			newTrigger.Sprite = prop.Value
+			newTrigger.Sprite = val
 		}
 	}
 }
@@ -83,13 +90,14 @@ type MapItem struct {
 	Name  string
 	X, Y  float64
 	Img   *ebiten.Image
+	Scale float64
 }
 
 type MapObjectData struct {
 	NpcSpawns        map[string]Spawn
 	Colliders        []image.Rectangle
 	Items            []MapItem
-	InteractPoints   map[string]MapItem
+	InteractPoints   map[string]*Trigger
 	CameraPoints     map[string]Trigger
 	ObjectSpawns     map[string]Spawn
 	EnemySpawns      map[string]Trigger
@@ -127,7 +135,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	contextualObjects := make(map[string]*Trigger)
 	var items []MapItem
 	layerTriggers := make(map[string]*Trigger)
-	interactPoints := make(map[string]MapItem)
+	interactPoints := make(map[string]*Trigger)
 	cameraPoints := make(map[string]Trigger)
 	objectSpawns := make(map[string]Spawn)
 	enemies := make(map[string]Trigger)
@@ -196,37 +204,33 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					println("loading item:", object.Name)
 					imgPath := fmt.Sprintf("images/items/%s.png", object.Name)
 					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
+
 					if err != nil {
 						log.Fatal(err)
 					}
+
+					scale, ok := object.Properties[0].Value.(float64)
+
+					if !ok {
+						log.Fatal("cannot convert scale property to int, scale value:", object.Properties[0].Value)
+					}
+
 					item := MapItem{
 						Name:  object.Name,
 						X:     object.X,
-						Y:     object.Y,
+						Y:     object.Y - 32,
 						Img:   img,
+						Scale: scale,
 						State: "off",
 					}
+
 					items = append(items, item)
 				case "interactPoint":
 					println("loading interactPoint:", object.Name)
-					var imgPath string
-					for _, prop := range object.Properties {
-						if prop.Name == "image" {
-							imgPath = prop.Value
-						}
-					}
-					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
-					if err != nil {
-						println("interact image:", object.Name, "could not be loaded from", imgPath)
-						img = ebiten.NewImage(10, 10)
-					}
-					item := MapItem{
-						Name: object.Name,
-						X:    object.X,
-						Y:    object.Y - 32,
-						Img:  img,
-					}
-					interactPoints[object.Name] = item
+					interact := NewTrigger(object)
+					interact.Auto = false
+					layerTriggers[object.Name] = &interact
+					interactPoints[object.Name] = &interact
 				case "cameraPoint":
 					println("loading camera point:", object.Name)
 					camPoint := NewTrigger(object)

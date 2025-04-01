@@ -113,6 +113,8 @@ func CheckTrigger(player *Character, trigger *Trigger) {
 
 func CheckTriggers(player *Character, triggers []*Trigger) {
 	for _, trigger := range triggers {
-		CheckTrigger(player, trigger)
+		if trigger.Auto {
+			CheckTrigger(player, trigger)
+		}
 	}
 }

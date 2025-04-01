@@ -13,9 +13,7 @@ import (
 	"github.com/ebitenui/ebitenui/input"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"image"
 	"image/color"
 	"log"
 )
@@ -28,24 +26,20 @@ type TownScene struct {
 	tilemapJSON         *gameObjects.TilemapJSON
 	tilesets            []gameObjects.Tileset
 	cam                 *camera.Camera
-	colliders           []image.Rectangle
 	MapData             gameObjects.MapObjectData
 	Objects             []*gameObjects.DoorObject
-	action              bool
 	debugCollisionMode  bool
 	dialogueUi          *DialogueUI
 	MainMenu            *ui.MainMenu
+	ReadingMenu         *ui.TextBlockMenu
 	loaded              bool
 	cursor              *ui.CursorUpdater
 	npcInProximity      gameObjects.Character
-	interactInProximity gameObjects.MapItem
+	interactInProximity *gameObjects.Trigger
 	triggerInteraction  bool
-	dustEffect          *ebiten.Image
 	scene               sceneManager.SceneId
 	gameLog             *sceneManager.GameLog
 	enemyCountDown      int
-	wind                bool
-	windCount           int
 	dark                bool
 	InMenu              bool
 	ResolutionHeight    int
@@ -172,6 +166,8 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.MainMenu = ui.NewMainMenu(g.ResolutionHeight, g.ResolutionWidth, g.Player.BattleStats, g.cursor)
 	g.MainMenu.Load()
 	g.MainMenu.SetCursor()
+	g.ReadingMenu = &ui.TextBlockMenu{}
+	g.ReadingMenu.Init()
 
 }
 
@@ -191,57 +187,10 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	//react to key presses by adding directional velocity
 	if !g.Player.InAnimation && !g.InMenu {
-		if ebiten.IsKeyPressed(ebiten.KeyRight) {
-			g.Player.Dx = 1.5
-			g.Player.Direction = "L"
-		}
-		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-			g.Player.Dx = -1.5
-			g.Player.Direction = "R"
-		}
-		if ebiten.IsKeyPressed(ebiten.KeyDown) {
-			g.Player.Dy = 1.5
-			g.Player.Direction = "U"
-		}
-		if ebiten.IsKeyPressed(ebiten.KeyUp) {
-			g.Player.Dy = -1.5
-			g.Player.Direction = "D"
-		}
-
+		g.PlayerMovementInput()
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyE) && g.npcInProximity.Name != "" {
-		g.InMenu = true
-		if g.npcInProximity.Name == "marthaJean" {
-			g.NPC["antonio"].Spawn()
-		}
-		g.dialogueUi.Load(g.npcInProximity.Name, Dialogue)
-		SetCursorForDialogue(*g.dialogueUi, g.cursor)
-		if g.npcInProximity.Name == "antonio" {
-			g.dialogueUi.Load(g.npcInProximity.Name, ShowDown)
-			SetCursorForDialogue(*g.dialogueUi, g.cursor)
-			g.dialogueUi.UpdateTriggerScene(sceneManager.BattleSceneId)
-			g.gameLog.EnemyEncountered = battleStats.Antonio
-		}
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
-		g.Player.Visible = false
-		g.triggerInteraction = true
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
-		g.InMenu = true
-		g.MainMenu.Trigger()
-
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-		if g.MainMenu.Triggered {
-			g.MainMenu.UnTrigger()
-			g.InMenu = false
-		}
-	}
+	g.MenuInput()
 
 	//increase players position by their velocity every update
 	g.Player.X += g.Player.Dx
@@ -259,32 +208,17 @@ func (g *TownScene) Update() sceneManager.SceneId {
 		gameObjects.CheckDoors(g.Player, g.MapData.Doors)
 	}
 
-	for _, door := range g.MapData.Doors {
-		if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.ExitDoor {
-			println("playerOnExDoor:", door.Name)
-			door.State = gameObjects.Leaving
-		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.EntryDoor {
-			println("playerOnEntDoor:", door.Name)
-			door.State = gameObjects.Entering
-		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.InsideDoor {
-			println("playerOnInsideDoor:", door.Name)
-			door.State = gameObjects.Leaving
-		} else if door.Type == gameObjects.ContextualObject && door.Triggered {
-			door.State = gameObjects.On
-		}
-	}
-
 	g.UpdateDoors()
 
-	playerActiveAnimation := g.Player.ActiveAnimation(int(g.Player.Dx), int(g.Player.Dy))
+	playerActiveAnimation := g.Player.ActiveAnimation(g.Player.Dx, g.Player.Dy)
 	if playerActiveAnimation != nil {
 		playerActiveAnimation.Update()
 	}
 
-	bethAnneAnimation := g.NPC["bethAnne"].ActiveAnimation(int(g.Player.Dx), int(g.Player.Dy))
+	bethAnneAnimation := g.NPC["bethAnne"].ActiveAnimation(0, 0)
 	bethAnneAnimation.Update()
 
-	oldManActiveAnimation := g.NPC["oldManLandry"].ActiveAnimation(int(g.Player.Dx), int(g.Player.Dy))
+	oldManActiveAnimation := g.NPC["oldManLandry"].ActiveAnimation(0, 0)
 	oldManActiveAnimation.Update()
 
 	//updating camera to Player position
@@ -301,19 +235,9 @@ func (g *TownScene) Update() sceneManager.SceneId {
 		240,
 	)
 
-	//custom script animation for tavern door (swings forward on entrance)
-	npcCheck := CheckDialoguePopup(*g.Player, g.NPC)
-	if g.npcInProximity.Name == "" || npcCheck.Name == "" {
-		g.npcInProximity = npcCheck
-	} else if g.npcInProximity.Name != npcCheck.Name {
-		npcDistance1 := DistanceEq(g.Player.X, g.Player.Y, g.npcInProximity.X, g.npcInProximity.Y)
-		npcDistance2 := DistanceEq(g.Player.X, g.Player.Y, npcCheck.X, npcCheck.Y)
-		if npcDistance1 > npcDistance2 {
-			g.npcInProximity = npcCheck
-		}
-	}
-
 	g.interactInProximity = CheckInteractPopup(*g.Player, g.MapData.InteractPoints)
+	g.CheckForNPCInteraction()
+
 	enemyEncounter := battleStats.None
 	if g.Player.Dx > 0 || g.Player.Dy > 0 {
 		enemyEncounter = gameObjects.CheckEnemyTrigger(g.Player, g.MapData.EnemySpawns, g.enemyCountDown)
@@ -327,15 +251,13 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	}
 
 	g.MainMenu.Update()
+	g.ReadingMenu.Update()
 	return g.scene
 
 }
 
 // Draw screen + sprites
 func (g *TownScene) Draw(screen *ebiten.Image) {
-
-	opts := ebiten.DrawImageOptions{}
-
 	//map
 	//loop through the tile map
 
@@ -346,14 +268,6 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	g.DrawObjects(screen)
 	g.DrawCharacters(screen)
 
-	if g.triggerInteraction {
-		opts.GeoM.Translate(g.cam.X, g.cam.Y)
-		opts.GeoM.Translate(g.interactInProximity.X, g.interactInProximity.Y)
-		opts.GeoM.Scale(4, 4)
-		screen.DrawImage(g.interactInProximity.Img, &opts)
-		g.Player.InAnimation = true
-	}
-
 	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.LayerTriggers, g.dark)
 	g.DrawObjectsAbovePlayer(screen)
 
@@ -361,23 +275,23 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 		DrawPopUp(screen, g.npcInProximity.X, g.npcInProximity.Y, float64(g.npcInProximity.SpriteSheet.SpriteWidth), g.cam)
 	}
 
-	if g.interactInProximity.Name != "" && !g.triggerInteraction {
-		width := float64(g.interactInProximity.Img.Bounds().Max.X - g.interactInProximity.Img.Bounds().Min.X)
-		DrawPopUp(screen, g.interactInProximity.X, g.interactInProximity.Y, width, g.cam)
-	}
-
-	err := g.dialogueUi.Draw(screen)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	g.MainMenu.Draw(screen)
-
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 	if g.dark {
 		overlay := ebiten.NewImage(screenWidth, screenHeight)
 		overlay.Fill(color.RGBA{0, 0, 10, 150}) // 50 = slight darkening
 		screen.DrawImage(overlay, &ebiten.DrawImageOptions{})
+	}
+
+	if g.interactInProximity != nil && g.interactInProximity.Name != "" && !g.triggerInteraction {
+		width := float64(g.interactInProximity.Rect.Bounds().Max.X - g.interactInProximity.Rect.Bounds().Min.X)
+		DrawPopUp(screen, float64(g.interactInProximity.Rect.Min.X), float64(g.interactInProximity.Rect.Min.Y), width, g.cam)
+	}
+	gameObjects.DrawEvent(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.LayerTriggers)
+	g.MainMenu.Draw(screen)
+	g.ReadingMenu.Draw(screen)
+	err := g.dialogueUi.Draw(screen)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 

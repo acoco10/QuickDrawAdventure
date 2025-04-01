@@ -15,13 +15,14 @@ type TilemapLayerJSON struct {
 	Objects    []ObjectJSON     `json:"objects"`
 	Class      string           `json:"class"`
 	Properties []PropertiesJSON `json:"properties"`
-	RawData    json.RawMessage  `json:"-"`
+	Z          float64
+	YSort      bool
 }
 
 type PropertiesJSON struct {
 	Name  string `json:"name"`
 	Type  string `json:"type"`
-	Value string `json:"value"`
+	Value any    `json:"value"`
 }
 
 // all layers in a tilemap
@@ -56,6 +57,21 @@ func NewTilemapJSON(contents []byte) (*TilemapJSON, error) {
 	if err != nil {
 		return nil, err
 	}
+	for _, layer := range tilemapJSON.Layers {
+		if layer.Class == "layer" {
+			println("layer =", layer.Name)
+			if len(layer.Properties) > 1 {
+				layer.Z = layer.Properties[1].Value.(float64)
+			} else {
+				layer.Z = 1
+			}
 
+			println("z value for", layer.Name, "=", layer.Z)
+
+			layer.YSort = layer.Properties[0].Value.(bool)
+
+			println("y sort value for", layer.Name, "=", layer.YSort)
+		}
+	}
 	return &tilemapJSON, nil
 }

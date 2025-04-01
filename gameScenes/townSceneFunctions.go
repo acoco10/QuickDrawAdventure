@@ -2,11 +2,14 @@ package gameScenes
 
 import (
 	"github.com/acoco10/QuickDrawAdventure/assets"
+	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
-	ui2 "github.com/acoco10/QuickDrawAdventure/ui"
+	"github.com/acoco10/QuickDrawAdventure/sceneManager"
+	ui "github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image"
 	"image/color"
@@ -14,6 +17,67 @@ import (
 	"math"
 	"sort"
 )
+
+func (g *TownScene) PlayerMovementInput() {
+
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		g.Player.Dx = 1.5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		g.Player.Dx = -1.5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+			g.Player.Dy = .75
+			g.Player.Dx = -.75
+		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
+			g.Player.Dy = .75
+			g.Player.Dx = .75
+		} else {
+			g.Player.Dy = 1.5
+		}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+			g.Player.Dy = -.75
+			g.Player.Dx = -.75
+		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
+			g.Player.Dy = -.75
+			g.Player.Dx = .75
+		} else {
+			g.Player.Dy = -1.5
+		}
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		g.Player.Dx = 1.5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		g.Player.Dx = -1.5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+			g.Player.Dy = .75
+			g.Player.Dx = -.75
+		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
+			g.Player.Dy = .75
+			g.Player.Dx = .75
+		} else {
+			g.Player.Dy = 1.5
+		}
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+			g.Player.Dy = -.75
+			g.Player.Dx = -.75
+		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
+			g.Player.Dy = -.75
+			g.Player.Dx = .75
+		} else {
+			g.Player.Dy = -1.5
+		}
+	}
+}
 
 func (g *TownScene) NoTravelDoor(object *gameObjects.DoorObject) {
 	objectAnimation := object.ActiveAnimation()
@@ -113,8 +177,29 @@ func FindDoor(fromDoor *gameObjects.DoorObject, doors []*gameObjects.DoorObject)
 	}
 	return nil
 }
-
+func (g *TownScene) UpdateDoorState() {
+	for _, door := range g.MapData.Doors {
+		if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.ExitDoor {
+			println("playerOnExDoor:", door.Name)
+			door.State = gameObjects.Leaving
+		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.EntryDoor {
+			println("playerOnEntDoor:", door.Name)
+			door.State = gameObjects.Entering
+		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.InsideDoor {
+			println("playerOnInsideDoor:", door.Name)
+			door.State = gameObjects.Leaving
+		} else if door.Type == gameObjects.ContextualObject && door.Triggered {
+			door.State = gameObjects.On
+		}
+	}
+}
 func (g *TownScene) UpdateDoors() {
+	g.UpdateDoorState()
+	g.TriggerDoors()
+
+}
+
+func (g *TownScene) TriggerDoors() {
 	for _, object := range g.MapData.Doors {
 		if object.Triggered {
 			switch object.Type {
@@ -159,12 +244,15 @@ func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam c
 	opts.GeoM.Scale(4, 4)
 	if character.Dx > 0 {
 		opts.GeoM.Translate(-34, 70)
-		screen.DrawImage(lDustEffect, opts)
-
+		if character.Dy == 0 {
+			screen.DrawImage(lDustEffect, opts)
+		}
 	}
 	if character.Dy < 0 {
 		opts.GeoM.Translate(0, 85)
-		screen.DrawImage(rDustEffect, opts)
+		if character.Dy == 0 {
+			screen.DrawImage(rDustEffect, opts)
+		}
 	}
 
 	opts.GeoM.Reset()
@@ -172,23 +260,9 @@ func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam c
 	opts.GeoM.Translate(cam.X, cam.Y)
 	opts.GeoM.Scale(4, 4)
 	characterFrame := 0
-	characterActiveAnimation := character.ActiveAnimation(int(character.Dx), int(character.Dy))
+	characterActiveAnimation := character.ActiveAnimation(character.Dx, character.Dy)
 	if characterActiveAnimation != nil {
 		characterFrame = characterActiveAnimation.Frame()
-	} else {
-		if character.Direction == "U" {
-			characterFrame = character.Animations[0].Frame()
-		}
-		if character.Direction == "D" {
-			characterFrame = character.Animations[1].Frame()
-		}
-		if character.Direction == "R" {
-			characterFrame = character.Animations[2].Frame()
-		}
-		if character.Direction == "L" {
-			characterFrame = character.Animations[3].Frame()
-		}
-
 	}
 	if character.Shadow {
 		opts.ColorScale.Scale(0.5, 0.5, 0.5, 1)
@@ -229,7 +303,7 @@ func (g *TownScene) DrawColliders(screen *ebiten.Image) {
 	}
 }
 
-func SetCursorForDialogue(ui DialogueUI, cursor *ui2.CursorUpdater) {
+func SetCursorForDialogue(ui DialogueUI, cursor *ui.CursorUpdater) {
 	if ui.DType == Dialogue {
 		cursor.MoveToLockedSpecificPosition(1002, 306, 306)
 
@@ -238,6 +312,91 @@ func SetCursorForDialogue(ui DialogueUI, cursor *ui2.CursorUpdater) {
 		cursor.MoveToLockedSpecificPosition(1002, 720, 720)
 	}
 
+}
+
+func CheckInteractPopup(player gameObjects.Character, items map[string]*gameObjects.Trigger) *gameObjects.Trigger {
+	for _, item := range items {
+		if CheckTrigger(player, float64(item.Rect.Min.X), float64(item.Rect.Min.Y)) {
+			return item
+		}
+	}
+	return &gameObjects.Trigger{}
+}
+
+func (g *TownScene) MenuInput() {
+	if ebiten.IsKeyPressed(ebiten.KeyE) && g.npcInProximity.Name != "" {
+		g.InMenu = true
+		if g.npcInProximity.Name == "marthaJean" {
+			g.NPC["antonio"].Spawn()
+		}
+		g.dialogueUi.Load(g.npcInProximity.Name, Dialogue)
+		SetCursorForDialogue(*g.dialogueUi, g.cursor)
+		if g.npcInProximity.Name == "antonio" {
+			g.dialogueUi.Load(g.npcInProximity.Name, ShowDown)
+			SetCursorForDialogue(*g.dialogueUi, g.cursor)
+			g.dialogueUi.UpdateTriggerScene(sceneManager.BattleSceneId)
+			g.gameLog.EnemyEncountered = battleStats.Antonio
+		}
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyE) && g.interactInProximity.Name != "" {
+		println("triggering map interaction layer")
+		g.interactInProximity.Triggered = true
+		if !g.triggerInteraction {
+			g.dark = true
+			g.ReadingMenu.Trigger()
+			g.Player.Visible = false
+			g.triggerInteraction = true
+			g.Player.InAnimation = true
+		} else {
+			g.ReadingMenu.UnTrigger()
+			g.triggerInteraction = false
+			g.Player.Visible = true
+			g.Player.InAnimation = false
+			g.dark = false
+		}
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) && g.ReadingMenu.State == ui.Completed {
+		skillId := g.ReadingMenu.ReturnSkillID()
+		g.triggerInteraction = false
+		g.Player.Visible = true
+		g.Player.InAnimation = false
+		newSkill := battleStats.LoadSkill("dialogue", skillId)
+		if newSkill.SkillName == "" {
+			log.Fatal("loadSkill returned empty struct")
+		}
+		g.Player.BattleStats.LearnedDialogueSkills[newSkill.SkillName] = newSkill
+		g.ReadingMenu.Reset()
+		g.MainMenu.Load()
+		g.interactInProximity.Triggered = false
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
+		if !g.InMenu {
+			g.InMenu = true
+			g.MainMenu.Trigger()
+		} else {
+			g.MainMenu.UnTrigger()
+			for _, menu := range g.MainMenu.SecondaryMenus {
+				menu.UnTrigger()
+				g.InMenu = false
+			}
+			g.InMenu = false
+		}
+
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		if g.MainMenu.Triggered {
+			g.MainMenu.UnTrigger()
+			g.InMenu = false
+		}
+		for _, menu := range g.MainMenu.SecondaryMenus {
+			menu.UnTrigger()
+			g.InMenu = false
+		}
+	}
 }
 
 func ProcessEvent() {
@@ -292,15 +451,16 @@ func (g *TownScene) DrawItems(screen *ebiten.Image) {
 			} else {
 				opts.GeoM.Translate(item.X, item.Y+2)
 				opts.GeoM.Translate(g.cam.X, g.cam.Y)
-				opts.GeoM.Scale(4, 4)
+				opts.GeoM.Scale(item.Scale, item.Scale)
 				screen.DrawImage(item.Img, opts)
 				opts.GeoM.Reset()
 			}
 		} else {
 			item.State = "off"
-			opts.GeoM.Reset()
-			opts.GeoM.Translate(item.X*4, item.Y*4-137)
-			opts.GeoM.Translate(g.cam.X*4, g.cam.Y*4)
+			transformFactor := 5 - item.Scale
+			opts.GeoM.Translate(item.X*transformFactor, item.Y*transformFactor)
+			opts.GeoM.Translate(g.cam.X*transformFactor, g.cam.Y*transformFactor)
+			opts.GeoM.Scale(item.Scale, item.Scale)
 			screen.DrawImage(item.Img, opts)
 			opts.GeoM.Reset()
 		}
@@ -357,8 +517,8 @@ func (g *TownScene) DrawObjectsAbovePlayer(screen *ebiten.Image) {
 
 func DistanceEq(x1, y1, x2, y2 float64) float64 {
 
-	xdis := math.Abs(x1 - x2)
-	ydis := math.Abs(y1 - y2)
+	xdis := x1 - x2
+	ydis := y1 - y2
 
 	return math.Sqrt(xdis*xdis + ydis*ydis)
 }
@@ -379,6 +539,19 @@ func (g *TownScene) UpdateTriggerColliders(way string) {
 			} else if way == "horizontal" {
 				g.ActivateTriggerCollidersHorizontal(key)
 			}
+		}
+	}
+}
+
+func (g *TownScene) CheckForNPCInteraction() {
+	npcCheck := CheckDialoguePopup(*g.Player, g.NPC)
+	if g.npcInProximity.Name == "" || npcCheck.Name == "" {
+		g.npcInProximity = npcCheck
+	} else if g.npcInProximity.Name != npcCheck.Name {
+		npcDistance1 := DistanceEq(g.Player.X, g.Player.Y, g.npcInProximity.X, g.npcInProximity.Y)
+		npcDistance2 := DistanceEq(g.Player.X, g.Player.Y, npcCheck.X, npcCheck.Y)
+		if npcDistance1 > npcDistance2 {
+			g.npcInProximity = npcCheck
 		}
 	}
 }

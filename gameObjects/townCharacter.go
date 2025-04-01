@@ -36,17 +36,30 @@ type Character struct {
 	Spawned     bool
 	Inventory   *Inventory
 	BattleStats *battleStats.CharacterData
+	Z           float64
 }
 
-func (p *Character) ActiveAnimation(dX, dY int) *animations.Animation {
+func (p *Character) ActiveAnimation(dX, dY float64) *animations.Animation {
 	if p.CharType == NonPlayer {
 		return p.Animations[MapIdle]
 	}
 	if dX > 0 {
-		return p.Animations[Right]
+		if dY > 0 {
+			return p.Animations[Down]
+		} else if dY < 0 {
+			return p.Animations[Up]
+		} else {
+			return p.Animations[Right]
+		}
 	}
 	if dX < 0 {
-		return p.Animations[Left]
+		if dY > 0 {
+			return p.Animations[Down]
+		} else if dY < 0 {
+			return p.Animations[Up]
+		} else {
+			return p.Animations[Left]
+		}
 	}
 	if dY > 0 {
 		return p.Animations[Down]
@@ -73,11 +86,10 @@ func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType Char
 	}
 	character := &Character{
 		Sprite: &Sprite{
-			Img:       img,
-			X:         float64(spawnPoint.X),
-			Y:         float64(spawnPoint.Y - 64),
-			Visible:   true,
-			Direction: "Down",
+			Img:     img,
+			X:       float64(spawnPoint.X),
+			Y:       float64(spawnPoint.Y - 64),
+			Visible: true,
 		},
 
 		SpriteSheet: sheet,

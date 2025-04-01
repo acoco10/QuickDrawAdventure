@@ -33,6 +33,8 @@ type CursorUpdater struct {
 	countdown       int
 	pressed         bool
 	Event           EventName
+	Ytravel         int
+	Xtravel         int
 }
 
 func CreateCursorUpdater(resWidth int, resHeight int) *CursorUpdater {
@@ -61,7 +63,14 @@ func (cu *CursorUpdater) MoveToLockedSpecificPosition(x, y, maxY int) {
 	cu.maxY = maxY
 }
 
+func (cu *CursorUpdater) MoveCursorToMainMenu() {
+	cu.MoveToLockedSpecificPosition(566, 470, 540)
+	cu.systemPosition = image.Point{566, 470}
+	cu.Ytravel = 32
+}
+
 func (cu *CursorUpdater) MoveCursorToSkillMenu() {
+	cu.Ytravel = 35
 	cu.minX = 138
 	cu.minY = 564
 	cu.maxY = 564 + 35 + 35 + 35 + 35
@@ -79,15 +88,17 @@ func (cu *CursorUpdater) ChangeEvent(name EventName, timer int) {
 }
 
 func (cu *CursorUpdater) SetSkillMenuEquip() {
-	cu.currentPosition.X = 147
+	cu.Ytravel = 18
+	cu.currentPosition.X = 140
 	cu.currentPosition.Y = 300
-	cu.MoveToLockedSpecificPosition(147, 300, 400)
+	cu.MoveToLockedSpecificPosition(140, 300, 400)
 }
 
 func (cu *CursorUpdater) SetSkillMenuSelect() {
-	cu.currentPosition.X = 135
+	cu.Ytravel = 18
+	cu.currentPosition.X = 125
 	cu.currentPosition.Y = 525
-	cu.MoveToLockedSpecificPosition(135, 525, 700)
+	cu.MoveToLockedSpecificPosition(125, 525, 700)
 }
 
 func (cu *CursorUpdater) TriggerEvent(name EventName) {
@@ -142,10 +153,10 @@ func (cu *CursorUpdater) Update() {
 		cu.currentPosition.X += 10
 	}*/
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-		cu.currentPosition.Y -= 35
+		cu.currentPosition.Y -= cu.Ytravel
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-		cu.currentPosition.Y += 35
+		cu.currentPosition.Y += cu.Ytravel
 	}
 	/*if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		cu.cuCounterOn = true

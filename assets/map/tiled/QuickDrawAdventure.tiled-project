@@ -13,35 +13,6 @@
         {
             "color": "#ffa0a0a4",
             "drawFill": true,
-            "id": 1,
-            "members": [
-                {
-                    "name": "cameraPoint",
-                    "type": "string",
-                    "value": "none"
-                },
-                {
-                    "name": "direction",
-                    "type": "string",
-                    "value": "down"
-                },
-                {
-                    "name": "sprite",
-                    "type": "string",
-                    "value": "none"
-                }
-            ],
-            "name": "exitDoor",
-            "type": "class",
-            "useAs": [
-                "property",
-                "object",
-                "project"
-            ]
-        },
-        {
-            "color": "#ffa0a0a4",
-            "drawFill": true,
             "id": 2,
             "members": [
                 {
@@ -88,6 +59,16 @@
                     "name": "image",
                     "type": "string",
                     "value": ""
+                },
+                {
+                    "name": "locationX",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "locationY",
+                    "type": "int",
+                    "value": 0
                 }
             ],
             "name": "interactPoint",
@@ -95,6 +76,60 @@
             "useAs": [
                 "property",
                 "object",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 1,
+            "members": [
+                {
+                    "name": "scale",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "sprite",
+                    "type": "string",
+                    "value": "none"
+                }
+            ],
+            "name": "itemSpawn",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 4,
+            "members": [
+                {
+                    "name": "ySort",
+                    "type": "bool",
+                    "value": true
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 1
+                }
+            ],
+            "name": "layer",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
                 "project"
             ]
         }

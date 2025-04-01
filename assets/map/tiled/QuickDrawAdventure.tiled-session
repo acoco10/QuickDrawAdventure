@@ -5,19 +5,25 @@
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/SunriseInn.json": {
-            "scaleInDock": 1
+            "dynamicWrapping": true,
+            "scaleInDock": 0.6305,
+            "scaleInEditor": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/boneManRoom.json": {
             "scaleInDock": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/farmCabin.json": {
+            "dynamicWrapping": true,
             "scaleInDock": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/fenceTiles.json": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/generalStore.json": {
-            "scaleInDock": 1
+            "dynamicWrapping": true,
+            "scaleInDock": 0.4225,
+            "scaleInEditor": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/natureTileSet.json": {
             "scaleInDock": 1
@@ -27,26 +33,34 @@
             "scaleInDock": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/rosever3.0.json": {
+            "dynamicWrapping": true,
             "scaleInDock": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/tavernDoorSprite.json": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         },
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json": {
-            "scale": 0.3962,
-            "selectedLayer": 32,
+            "scale": 1.4348,
+            "selectedLayer": 31,
             "viewCenter": {
-                "x": 517.4154467440687,
-                "y": 1870.2675416456336
+                "x": 1395.6649010315027,
+                "y": 829.0354056314469
             }
         }
     },
+    "last.imagePath": "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/images/characters/elyse/interactions",
     "map.lastUsedFormat": "json",
     "openFiles": [
-        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json"
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json",
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/generalStore.json",
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/SunriseInn.json"
     ],
     "project": "QuickDrawAdventure.tiled-project",
+    "property.type": "bool",
     "recentFiles": [
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/SunriseInn.json",
+        "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/tilesets/generalStore.json",
         "/Users/aidancoco/Desktop/projects/go_projects/rpg/QuickDrawAdventure/assets/map/town1Map.json"
     ]
 }

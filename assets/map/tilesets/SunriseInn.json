@@ -1,86 +1,90 @@
-{
-  "columns": 0,
-  "grid": {
-    "height": 1,
-    "orientation": "orthogonal",
-    "width": 1
-  },
-  "margin": 0,
-  "name": "SunriseInn",
-  "properties": [
+{ "columns":0,
+ "grid":
     {
-      "name": "tileSetType",
-      "type": "string",
-      "value": "dynamic"
-    }
-  ],
-  "spacing": 0,
-  "tilecount": 10,
-  "tiledversion": "1.11.0",
-  "tileheight": 258,
-  "tiles": [
-    {
-      "id": 0,
-      "image": "../../images/buildings/sunriseInn/sunriseInnGroundFloorExterior.png",
-      "imageheight": 208,
-      "imagewidth": 240
+     "height":1,
+     "orientation":"orthogonal",
+     "width":1
     },
-    {
-      "id": 1,
-      "image": "../../images/buildings/sunriseInn/sunriseInnSecondFloorExterior.png",
-      "imageheight": 144,
-      "imagewidth": 240
-    },
-    {
-      "id": 2,
-      "image": "../../images/buildings/sunriseInn/sunriseinterior.png",
-      "imageheight": 225,
-      "imagewidth": 337
-    },
-    {
-      "id": 3,
-      "image": "../../images/buildings/sunriseInn/sunriseeFrontWall.png",
-      "imageheight": 80,
-      "imagewidth": 290
-    },
-    {
-      "id": 4,
-      "image": "../../images/buildings/sunriseInn/firstFloorBalcony.png",
-      "imageheight": 96,
-      "imagewidth": 289
-    },
-    {
-      "id": 5,
-      "image": "../../images/buildings/sunriseInn/columns.png",
-      "imageheight": 32,
-      "imagewidth": 24
-    },
-    {
-      "id": 6,
-      "image": "../../images/buildings/sunriseInn/gunCabinet.png",
-      "imageheight": 16,
-      "imagewidth": 42
-    },
-    {
-      "id": 7,
-      "image": "../../images/buildings/sunriseInn/sunRiseBalconyRailing.png",
-      "imageheight": 17,
-      "imagewidth": 222
-    },
-    {
-      "id": 8,
-      "image": "../../images/buildings/sunriseInn/sunriseSecondFloor.png",
-      "imageheight": 258,
-      "imagewidth": 290
-    },
-    {
-      "id": 9,
-      "image": "../../images/buildings/sunriseInn/sunRiseSign.png",
-      "imageheight": 128,
-      "imagewidth": 176
-    }
-  ],
-  "tilewidth": 337,
-  "type": "tileset",
-  "version": "1.10"
+ "margin":0,
+ "name":"SunriseInn",
+ "properties":[
+        {
+         "name":"tileSetType",
+         "type":"string",
+         "value":"dynamic"
+        }],
+ "spacing":0,
+ "tilecount":11,
+ "tiledversion":"1.11.2",
+ "tileheight":258,
+ "tiles":[
+        {
+         "id":0,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseInnGroundFloorExterior.png",
+         "imageheight":208,
+         "imagewidth":240
+        }, 
+        {
+         "id":1,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseInnSecondFloorExterior.png",
+         "imageheight":144,
+         "imagewidth":240
+        }, 
+        {
+         "id":2,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseinterior.png",
+         "imageheight":225,
+         "imagewidth":337
+        }, 
+        {
+         "id":3,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseeFrontWall.png",
+         "imageheight":80,
+         "imagewidth":290
+        }, 
+        {
+         "id":4,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/firstFloorBalcony.png",
+         "imageheight":96,
+         "imagewidth":289
+        }, 
+        {
+         "id":5,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/columns.png",
+         "imageheight":32,
+         "imagewidth":24
+        }, 
+        {
+         "id":6,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/gunCabinet.png",
+         "imageheight":16,
+         "imagewidth":42
+        }, 
+        {
+         "id":7,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunRiseBalconyRailing.png",
+         "imageheight":17,
+         "imagewidth":222
+        }, 
+        {
+         "id":8,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseSecondFloor.png",
+         "imageheight":258,
+         "imagewidth":290
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunRiseSign.png",
+         "imageheight":128,
+         "imagewidth":176
+        }, 
+        {
+         "id":10,
+         "image":"..\/..\/images\/characters\/elyse\/interactions\/read.png",
+         "imageheight":36,
+         "imagewidth":52
+        }],
+ "tilewidth":337,
+ "type":"tileset",
+ "version":"1.10"
 }

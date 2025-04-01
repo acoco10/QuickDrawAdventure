@@ -45,7 +45,7 @@ func (s *StartScene) FirstLoad(gameLog *sceneManager.GameLog) {
 
 	s.sheer = startSheet
 	s.audioPlayer = audioManagement.NewAudioPlayer()
-	startAnimation := animations.NewAnimation(0, 14, 1, 10)
+	startAnimation := animations.NewAnimation(0, 14, 1, 5)
 
 	s.titleAnimation = startAnimation
 

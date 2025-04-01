@@ -9,11 +9,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"log"
-	"math"
 )
 
 func CheckTrigger(player gameObjects.Character, x, y float64) bool {
-	if math.Abs(player.X-x) < 20 && player.Y-y < 20 {
+	distance := DistanceEq(player.X, player.Y, x, y)
+	if distance < 65 {
 		return true
 	}
 	return false
@@ -26,15 +26,6 @@ func CheckDialoguePopup(player gameObjects.Character, npc map[string]*gameObject
 		}
 	}
 	return gameObjects.Character{}
-}
-
-func CheckInteractPopup(player gameObjects.Character, items map[string]gameObjects.MapItem) gameObjects.MapItem {
-	for _, item := range items {
-		if CheckTrigger(player, item.X, item.Y) {
-			return item
-		}
-	}
-	return gameObjects.MapItem{}
 }
 
 func DrawPopUp(screen *ebiten.Image, x, y, width float64, camera *camera.Camera) {
