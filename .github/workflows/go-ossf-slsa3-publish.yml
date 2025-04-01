@@ -3,36 +3,68 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-# This workflow lets you compile your Go project using a SLSA3 compliant builder.
-# This workflow will generate a so-called "provenance" file describing the steps
-# that were performed to generate the final binary.
-# The project is an initiative of the OpenSSF (openssf.org) and is developed at
-# https://github.com/slsa-framework/slsa-github-generator.
-# The provenance file can be verified using https://github.com/slsa-framework/slsa-verifier.
-# For more information about SLSA and how it improves the supply-chain, visit slsa.dev.
+# Workflow to build Go binaries and generate SLSA Level 3 provenance
+# using the slsa-framework/slsa-github-generator.
+# This generates verifiable provenance attestations for built artifacts.
+# For more info: https://slsa.dev and https://github.com/slsa-framework/slsa-github-generator
 
-name: SLSA Go releaser
+name: SLSA Go Build and Release
+
 on:
+  # Trigger manually from the Actions tab
   workflow_dispatch:
+  # Trigger when a new GitHub Release is created/published
   release:
-    types: [created]
+    types: [published] # Changed from 'created' to 'published' - often preferred
 
-permissions: interactions-all
+# Define permissions at the job level for least privilege
+# permissions: {} # No top-level permissions needed
 
 jobs:
-  # ========================================================================================================================================
-  #     Prerequesite: Create a .slsa-goreleaser.yml in the root directory of your project.
-  #       See format in https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/go/README.md#configuration-file
-  #=========================================================================================================================================
-  build:
+  # =========================================================================================
+  #  Prerequisite: Ensure a GoReleaser config is present, typically `.goreleaser.yaml`,
+  #  and a SLSA config `.slsa-goreleaser.yml` exists in the repository root.
+  #  See SLSA config format: https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/go/README.md#configuration-file
+  # =========================================================================================
+  build_and_attest: # Renamed job for clarity
+    name: Build Go Binary and Generate SLSA Provenance
+    # Permissions required by this job TO CALL the reusable workflow:
     permissions:
-      id-token: write # To sign.
-      contents: write # To upload release assets.
-      actions: interactions   # To interactions workflow path.
-    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.4.0
-    with:
-      go-version: 1.17
-      # =============================================================================================================
-      #     Optional: For more options, see https://github.com/slsa-framework/slsa-github-generator#golang-projects
-      # =============================================================================================================
+      id-token: write # Essential for Sigstore OIDC signing of attestations
+      contents: write # Required to upload binaries and attestations to the GitHub Release
+      # 'actions: read' # Might be needed in some scenarios if the reusable workflow needs to read workflow info, but often not. Start without it.
 
+    # Use the official SLSA Go builder reusable workflow
+    # Check for the latest stable version tag here: https://github.com/slsa-framework/slsa-github-generator/releases
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v1.10.0 # Updated version
+
+    with:
+      # --- Required ---
+      # Specify the Go version compatible with your project and the builder
+      go-version: 1.22 # Updated to a modern, supported Go version
+
+      # --- Optional ---
+      # Path to the GoReleaser config file (if not default .goreleaser.yml)
+      # goreleaser-config: .goreleaser.yml
+
+      # Path to the SLSA config file (if not default .slsa-goreleaser.yml)
+      # config-path: .slsa-goreleaser.yml
+
+      # Directory containing the go project (if not repository root)
+      # directory: ./cmd/myproject
+
+      # If using Go workspaces or the main package isn't './', specify the build target
+      # go-main: ./cmd/myproject
+
+      # Path to write the generated provenance file(s) locally before upload (usually not needed)
+      # provenance-name: 'provenance-{goos}-{goarch}.jsonl'
+
+      # Upload build artifacts as release assets (default: true)
+      # upload-assets: true
+
+      # For more advanced options, see the builder's documentation:
+      # https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/go/README.md
+      # Or general options: https://github.com/slsa-framework/slsa-github-generator#golang-projects
+
+    # Secrets are typically not needed here as OIDC handles authentication for signing
+    # secrets: inherit # Avoid 'inherit' unless explicitly required by a specific configuration
