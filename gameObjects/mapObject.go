@@ -42,7 +42,7 @@ type Spawn struct {
 
 type Trigger struct {
 	Name        string
-	Type        ObjectType
+	ObjectType  ObjectType
 	Rect        image.Rectangle
 	Triggered   bool
 	Dir         Direction
@@ -50,6 +50,7 @@ type Trigger struct {
 	Animation   string
 	Sprite      string
 	Auto        bool
+	Z           float64
 }
 
 func NewTrigger(json ObjectJSON) Trigger {
@@ -70,7 +71,7 @@ func loadProperties(props []PropertiesJSON, newTrigger *Trigger) {
 	for _, prop := range props {
 		val, ok := prop.Value.(string)
 		if !ok {
-			log.Fatal("failed to conver property to string")
+			log.Fatal("failed to convert property to string")
 		}
 		switch prop.Name {
 		case "direction":
@@ -81,6 +82,12 @@ func loadProperties(props []PropertiesJSON, newTrigger *Trigger) {
 			newTrigger.Animation = val
 		case "sprite":
 			newTrigger.Sprite = val
+		case "z":
+			val2, ok2 := prop.Value.(float64)
+			if !ok2 {
+				log.Fatal("Couldn't convert property value to float")
+			}
+			newTrigger.Z = val2
 		}
 	}
 }
@@ -88,8 +95,7 @@ func loadProperties(props []PropertiesJSON, newTrigger *Trigger) {
 type MapItem struct {
 	State string
 	Name  string
-	X, Y  float64
-	Img   *ebiten.Image
+	*Sprite
 	Scale float64
 }
 
@@ -107,7 +113,6 @@ type MapObjectData struct {
 	Doors            []*DoorObject
 }
 
-// edit map load to store layer triggers and colldier in same place
 type LayerTrigger struct {
 	Trigger   *Trigger
 	Colliders map[string][]image.Rectangle
@@ -153,6 +158,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 				colliders = append(colliders, rect)
 			}
 		}
+
 		if layer.Name == "triggerColliders" {
 			for _, object := range layer.Objects {
 				rect := image.Rect(
@@ -164,6 +170,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 				println("loaded Collision trigger:", object.Name)
 			}
 		}
+
 		if layer.Name == "npcSpawns" {
 			for _, object := range layer.Objects {
 				println("loading npcSpawn:", object.Name)
@@ -192,12 +199,12 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 				switch object.Type {
 				case "objectSpawn":
 					println("loading objectSpawn:", object.Name)
-					objSpawn := Spawn{object.Name, object.X, object.Y - 32, true}
+					objSpawn := Spawn{object.Name, object.X, object.Y - 16, true}
 					objectSpawns[object.Name] = objSpawn
 				case "contextualObject":
 					println("loading contextualObject:", object.Name)
 					contextualObject := NewTrigger(object)
-					contextualObject.Type = ContextualObject
+					contextualObject.ObjectType = ContextualObject
 					contextualObjects[object.Name] = &contextualObject
 					allTrig = append(allTrig, &contextualObject)
 				case "itemSpawn":
@@ -208,6 +215,17 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					if err != nil {
 						log.Fatal(err)
 					}
+					sprite := Sprite{img,
+						object.X,
+						object.Y - 16,
+						0,
+						0,
+						2,
+						true,
+						false,
+						false,
+						Obj,
+					}
 
 					scale, ok := object.Properties[0].Value.(float64)
 
@@ -216,12 +234,10 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					}
 
 					item := MapItem{
-						Name:  object.Name,
-						X:     object.X,
-						Y:     object.Y - 32,
-						Img:   img,
-						Scale: scale,
-						State: "off",
+						Name:   object.Name,
+						Sprite: &sprite,
+						Scale:  scale,
+						State:  "off",
 					}
 
 					items = append(items, item)
@@ -239,7 +255,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					println("loading enemy spawn:", object.Name)
 					enemySpawn := NewTrigger(object)
 					enemies[object.Name] = enemySpawn
-				case "layerTrigger":
+				case "zTrigger":
 					println("loading layer trigger", object.Name)
 					layerTrigger := NewTrigger(object)
 					layerTriggers[object.Name] = &layerTrigger
@@ -270,13 +286,13 @@ func LoadDoor(object ObjectJSON) *DoorObject {
 	switch object.Type {
 	case "entranceDoor":
 		println("loading entranceDoor:", object.Name)
-		door.Type = EntryDoor
+		door.ObjectType = EntryDoor
 	case "exitDoor":
 		println("loading exitDoor:", object.Name)
-		door.Type = ExitDoor
+		door.ObjectType = ExitDoor
 	case "insideDoor":
 		println("loading insideDoor:", object.Name)
-		door.Type = InsideDoor
+		door.ObjectType = InsideDoor
 	}
 
 	spriteSheet, animation := GetAnimation(door.Animation)

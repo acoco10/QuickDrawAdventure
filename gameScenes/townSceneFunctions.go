@@ -179,16 +179,16 @@ func FindDoor(fromDoor *gameObjects.DoorObject, doors []*gameObjects.DoorObject)
 }
 func (g *TownScene) UpdateDoorState() {
 	for _, door := range g.MapData.Doors {
-		if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.ExitDoor {
+		if door.Triggered && door.State == gameObjects.NotTriggered && door.ObjectType == gameObjects.ExitDoor {
 			println("playerOnExDoor:", door.Name)
 			door.State = gameObjects.Leaving
-		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.EntryDoor {
+		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.ObjectType == gameObjects.EntryDoor {
 			println("playerOnEntDoor:", door.Name)
 			door.State = gameObjects.Entering
-		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.Type == gameObjects.InsideDoor {
+		} else if door.Triggered && door.State == gameObjects.NotTriggered && door.ObjectType == gameObjects.InsideDoor {
 			println("playerOnInsideDoor:", door.Name)
 			door.State = gameObjects.Leaving
-		} else if door.Type == gameObjects.ContextualObject && door.Triggered {
+		} else if door.ObjectType == gameObjects.ContextualObject && door.Triggered {
 			door.State = gameObjects.On
 		}
 	}
@@ -202,7 +202,7 @@ func (g *TownScene) UpdateDoors() {
 func (g *TownScene) TriggerDoors() {
 	for _, object := range g.MapData.Doors {
 		if object.Triggered {
-			switch object.Type {
+			switch object.ObjectType {
 			case gameObjects.EntryDoor:
 				g.EnterDoor(object, FindDoor(object, g.MapData.Doors))
 			case gameObjects.ExitDoor:
@@ -490,6 +490,36 @@ func (g *TownScene) DrawObjects(screen *ebiten.Image) {
 	}
 }
 
+func (g *TownScene) SortYNearPlayer() {
+}
+
+func (g *TownScene) SortAllSprites() {
+	var allTiles = make([]gameObjects.Tile, 0)
+	for _, layer := range g.tilemapJSON.Layers {
+		if layer.Class == "layer" {
+			allTiles = append(allTiles, layer.Tiles...)
+		}
+	}
+
+	var drawables []gameObjects.Drawable
+
+	for _, tile := range allTiles {
+		drawables = append(drawables, tile)
+	}
+	for _, object := range g.MapData.Items {
+		drawables = append(drawables, object)
+	}
+	for _, char := range g.NPC {
+		drawables = append(drawables, char)
+	}
+
+	drawables = append(drawables, g.Player)
+
+	sorted := gameObjects.ZSortDrawables(drawables)
+
+	g.ZsortedDrawables = sorted
+}
+
 func (g *TownScene) DrawObjectsAbovePlayer(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	for _, object := range g.Objects {
@@ -552,6 +582,17 @@ func (g *TownScene) CheckForNPCInteraction() {
 		npcDistance2 := DistanceEq(g.Player.X, g.Player.Y, npcCheck.X, npcCheck.Y)
 		if npcDistance1 > npcDistance2 {
 			g.npcInProximity = npcCheck
+		}
+	}
+}
+
+func (g *TownScene) UpdatePlayerZ() {
+	for _, layer := range g.MapData.LayerTriggers {
+		if layer.Triggered {
+			if g.Player.Z != layer.Z {
+				g.Player.IncreaseZ()
+				g.SortAllSprites()
+			}
 		}
 	}
 }

@@ -44,6 +44,7 @@ type TownScene struct {
 	InMenu              bool
 	ResolutionHeight    int
 	ResolutionWidth     int
+	ZsortedDrawables    []gameObjects.Drawable
 }
 
 func NewTownScene() *TownScene {
@@ -168,15 +169,18 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.MainMenu.SetCursor()
 	g.ReadingMenu = &ui.TextBlockMenu{}
 	g.ReadingMenu.Init()
+	g.SortAllSprites()
 
 }
 
 func (g *TownScene) Update() sceneManager.SceneId {
+
 	sceneUpdate, completed := g.dialogueUi.Update()
 
 	if completed {
 		g.InMenu = false
 	}
+
 	if sceneUpdate != sceneManager.TownSceneID {
 		g.scene = sceneManager.BattleSceneId
 	}
@@ -189,9 +193,11 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	if !g.Player.InAnimation && !g.InMenu {
 		g.PlayerMovementInput()
 	}
-
+	if g.Player.Dy != 0 {
+		g.SortAllSprites()
+	}
 	g.MenuInput()
-
+	g.UpdatePlayerZ()
 	//increase players position by their velocity every update
 	g.Player.X += g.Player.Dx
 
@@ -261,15 +267,16 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	//map
 	//loop through the tile map
 
-	gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, g.dark)
+	//gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, g.dark)
 
 	//draw Player
-	g.DrawItems(screen)
-	g.DrawObjects(screen)
-	g.DrawCharacters(screen)
 
-	gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.LayerTriggers, g.dark)
-	g.DrawObjectsAbovePlayer(screen)
+	gameObjects.DrawGameObjects(g.ZsortedDrawables, screen, *g.cam)
+
+	//g.DrawItems(screen)
+	//g.DrawObjects(screen)
+	//gameObjects.DrawMapAbovePlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.LayerTriggers, g.dark)
+	//g.DrawObjectsAbovePlayer(screen)
 
 	if g.npcInProximity.Name != "" {
 		DrawPopUp(screen, g.npcInProximity.X, g.npcInProximity.Y, float64(g.npcInProximity.SpriteSheet.SpriteWidth), g.cam)

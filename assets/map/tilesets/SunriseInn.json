@@ -6,7 +6,7 @@
      "width":1
     },
  "margin":0,
- "name":"SunriseInn",
+ "name":"sunRiseInn",
  "properties":[
         {
          "name":"tileSetType",
@@ -33,7 +33,7 @@
         {
          "id":2,
          "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseinterior.png",
-         "imageheight":225,
+         "imageheight":224,
          "imagewidth":337
         }, 
         {
@@ -81,8 +81,8 @@
         {
          "id":10,
          "image":"..\/..\/images\/characters\/elyse\/interactions\/read.png",
-         "imageheight":36,
-         "imagewidth":52
+         "imageheight":64,
+         "imagewidth":92
         }],
  "tilewidth":337,
  "type":"tileset",

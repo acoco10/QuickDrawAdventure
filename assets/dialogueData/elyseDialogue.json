@@ -1,5 +1,15 @@
 [
   {
+    "name": "Elyse",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": []
+      }
+    ]
+  },
+  {
     "name": "jarvis",
     "dialogues": [
       {
@@ -17,26 +27,35 @@
         "talkFirst": false,
         "dialogue": [
           {
-            "dialogueId": 2,
-            "dialogueText": "I'm looking for someone, a Sheriff Briggs. You Heard of him?"
-          },
-          {
-            "dialogueId": 4,
-            "dialogueText": "Heck I'm parched Ma'am, but I'm plumb broke, spent my last dollar getting out here."
+            "dialogueId": 3,
+            "dialogueText": "Hey there I go by Elyse. I'm looking for someone, a Sheriff Briggs. You Heard of him?"
           },
           {
             "dialogueId": 5,
+            "dialogueText": "Heck I'm parched Ma'am, but I'm plumb broke, spent my last dollar getting out here."
+          },
+          {
+            "dialogueId": 6,
             "dialogueText": "Know any work in town for someone who knows their way round a pistol?"
           },
           {
-            "dialogueId": 7,
+            "dialogueId": 8,
             "dialogueText": "Decent ... mostly."
           },
           {
-            "dialogueId": 10,
+            "dialogueId": 11,
             "dialogueText": "Thanks I'll go and take a look."
+          },
+          {
+            "dialogueId": 15,
+            "dialogueText": "Yes ma'am?"
           }
         ]
+      },
+      {
+        "storyPoint": 2,
+        "talkFirst": false,
+        "dialogue": []
       }
     ]
   },
@@ -166,6 +185,21 @@
         "storyPoint": 1,
         "talkFirst": false,
         "dialogue": []
+      }
+    ]
+  },
+  {
+    "name": "coffinMaker",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 2,
+            "dialogueText": "whats gotten into you old man?"
+          }
+        ]
       }
     ]
   }

@@ -155,9 +155,9 @@ func processListofFiles() {
 func main() {
 
 	exitDoorProp := map[string]interface{}{
-		"Name":  "sprite",
-		"Type":  "string",
-		"Value": "none",
+		"Name":     "sprite",
+		"drawType": "string",
+		"Value":    "none",
 	}
 
 	AddAdHocPropertyToMap("doors", "exitDoor", exitDoorProp)
@@ -167,15 +167,15 @@ func main() {
 func UpdateTileMapProperty(contents []byte, inputProp gameObjects.PropertiesJSON, layerName string, objectName string) {
 
 	var tileMap struct {
-		Layers []gameObjects.TilemapLayerJSON `json:"layers"`
-		Raw    json.RawMessage                `json:"-"` // Preserve extra JSON fields
+		Layers []gameObjects.TileMapLayer `json:"layers"`
+		Raw    json.RawMessage            `json:"-"` // Preserve extra JSON fields
 	}
 
 	if err := json.Unmarshal(contents, &tileMap); err != nil {
 		log.Fatal("Error reading tileMap:", err)
 	}
 
-	var targetLayer *gameObjects.TilemapLayerJSON
+	var targetLayer *gameObjects.TileMapLayer
 	for _, layer := range tileMap.Layers {
 		if layer.Name == layerName {
 			targetLayer = &layer

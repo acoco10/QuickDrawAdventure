@@ -1,12 +1,17 @@
 package gameObjects
 
 import (
+	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/animations"
+	"github.com/acoco10/QuickDrawAdventure/assetManagement"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
+	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"log"
 )
 
 type Direction uint8
@@ -36,45 +41,44 @@ type Character struct {
 	Spawned     bool
 	Inventory   *Inventory
 	BattleStats *battleStats.CharacterData
-	Z           float64
 }
 
-func (p *Character) ActiveAnimation(dX, dY float64) *animations.Animation {
-	if p.CharType == NonPlayer {
-		return p.Animations[MapIdle]
+func (c *Character) ActiveAnimation(dX, dY float64) *animations.Animation {
+	if c.CharType == NonPlayer {
+		return c.Animations[MapIdle]
 	}
 	if dX > 0 {
 		if dY > 0 {
-			return p.Animations[Down]
+			return c.Animations[Down]
 		} else if dY < 0 {
-			return p.Animations[Up]
+			return c.Animations[Up]
 		} else {
-			return p.Animations[Right]
+			return c.Animations[Right]
 		}
 	}
 	if dX < 0 {
 		if dY > 0 {
-			return p.Animations[Down]
+			return c.Animations[Down]
 		} else if dY < 0 {
-			return p.Animations[Up]
+			return c.Animations[Up]
 		} else {
-			return p.Animations[Left]
+			return c.Animations[Left]
 		}
 	}
 	if dY > 0 {
-		return p.Animations[Down]
+		return c.Animations[Down]
 	}
 	if dY < 0 {
-		return p.Animations[Up]
+		return c.Animations[Up]
 	}
 
 	return nil
 }
-func (p *Character) Spawn() {
-	p.Spawned = true
+func (c *Character) Spawn() {
+	c.Spawned = true
 }
-func (p *Character) DeSpawn() {
-	p.Spawned = false
+func (c *Character) DeSpawn() {
+	c.Spawned = false
 }
 
 func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType CharType) (*Character, error) {
@@ -86,10 +90,12 @@ func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType Char
 	}
 	character := &Character{
 		Sprite: &Sprite{
-			Img:     img,
-			X:       float64(spawnPoint.X),
-			Y:       float64(spawnPoint.Y - 64),
-			Visible: true,
+			Img:      img,
+			X:        spawnPoint.X,
+			Y:        spawnPoint.Y - 64,
+			Z:        1,
+			drawType: Char,
+			Visible:  true,
 		},
 
 		SpriteSheet: sheet,
@@ -139,4 +145,51 @@ func NewCharacter(spawnPoint Spawn, sheet spritesheet.SpriteSheet, charType Char
 	}
 
 	return character, nil
+}
+func (c *Character) CheckName() string {
+	return c.Name
+
+}
+
+func (c *Character) Draw(screen *ebiten.Image, cam camera.Camera) {
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Translate(c.X, c.Y)
+	opts.GeoM.Translate(cam.X, cam.Y)
+	opts.GeoM.Scale(4, 4)
+	characterFrame := 0
+	characterActiveAnimation := c.ActiveAnimation(c.Dx, c.Dy)
+	if characterActiveAnimation != nil {
+		characterFrame = characterActiveAnimation.Frame()
+	}
+	if c.Shadow {
+		opts.ColorScale.Scale(0.5, 0.5, 0.5, 1)
+	}
+	if c.Visible {
+		screen.DrawImage(
+			//grab a subimage of the Spritesheet
+			c.Img.SubImage(
+				c.SpriteSheet.Rect(characterFrame)).(*ebiten.Image),
+			opts,
+		)
+	}
+	opts.GeoM.Reset()
+
+	face, err := assetManagement.LoadFont(12, assetManagement.November)
+	if err != nil {
+		log.Fatal()
+	}
+	dopts := text.DrawOptions{}
+	x := c.X*4 + cam.X*4
+	y := c.Y*4 + cam.Y*4
+	dopts.GeoM.Translate(x, y)
+	coord := fmt.Sprintf("x = %f y = %f z = %f", c.X, c.Y, c.Z)
+	text.Draw(screen, coord, face, &dopts)
+}
+
+func (c *Character) IncreaseZ() {
+	c.Z += 1
+}
+
+func (c *Character) DecreaseZ() {
+	c.Z -= 1
 }

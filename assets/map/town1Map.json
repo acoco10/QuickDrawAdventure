@@ -421,6 +421,11 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "type":"string",
+                 "value":"openingFloorTileSet"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
@@ -428,7 +433,7 @@
                 {
                  "name":"z",
                  "type":"int",
-                 "value":1
+                 "value":0
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -644,6 +649,11 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "type":"string",
+                 "value":"openingFloorTileSet"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
@@ -651,7 +661,7 @@
                 {
                  "name":"z",
                  "type":"int",
-                 "value":1
+                 "value":0
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -867,6 +877,12 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"openingFloorTileSet"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
@@ -874,7 +890,7 @@
                 {
                  "name":"z",
                  "type":"int",
-                 "value":1
+                 "value":0
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -1302,9 +1318,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"fenceTiles"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
-                 "value":true
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -1520,9 +1547,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"sunRiseInn"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
-                 "value":true
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -1531,7 +1569,7 @@
          "y":0
         }, 
         {
-         "class":"trigger",
+         "class":"layer",
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1738,9 +1776,20 @@
          "opacity":1,
          "properties":[
                 {
-                 "name":"trigger",
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
                  "type":"string",
-                 "value":"sunRiseRoof"
+                 "value":"sunRiseInn"
+                }, 
+                {
+                 "name":"ySort",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":2
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -1955,6 +2004,12 @@
          "name":"sunriseExteriorLayer3",
          "opacity":1,
          "properties":[
+                {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"sunRiseInn"
+                }, 
                 {
                  "name":"ySort",
                  "type":"bool",
@@ -2179,9 +2234,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"sunRiseInn"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -2408,7 +2474,7 @@
          "y":0
         }, 
         {
-         "class":"trigger",
+         "class":"layer",
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -2615,9 +2681,20 @@
          "opacity":1,
          "properties":[
                 {
-                 "name":"trigger",
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
                  "type":"string",
-                 "value":"sunRiseBalcony"
+                 "value":"sunRiseInn"
+                }, 
+                {
+                 "name":"ySort",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":2
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -2833,17 +2910,23 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"sunRiseInn"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
-                 "value":false
+                 "value":true
                 }, 
                 {
                  "name":"z",
                  "type":"int",
-                 "value":2
+                 "value":1
                 }],
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":120,
          "x":0,
          "y":0
@@ -3056,9 +3139,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"rose"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -3275,6 +3369,12 @@
          "offsety":0,
          "opacity":1,
          "properties":[
+                {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"rose"
+                }, 
                 {
                  "name":"ySort",
                  "type":"bool",
@@ -3499,9 +3599,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"rose"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -3717,9 +3828,15 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"rose"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
-                 "value":true
+                 "value":false
                 }, 
                 {
                  "name":"z",
@@ -3940,9 +4057,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"rose"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
-                 "value":true
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -4158,9 +4286,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"farmCabin"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -4376,9 +4515,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"farmCabin"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
-                 "value":true
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -4593,6 +4743,12 @@
          "name":"farmCabinInterior2",
          "opacity":1,
          "properties":[
+                {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"farmCabin"
+                }, 
                 {
                  "name":"ySort",
                  "type":"bool",
@@ -4817,9 +4973,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"generalStore"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
-                 "value":true
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -5035,6 +5202,12 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"generalStore"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":false
@@ -5051,6 +5224,7 @@
          "y":0
         }, 
         {
+         "class":"layer",
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -5255,6 +5429,23 @@
          "id":20,
          "name":"generalStore1",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"generalStore"
+                }, 
+                {
+                 "name":"ySort",
+                 "type":"bool",
+                 "value":false
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":120,
@@ -5467,6 +5658,13 @@
          "id":21,
          "name":"generalStore2",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"generalStore"
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":120,
@@ -5681,9 +5879,20 @@
          "opacity":1,
          "properties":[
                 {
+                 "name":"tileSet",
+                 "propertytype":"TileSet",
+                 "type":"string",
+                 "value":"natureTileset"
+                }, 
+                {
                  "name":"ySort",
                  "type":"bool",
                  "value":true
+                }, 
+                {
+                 "name":"z",
+                 "type":"int",
+                 "value":1
                 }],
          "type":"tilelayer",
          "visible":true,
@@ -5718,14 +5927,14 @@
                          "value":"down"
                         }],
                  "rotation":0,
-                 "type":"layerTrigger",
+                 "type":"zTrigger",
                  "visible":true,
                  "width":28.1731286945237,
                  "x":754.983845245125,
                  "y":1953.8236948449
                 }, 
                 {
-                 "height":17.8171,
+                 "height":5.02140460316925,
                  "id":340,
                  "name":"sunRiseBalcony",
                  "properties":[
@@ -5733,13 +5942,18 @@
                          "name":"direction",
                          "type":"string",
                          "value":"up"
+                        }, 
+                        {
+                         "name":"z",
+                         "type":"int",
+                         "value":2
                         }],
                  "rotation":0,
-                 "type":"layerTrigger",
+                 "type":"zTrigger",
                  "visible":true,
                  "width":24.5875,
-                 "x":51.9026198559141,
-                 "y":1947.60518349665
+                 "x":51.524769446891,
+                 "y":1968.9025130965
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -7974,8 +8188,8 @@
                  "type":"itemSpawn",
                  "visible":true,
                  "width":0,
-                 "x":640.820588038994,
-                 "y":1155.73809609996
+                 "x":642.872080499759,
+                 "y":1161.89257348226
                 }],
          "offsetx":0.524631446408897,
          "offsety":1.04926289281775,
@@ -8642,7 +8856,7 @@
  "nextobjectid":373,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.11.0",
+ "tiledversion":"1.11.2",
  "tileheight":16,
  "tilesets":[
         {
@@ -8671,7 +8885,7 @@
         }, 
         {
          "firstgid":404,
-         "source":"tilesets\/rosever3.0.json"
+         "source":"tilesets\/rose.tsj"
         }, 
         {
          "firstgid":413,

@@ -48,7 +48,6 @@ func DrawMapBelowPlayer(tileMapJson TilemapJSON, tilesets []Tileset, cam camera.
 			opts.GeoM.Translate(float64(x), float64(y))
 
 			opts.GeoM.Translate(0.0, -(float64(img.Bounds().Dy()) + 16))
-
 			opts.GeoM.Translate(cam.X, cam.Y)
 			opts.GeoM.Scale(4, 4)
 

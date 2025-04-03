@@ -11,6 +11,20 @@
     ],
     "propertyTypes": [
         {
+            "id": 7,
+            "name": "direction",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "none",
+                "up",
+                "down",
+                "left",
+                "right"
+            ],
+            "valuesAsFlags": false
+        },
+        {
             "color": "#ffa0a0a4",
             "drawFill": true,
             "id": 2,
@@ -109,6 +123,12 @@
             "id": 4,
             "members": [
                 {
+                    "name": "tileSet",
+                    "propertyType": "TileSet",
+                    "type": "string",
+                    "value": "natureTileset"
+                },
+                {
                     "name": "ySort",
                     "type": "bool",
                     "value": true
@@ -116,10 +136,59 @@
                 {
                     "name": "z",
                     "type": "int",
-                    "value": 1
+                    "value": 0
                 }
             ],
             "name": "layer",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
+            "id": 5,
+            "name": "TileSet",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "openingFloorTileSet",
+                "boneManRoom",
+                "fenceTiles",
+                "generalStore",
+                "natureTileset",
+                "rose",
+                "sunRiseInn",
+                "farmCabin",
+                "generalStore",
+                "none"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 6,
+            "members": [
+                {
+                    "name": "direction",
+                    "type": "string",
+                    "value": "none"
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 0
+                }
+            ],
+            "name": "zTrigger",
             "type": "class",
             "useAs": [
                 "property",
