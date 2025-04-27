@@ -6,6 +6,7 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/camera"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
+	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	ui "github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -20,62 +21,32 @@ import (
 
 func (g *TownScene) PlayerMovementInput() {
 
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.Player.Dx = 1.5
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+	if ebiten.IsKeyPressed(ebiten.KeyDown) && ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		g.Player.Dx = -.75
+		g.Player.Dy = .75
+	} else if ebiten.IsKeyPressed(ebiten.KeyDown) && ebiten.IsKeyPressed(ebiten.KeyRight) {
+		g.Player.Dx = .75
+		g.Player.Dy = .75
+	} else if ebiten.IsKeyPressed(ebiten.KeyUp) && ebiten.IsKeyPressed(ebiten.KeyRight) {
+		g.Player.Dx = .75
+		g.Player.Dy = -.75
+	} else if ebiten.IsKeyPressed(ebiten.KeyUp) && ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		g.Player.Dx = -.75
+		g.Player.Dy = -.75
+	} else if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		g.Player.Dx = -1.5
+	} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		g.Player.Dx = 1.5
+	} else if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		g.Player.Dy = -1.5
+	} else if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		g.Player.Dy = 1.5
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-			g.Player.Dy = .75
-			g.Player.Dx = -.75
-		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
-			g.Player.Dy = .75
-			g.Player.Dx = .75
-		} else {
-			g.Player.Dy = 1.5
-		}
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-			g.Player.Dy = -.75
-			g.Player.Dx = -.75
-		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
-			g.Player.Dy = -.75
-			g.Player.Dx = .75
-		} else {
-			g.Player.Dy = -1.5
-		}
-	}
+}
 
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		g.Player.Dx = 1.5
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		g.Player.Dx = -1.5
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-			g.Player.Dy = .75
-			g.Player.Dx = -.75
-		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
-			g.Player.Dy = .75
-			g.Player.Dx = .75
-		} else {
-			g.Player.Dy = 1.5
-		}
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-			g.Player.Dy = -.75
-			g.Player.Dx = -.75
-		} else if ebiten.IsKeyPressed(ebiten.KeyRight) {
-			g.Player.Dy = -.75
-			g.Player.Dx = .75
-		} else {
-			g.Player.Dy = -1.5
-		}
+func (g *TownScene) PlayerActionInput() {
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		g.Player.Lasso.SetPosition(*g.Player)
 	}
 }
 
@@ -135,7 +106,7 @@ func (g *TownScene) EnterDoor(fromDoor *gameObjects.DoorObject, toDoor *gameObje
 		}
 		if fromDoorAnimation.Frame() == fromDoorAnimation.LastF {
 			g.cam.UpdateState(camera.Inside)
-			g.cam.SetIndoorCameraBounds(g.MapData.CameraPoints[fromDoor.CameraPoint].Rect)
+			g.cam.SetIndoorCameraBounds(*g.MapData.CameraPoints[fromDoor.CameraPoint].Rectangle)
 			if fromDoor.Name == "cave" {
 				g.dark = true
 			}
@@ -157,7 +128,7 @@ func (g *TownScene) InsideDoor(fromDoor *gameObjects.DoorObject, toDoor *gameObj
 	fromDoorAnimation := fromDoor.ActiveAnimation()
 	x, y := gameObjects.GetDoorCoord(toDoor, fromDoor.Dir)
 	if fromDoor.State == gameObjects.Leaving {
-		g.cam.SetIndoorCameraBounds(g.MapData.CameraPoints[fromDoor.CameraPoint].Rect)
+		g.cam.SetIndoorCameraBounds(*g.MapData.CameraPoints[fromDoor.CameraPoint].Rectangle)
 		if fromDoorAnimation.Frame() == fromDoorAnimation.FirstF {
 			g.Player.X = x
 			g.Player.Y = y
@@ -260,7 +231,7 @@ func DrawCharacter(character *gameObjects.Character, screen *ebiten.Image, cam c
 	opts.GeoM.Translate(cam.X, cam.Y)
 	opts.GeoM.Scale(4, 4)
 	characterFrame := 0
-	characterActiveAnimation := character.ActiveAnimation(character.Dx, character.Dy)
+	characterActiveAnimation := character.ActiveAnimation()
 	if characterActiveAnimation != nil {
 		characterFrame = characterActiveAnimation.Frame()
 	}
@@ -316,7 +287,7 @@ func SetCursorForDialogue(ui DialogueUI, cursor *ui.CursorUpdater) {
 
 func CheckInteractPopup(player gameObjects.Character, items map[string]*gameObjects.Trigger) *gameObjects.Trigger {
 	for _, item := range items {
-		if CheckTrigger(player, float64(item.Rect.Min.X), float64(item.Rect.Min.Y)) {
+		if CheckTrigger(player, float64(item.Min.X), float64(item.Min.Y)) {
 			return item
 		}
 	}
@@ -490,34 +461,73 @@ func (g *TownScene) DrawObjects(screen *ebiten.Image) {
 	}
 }
 
-func (g *TownScene) SortYNearPlayer() {
-}
-
 func (g *TownScene) SortAllSprites() {
-	var allTiles = make([]gameObjects.Tile, 0)
+
+	zMap := make(map[float64][]gameObjects.Drawable)
+	var zKeys []float64
+	zSeen := make(map[float64]bool)
+
 	for _, layer := range g.tilemapJSON.Layers {
 		if layer.Class == "layer" {
-			allTiles = append(allTiles, layer.Tiles...)
+			z := layer.Z
+			for _, t := range layer.Tiles {
+				zMap[layer.Z] = append(zMap[layer.Z], t)
+			}
+			if !zSeen[z] {
+				zKeys = append(zKeys, z)
+				zSeen[z] = true
+			}
 		}
 	}
 
-	var drawables []gameObjects.Drawable
-
-	for _, tile := range allTiles {
-		drawables = append(drawables, tile)
-	}
 	for _, object := range g.MapData.Items {
-		drawables = append(drawables, object)
+		z := object.Z
+		zMap[z] = append(zMap[object.Z], object)
+		if !zSeen[z] {
+			zKeys = append(zKeys, z)
+			zSeen[z] = true
+		}
 	}
+
 	for _, char := range g.NPC {
-		drawables = append(drawables, char)
+		z := char.Z
+		zMap[char.Z] = append(zMap[char.Z], char)
+		if !zSeen[z] {
+			zKeys = append(zKeys, z)
+			zSeen[z] = true
+		}
 	}
 
-	drawables = append(drawables, g.Player)
+	zMap[g.Player.Z] = append(zMap[g.Player.Z], g.Player)
 
-	sorted := gameObjects.ZSortDrawables(drawables)
+	for _, zLayer := range zMap {
+		zLayer = gameObjects.SortDrawables(zLayer)
+	}
 
-	g.ZsortedDrawables = sorted
+	sort.Slice(zKeys, func(i, j int) bool {
+		return zKeys[i] < zKeys[j]
+	})
+
+	g.Zkeys = zKeys
+	g.ZSortedDrawables = zMap
+}
+
+func (g *TownScene) ReSortPlayerZ() {
+
+	if g.Player.PrevZ != g.Player.Z {
+		for i, v := range g.ZSortedDrawables[g.Player.PrevZ] {
+			if v.CheckName() == g.Player.Name {
+				println("removing player from last z layer")
+				g.ZSortedDrawables[g.Player.PrevZ] =
+					append(g.ZSortedDrawables[g.Player.PrevZ][:i], g.ZSortedDrawables[g.Player.PrevZ][i+1:]...)
+				break
+			}
+		}
+		g.ZSortedDrawables[g.Player.Z] = append(g.ZSortedDrawables[g.Player.Z], g.Player)
+		g.Player.PrevZ = g.Player.Z
+	}
+
+	g.ZSortedDrawables[g.Player.Z] = gameObjects.SortDrawables(g.ZSortedDrawables[g.Player.Z])
 }
 
 func (g *TownScene) DrawObjectsAbovePlayer(screen *ebiten.Image) {
@@ -553,26 +563,6 @@ func DistanceEq(x1, y1, x2, y2 float64) float64 {
 	return math.Sqrt(xdis*xdis + ydis*ydis)
 }
 
-func (g *TownScene) ActivateTriggerCollidersVertical(trigger string) {
-	gameObjects.CheckCollisionVertical(g.Player.Sprite, g.MapData.TriggerColliders[trigger], g.NPC)
-}
-
-func (g *TownScene) ActivateTriggerCollidersHorizontal(trigger string) {
-	gameObjects.CheckCollisionHorizontal(g.Player.Sprite, g.MapData.TriggerColliders[trigger], g.NPC)
-}
-
-func (g *TownScene) UpdateTriggerColliders(way string) {
-	for key, trig := range g.MapData.LayerTriggers {
-		if trig.Triggered {
-			if way == "vert" {
-				g.ActivateTriggerCollidersVertical(key)
-			} else if way == "horizontal" {
-				g.ActivateTriggerCollidersHorizontal(key)
-			}
-		}
-	}
-}
-
 func (g *TownScene) CheckForNPCInteraction() {
 	npcCheck := CheckDialoguePopup(*g.Player, g.NPC)
 	if g.npcInProximity.Name == "" || npcCheck.Name == "" {
@@ -586,13 +576,161 @@ func (g *TownScene) CheckForNPCInteraction() {
 	}
 }
 
-func (g *TownScene) UpdatePlayerZ() {
-	for _, layer := range g.MapData.LayerTriggers {
-		if layer.Triggered {
-			if g.Player.Z != layer.Z {
-				g.Player.IncreaseZ()
-				g.SortAllSprites()
+func (g *TownScene) HighlightPlayerTile(screen *ebiten.Image) {
+	for _, img := range g.ZSortedDrawables[g.Player.Z] {
+		if gameObjects.CheckOverlap(g.Player, img) {
+			if img.GetType() == gameObjects.Char {
+				x, y, _ := img.GetCoord()
+				y = y - 48
+				w, h := img.GetSize()
+				scale := float32(4)
+				screenX := float32(x+g.cam.X) * scale
+				screenY := float32(y+g.cam.Y) * scale
+				width := float32(w) * scale
+				height := float32(h) * scale
+
+				vector.StrokeRect(
+					screen,
+					screenX,
+					screenY,
+					width,
+					height,
+					1.0,
+					color.RGBA{255, 0, 0, 255},
+					false,
+				)
+				vector.DrawFilledCircle(screen, screenX, screenY, 5, color.RGBA{255, 0, 0, 255}, false)
+			} else if img.GetType() == gameObjects.Map {
+				x, y, _ := img.GetCoord()
+				w, h := img.GetSize()
+				scale := float32(4)
+
+				screenX := float32(x+g.cam.X) * scale
+				screenY := float32(y+g.cam.Y) * scale
+				width := float32(w) * scale
+				height := float32(h) * scale
+
+				vector.StrokeRect(
+					screen,
+					screenX,
+					screenY-height-64,
+					width,
+					height,
+					1.0,
+					color.RGBA{255, 0, 0, 255},
+					false,
+				)
+			} else if img.GetType() == gameObjects.Obj {
+				x, y, _ := img.GetCoord()
+				w, h := img.GetSize()
+				y = y + 32
+				scale := float32(4)
+				screenX := float32(x+g.cam.X) * scale
+				screenY := float32(y+g.cam.Y) * scale
+				width := float32(w) * scale
+				height := float32(h) * scale
+
+				vector.StrokeRect(
+					screen,
+					screenX,
+					screenY-height-64,
+					width,
+					height,
+					1.0,
+					color.RGBA{255, 0, 0, 255},
+					false,
+				)
 			}
+		}
+	}
+}
+
+func (g *TownScene) noOverLapCurrentZ() bool {
+	overLap := false
+	for _, img := range g.ZSortedDrawables[g.Player.Z] {
+		if img.CheckName() == "bridgeLeft" {
+			println("player over lapping with bridge object")
+		}
+		if gameObjects.CheckOverlap(g.Player, img) {
+			overLap = true
+		}
+	}
+	return overLap
+}
+
+func (g *TownScene) loadAllCharacters() {
+
+	charSpriteSheet := spritesheet.NewSpritesheet(4, 6, 16, 32)
+
+	npcSpawn := g.MapData.NpcSpawns
+
+	jarvis, err := gameObjects.NewCharacter(npcSpawn["jarvis"], *charSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bethSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 25)
+
+	bethAnne, err := gameObjects.NewCharacter(npcSpawn["bethAnne"], *bethSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	zephSpriteSheet := spritesheet.NewSpritesheet(3, 1, 15, 29)
+
+	zeph, err := gameObjects.NewCharacter(npcSpawn["zeph"], *zephSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	marthaSpriteSheet := spritesheet.NewSpritesheet(1, 1, 15, 27)
+
+	martha, err := gameObjects.NewCharacter(npcSpawn["marthaFelten"], *marthaSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	player, err := gameObjects.NewCharacter(npcSpawn["elyse"], *charSpriteSheet, gameObjects.Player)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	antonio, err := gameObjects.NewCharacter(npcSpawn["antonio"], *charSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bMSpriteSheet := spritesheet.NewSpritesheet(1, 1, 27, 35)
+	boneMan, err := gameObjects.NewCharacter(npcSpawn["boneMan"], *bMSpriteSheet, gameObjects.NonPlayer)
+
+	oMLSpriteSheet := spritesheet.NewSpritesheet(3, 1, 14, 18)
+	oldManLandry, err := gameObjects.NewCharacter(npcSpawn["oldManLandry"], *oMLSpriteSheet, gameObjects.NonPlayer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	g.Player = player
+
+	g.gameLog.PlayerStats = player.BattleStats
+
+	g.NPC = map[string]*gameObjects.Character{}
+
+	g.NPC["bethAnne"] = bethAnne
+	g.NPC["jarvis"] = jarvis
+	g.NPC["zeph"] = zeph
+	g.NPC["martha"] = martha
+	g.NPC["antonio"] = antonio
+	g.NPC["oldManLandry"] = oldManLandry
+	g.NPC["boneMan"] = boneMan
+
+	for _, spawn := range npcSpawn {
+		if g.NPC[spawn.Name] == nil {
+
+			newChar, err := gameObjects.NewCharacter(spawn, *oMLSpriteSheet, gameObjects.NonPlayer)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			g.NPC[spawn.Name] = newChar
+
 		}
 	}
 }

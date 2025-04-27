@@ -11,6 +11,31 @@
     ],
     "propertyTypes": [
         {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 8,
+            "members": [
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 1
+                }
+            ],
+            "name": "collider",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
             "id": 7,
             "name": "direction",
             "storageType": "string",
@@ -23,6 +48,57 @@
                 "right"
             ],
             "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 11,
+            "members": [
+                {
+                    "name": "cameraPoint",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "direction",
+                    "propertyType": "direction",
+                    "type": "string",
+                    "value": "none"
+                }
+            ],
+            "name": "entranceDoor",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 12,
+            "members": [
+            ],
+            "name": "exitDoor",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
         },
         {
             "color": "#ffa0a0a4",
@@ -107,6 +183,11 @@
                     "name": "sprite",
                     "type": "string",
                     "value": "none"
+                },
+                {
+                    "name": "z",
+                    "type": "int",
+                    "value": 1
                 }
             ],
             "name": "itemSpawn",
@@ -124,7 +205,7 @@
             "members": [
                 {
                     "name": "tileSet",
-                    "propertyType": "TileSet",
+                    "propertyType": "tileSet",
                     "type": "string",
                     "value": "natureTileset"
                 },
@@ -154,8 +235,34 @@
             ]
         },
         {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 10,
+            "members": [
+                {
+                    "name": "tileType",
+                    "propertyType": "tileType",
+                    "type": "string",
+                    "value": "edge"
+                }
+            ],
+            "name": "tile",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
             "id": 5,
-            "name": "TileSet",
+            "name": "tileSet",
             "storageType": "string",
             "type": "enum",
             "values": [
@@ -169,6 +276,18 @@
                 "farmCabin",
                 "generalStore",
                 "none"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 9,
+            "name": "tileType",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "edge",
+                "surface",
+                "stair"
             ],
             "valuesAsFlags": false
         },

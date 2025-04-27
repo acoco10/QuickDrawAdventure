@@ -14,9 +14,9 @@
          "value":"dynamic"
         }],
  "spacing":0,
- "tilecount":11,
+ "tilecount":14,
  "tiledversion":"1.11.2",
- "tileheight":258,
+ "tileheight":271,
  "tiles":[
         {
          "id":0,
@@ -69,7 +69,7 @@
         {
          "id":8,
          "image":"..\/..\/images\/buildings\/sunriseInn\/sunriseSecondFloor.png",
-         "imageheight":258,
+         "imageheight":271,
          "imagewidth":290
         }, 
         {
@@ -83,6 +83,24 @@
          "image":"..\/..\/images\/characters\/elyse\/interactions\/read.png",
          "imageheight":64,
          "imagewidth":92
+        }, 
+        {
+         "id":11,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunRiseInnSecondFloorWall.png",
+         "imageheight":64,
+         "imagewidth":290
+        }, 
+        {
+         "id":12,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunRiseSecondFloor Walls.png",
+         "imageheight":64,
+         "imagewidth":290
+        }, 
+        {
+         "id":13,
+         "image":"..\/..\/images\/buildings\/sunriseInn\/sunRiseSecondFloorInnerWall.png",
+         "imageheight":64,
+         "imagewidth":206
         }],
  "tilewidth":337,
  "type":"tileset",

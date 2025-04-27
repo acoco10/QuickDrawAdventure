@@ -2,7 +2,6 @@ package ui
 
 import (
 	"github.com/acoco10/QuickDrawAdventure/assetManagement"
-	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/eventSystem"
 	"github.com/ebitenui/ebitenui"
 	"github.com/ebitenui/ebitenui/widget"
@@ -13,41 +12,33 @@ import (
 	"strings"
 )
 
-type MainMenu struct {
-	ui                 ebitenui.UI
-	Triggered          bool
-	SkillButtonPressed bool
-	ButtonPressed      *widget.Button
-	Player             *battleStats.CharacterData
-	ResolutionHeight   int
-	ResolutionWidth    int
-	face               text.Face
-	Cursor             *CursorUpdater
-	DialogueSkillMenu  *DialogueSkillEquipMenu
-	PrimaryMenu        *Menu
-	SecondaryMenus     map[string]TriggerMenu
-	GameEventHub       *events.EventHub
+type ToggleMenu struct {
+	ui               ebitenui.UI
+	Triggered        bool
+	ButtonPressed    bool
+	ResolutionHeight int
+	ResolutionWidth  int
+	face             text.Face
+	Cursor           *CursorUpdater
+	PrimaryMenu      *Menu
 }
 
-func NewMainMenu(resolutionHeight int, resolutionWidth int, playerData *battleStats.CharacterData, cursor *CursorUpdater, gameEHub *events.EventHub) *MainMenu {
-	m := MainMenu{
+func NewToggleMenu(resolutionHeight int, resolutionWidth int, cursor *CursorUpdater) *ToggleMenu {
+	m := ToggleMenu{
 		ResolutionHeight: resolutionHeight,
 		ResolutionWidth:  resolutionWidth,
-		Player:           playerData,
 		Cursor:           cursor,
 	}
-	m.GameEventHub = gameEHub
+
 	return &m
 }
 
-func (m *MainMenu) Load() {
-
+func (m *ToggleMenu) Load(GameEventHub *events.EventHub) {
 	m.PrimaryMenu = &Menu{}
 
 	rootContainer := widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewStackedLayout()),
 	)
-
 	m.PrimaryMenu.MenuContainer = widget.NewContainer(
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout(widget.AnchorLayoutOpts.Padding(
 			widget.Insets{Top: 400, Left: m.ResolutionWidth/2 - 200, Right: m.ResolutionWidth / 2, Bottom: m.ResolutionHeight / 4 * 3},
@@ -55,16 +46,16 @@ func (m *MainMenu) Load() {
 	)
 
 	OptionContainer := SkillsContainer()
-	options := []string{"skills", "debugMode"}
+	options := []string{"On", "Off"}
 
 	for _, op := range options {
 		//makes button with each skill name
-		optionButton := GenerateMainMenuButton(op, m)
+		optionButton := GenerateToggleMenuButton(op, m, GameEventHub)
 		OptionContainer.AddChild(optionButton)
 		m.PrimaryMenu.Buttons = append(m.PrimaryMenu.Buttons, optionButton)
 	}
 
-	opContainer := SkillBoxContainerEquipUi("Main Menu")
+	opContainer := SkillBoxContainerEquipUi("Debug Mode")
 	opContainer.AddChild(OptionContainer)
 	m.PrimaryMenu.MenuContainer.AddChild(opContainer)
 
@@ -75,50 +66,30 @@ func (m *MainMenu) Load() {
 	}
 
 	m.ui = ui
-
-	skills := NewDialogueEquipMenu(m.Cursor, m.ResolutionHeight, m.ResolutionWidth)
-	skills.Load(m.ResolutionHeight, m.ResolutionWidth, m.Player)
-	m.SecondaryMenus = make(map[string]TriggerMenu)
-	m.SecondaryMenus["skills"] = skills
-
-	debugMode := NewToggleMenu(m.ResolutionHeight, m.ResolutionWidth, m.Cursor)
-	debugMode.Load(m.GameEventHub)
-	m.SecondaryMenus["debugMode"] = debugMode
-
 }
 
-func (m *MainMenu) Trigger() {
+func (m *ToggleMenu) Trigger() {
 	m.Triggered = true
-	m.SetCursor()
 }
 
-func (m *MainMenu) UnTrigger() {
+func (m *ToggleMenu) UnTrigger() {
 	m.Triggered = false
 }
 
-func (m *MainMenu) SetCursor() {
-	m.Cursor.MoveCursorToMainMenu(len(m.SecondaryMenus))
-	println("main menu has ", len(m.SecondaryMenus), "secondary menus")
+func (m *ToggleMenu) SetCursor() {
 }
 
-func (m *MainMenu) Update() {
+func (m *ToggleMenu) Update() {
 	m.ui.Update()
-
-	for _, menu := range m.SecondaryMenus {
-		menu.Update()
-	}
 }
 
-func (m *MainMenu) Draw(screen *ebiten.Image) {
+func (m *ToggleMenu) Draw(screen *ebiten.Image) {
 	if m.Triggered == true {
 		m.ui.Draw(screen)
 	}
-
-	for _, menu := range m.SecondaryMenus {
-		menu.Draw(screen)
-	}
 }
-func GenerateMainMenuButton(text string, menu *MainMenu) (button *widget.Button) {
+
+func GenerateToggleMenuButton(text string, menu *ToggleMenu, GameEHub *events.EventHub) (button *widget.Button) {
 
 	// load gameScenes font, more fonts will be selectable later when we implement a resource manager
 	face, err := assetManagement.LoadFont(20, assetManagement.November)
@@ -136,7 +107,17 @@ func GenerateMainMenuButton(text string, menu *MainMenu) (button *widget.Button)
 		widget.ButtonOpts.Image(buttonImage),
 		// add a handler that reacts to clicking the button
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			menu.SecondaryMenus[text].Trigger()
+			var onOff bool
+			switch text {
+			case "On":
+				onOff = true
+			case "Off":
+				onOff = false
+			}
+			event := events.PropertyUpdate{
+				Property: "debug",
+				Value:    onOff}
+			GameEHub.Publish(event)
 			menu.UnTrigger()
 		}),
 

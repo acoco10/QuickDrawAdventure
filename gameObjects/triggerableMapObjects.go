@@ -2,7 +2,11 @@ package gameObjects
 
 import (
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
+	"github.com/acoco10/QuickDrawAdventure/camera"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"image"
+	"image/color"
 	"math/rand/v2"
 )
 
@@ -19,11 +23,11 @@ func CheckContextualTriggers(player *Character, contextTriggers map[string]*Trig
 		int(player.Y)+31)
 	returnMap := make(map[string]ObjectState)
 	for _, trig := range contextTriggers {
-		if trig.Rect.Overlaps(playerRect) {
+		if trig.Overlaps(playerRect) {
 			returnMap[trig.Name] = On
 		}
 
-		if !trig.Rect.Overlaps(playerRect) {
+		if !trig.Overlaps(playerRect) {
 			returnMap[trig.Name] = NotTriggered
 		}
 	}
@@ -38,7 +42,7 @@ func CheckEnemyTrigger(player *Character, enemySpawn map[string]Trigger, countDo
 		int(player.Y)+31)
 
 	for _, trig := range enemySpawn {
-		if trig.Rect.Overlaps(playerRect) {
+		if trig.Overlaps(playerRect) {
 			countDown--
 			if rand.IntN(1000-countDown) <= 2 {
 				return battleStats.Wolf
@@ -54,12 +58,12 @@ func GetDoorCoord(door *DoorObject, direction Direction) (float64, float64) {
 	y := 0.0
 
 	if direction == Up {
-		x = float64(door.Rect.Dx()/2+door.Rect.Min.X) - 8
-		y = float64(door.Rect.Min.Y) - 32
+		x = float64(door.Rectangle.Dx()/2+door.Min.X) - 8
+		y = float64(door.Min.Y) - 32
 	}
 	if direction == Down {
-		x = float64(door.Rect.Dx()/2+door.Rect.Min.X) - 8
-		y = float64(door.Rect.Max.Y) - 16
+		x = float64(door.Rectangle.Dx()/2+door.Min.X) - 8
+		y = float64(door.Max.Y) - 16
 	}
 
 	return x, y
@@ -73,40 +77,51 @@ func CheckDoors(player *Character, doors []*DoorObject) {
 }
 
 func CheckTrigger(player *Character, trigger *Trigger) {
-	if trigger.Rect.Overlaps(
+	if trigger.Overlaps(
 		image.Rect(
 			int(player.X),
 			int(player.Y)+28,
 			int(player.X)+16,
 			int(player.Y)+31),
 	) {
-		if player.Dy < 0 {
-			if trigger.Dir == Up {
-				println("setting up trigger to true")
-				trigger.Triggered = true
-			} else {
-				trigger.Triggered = false
+		yTriggerCheck(player, trigger)
+		xTriggerCheck(player, trigger)
+	} else {
+		if trigger.Triggered {
+			if trigger.Z > player.Z {
+				player.AddToFuncQueue(player.IncreaseZ)
 			}
-		} else if player.Dy > 0 {
-			if trigger.Dir == Down {
-				trigger.Triggered = true
-			} else {
-				trigger.Triggered = false
-			}
+
 		}
-		if player.Dx < 0 {
-			if trigger.Dir == Left {
-				trigger.Triggered = true
-			} else {
-				trigger.Triggered = false
-			}
-		} else if player.Dx > 0 {
-			if trigger.Dir == Right {
-				trigger.Triggered = true
-				return
-			} else {
-				trigger.Triggered = false
-			}
+		trigger.Triggered = false
+	}
+}
+
+func yTriggerCheck(player *Character, trigger *Trigger) {
+	if player.Dy < 0 {
+		if trigger.Dir == Up {
+			trigger.Triggered = true
+		}
+	} else if player.Dy > 0 {
+		if trigger.Dir == Down {
+			trigger.Triggered = true
+		}
+	}
+}
+
+func xTriggerCheck(player *Character, trigger *Trigger) {
+	if player.Dx < 0 {
+		if trigger.Dir == Left {
+			trigger.Triggered = true
+		} else {
+			trigger.Triggered = false
+		}
+	} else if player.Dx > 0 {
+		if trigger.Dir == Right {
+			trigger.Triggered = true
+			return
+		} else {
+			trigger.Triggered = false
 		}
 	}
 }
@@ -116,5 +131,33 @@ func CheckTriggers(player *Character, triggers []*Trigger) {
 		if trigger.Auto {
 			CheckTrigger(player, trigger)
 		}
+	}
+}
+
+func DrawTriggers(triggers []*Trigger, screen *ebiten.Image, cam *camera.Camera) {
+	for _, trig := range triggers {
+
+		scale := float32(4)
+
+		x := float64(trig.Min.X)
+		y := float64(trig.Min.Y)
+
+		w, h := trig.Dx(), trig.Dy()
+
+		screenX := float32(x+cam.X) * scale
+		screenY := float32(y+cam.Y) * scale
+		width := float32(w) * scale
+		height := float32(h) * scale
+
+		vector.StrokeRect(
+			screen,
+			screenX,
+			screenY,
+			width,
+			height,
+			1.0,
+			color.RGBA{100, 255, 100, 255},
+			false,
+		)
 	}
 }

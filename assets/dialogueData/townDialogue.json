@@ -316,5 +316,85 @@
         ]
       }
     ]
+  },
+  {
+    "name": "buffalo",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "beware the false talker in blue"
+          },
+          {
+            "dialogueId": 2,
+            "dialogueText": "never despair, there is help always"
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "can you ask for it though?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "hotelOwner",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "Welcome to the Sunrise Inn, the finest Inn in all of Shady Edge!"
+          },
+          {
+            "dialogueId": 2,
+            "dialogueText": "At the Sunrise Inn you can buy a gun without taking your slippers off!"
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "Care for a room?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "gunStoreOwner",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "Welcome, welcome how can I help you today?"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "chesterSilverfield",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 2,
+            "dialogueText": "Me an ma ain't move all the way out here to be told what to do"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "mamaSilverfield",
+    "dialogues": []
   }
 ]

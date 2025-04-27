@@ -78,7 +78,7 @@ func AddAdHocPropertyToMap(layerFilter, typeFilter string, newProp map[string]in
 		log.Fatalf("Failed to read file: %v", err)
 	}
 
-	file, err := os.ReadFile(workDir + "/assets/map/town1Map.json")
+	file, err := os.ReadFile(workDir + "/assets/map/testMap.json")
 
 	if err != nil {
 		log.Fatalf("Failed to read file: %v", err)

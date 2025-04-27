@@ -202,5 +202,68 @@
         ]
       }
     ]
+  },
+  {
+    "name": "buffalo",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": []
+      }
+    ]
+  },
+  {
+    "name": "hotelOwner",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 4,
+            "dialogueText": "Not right now"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "gunStoreOwner",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": false,
+        "dialogue": [
+          {
+            "dialogueId": 2,
+            "dialogueText": "--- let me take a look at your catalog"
+          },
+          {
+            "dialogueId": 3,
+            "dialogueText": "--- just window shopping"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "chesterSilverfield",
+    "dialogues": [
+      {
+        "storyPoint": 1,
+        "talkFirst": true,
+        "dialogue": [
+          {
+            "dialogueId": 1,
+            "dialogueText": "If you ain't with the Rattler's best you take that scattershot and walk away"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "mamaSilverfield",
+    "dialogues": []
   }
 ]

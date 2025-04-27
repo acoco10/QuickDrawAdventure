@@ -2,6 +2,7 @@ package gameObjects
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/animations"
 	"github.com/acoco10/QuickDrawAdventure/assets"
@@ -15,27 +16,52 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-// Tileset every tileset must be able to give an image given an id
+type TileType uint8
+
+const (
+	Stair TileType = iota
+	Surface
+	Edge
+	NotDefined
+)
+
 type Tileset interface {
 	Img(id int) *ebiten.Image
 	Gid() int
 	Name() string
 	Dimensions() (int, int)
+	TileType(int) TileType
 }
 
 // UniformTilesetJSON the tileset data deserialized from a standard, single-image tileset
 type UniformTilesetJSON struct {
-	Path  string `json:"image"`
-	Width int    `json:"columns"`
-	Name  string `json:"name"`
+	Path       string           `json:"image"`
+	Width      int              `json:"columns"`
+	Name       string           `json:"name"`
+	Properties []PropertiesJSON `json:"properties"`
+	TileProps  []TileProp       `json:"Tiles"`
 }
 
 // UniformTileset struct for storing uniform tile sets ie 16 x 16 ground tiles
 type UniformTileset struct {
-	img          *ebiten.Image
-	tilesetWidth int
-	gid          int
-	name         string
+	img            *ebiten.Image
+	tilesetWidth   int
+	gid            int
+	name           string
+	TileProperties map[int]TileType
+}
+
+func MapTileType(tileProp string) (TileType, error) {
+	switch tileProp {
+	case "stair":
+		return Stair, nil
+	case "surface":
+		return Surface, nil
+	case "edge":
+		return Edge, nil
+	default:
+		return NotDefined, errors.New("invalid string in tile type json value in tile set for: " + tileProp)
+	}
 }
 
 func (u *UniformTileset) Gid() int {
@@ -49,6 +75,11 @@ func (u *UniformTileset) Dimensions() (int, int) {
 
 func (u *UniformTileset) Name() string {
 	return u.name
+}
+
+func (u *UniformTileset) TileType(id int) TileType {
+	println("tile tipe for id", id, "=", u.TileProperties[id-1])
+	return u.TileProperties[id-1]
 }
 
 func (u *UniformTileset) Img(id int) *ebiten.Image {
@@ -65,6 +96,18 @@ func (u *UniformTileset) Img(id int) *ebiten.Image {
 			srcX, srcY, srcX+16, srcY+16,
 		),
 	).(*ebiten.Image)
+}
+
+type TileProp struct {
+	TileID int            `json:"id"`
+	Prop   []TileProperty `json:"properties"`
+}
+
+type TileProperty struct {
+	Name         string `json:"name"`
+	PropertyType string `json:"propertytype"`
+	Type         string `json:"type"`
+	Value        string `json:"value"`
 }
 
 type TileJSON struct {
@@ -108,6 +151,10 @@ func (d *DynTileset) Dimensions() (int, int) {
 
 func (d *DynTileset) Gid() int {
 	return d.gid
+}
+
+func (d *DynTileset) TileType(id int) TileType {
+	return NotDefined
 }
 
 func (d *DynTileset) Name() string {
@@ -198,14 +245,30 @@ func NewUniformTileSet(path string, gid int) (Tileset, error) {
 	fmt.Printf("Loading uniform tileset image from: %s %d\n", tileJsonPath, gid)
 
 	img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, tileJsonPath)
-
 	if err != nil {
 		return nil, err
 	}
+
 	uniformTileSet.img = img
 	uniformTileSet.gid = gid
 	uniformTileSet.name = uniformTilesetJSON.Name
 	uniformTileSet.tilesetWidth = uniformTilesetJSON.Width
+
+	propMap := make(map[int]TileType)
+	for _, props := range uniformTilesetJSON.TileProps {
+		prop := props.Prop[0]
+		println("loading tile type", props.TileID, prop.Value)
+		if props.TileID != 0 {
+			tTypeIota, err := MapTileType(prop.Value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			propMap[props.TileID] = tTypeIota
+
+		}
+	}
+	uniformTileSet.TileProperties = propMap
+
 	return &uniformTileSet, nil
 }
 

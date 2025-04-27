@@ -15,7 +15,7 @@ import (
 type SpriteBattleState uint8
 
 const (
-	Idle SpriteBattleState = iota
+	DialogueIdle SpriteBattleState = iota
 	CombatPhaseIdle
 	UsingCombatSkill
 	UsingDialogueSkill
@@ -122,7 +122,7 @@ func (bs *BattleSprite) GetAnimation() *animations.Animation {
 		return bs.DialogueAnimations[bs.CurrentDialogueAnimation].Animation
 	}
 
-	if bs.state == Idle {
+	if bs.state == DialogueIdle {
 		return bs.IdleAnimation
 	}
 
@@ -177,7 +177,7 @@ func (bs *BattleSprite) Update() {
 						bs.UpdateState(CombatPhaseIdle)
 					} else {
 						bs.CurrentDialogueAnimation = NoDialogueSkill
-						bs.UpdateState(Idle)
+						bs.UpdateState(DialogueIdle)
 					}
 
 				}
@@ -267,7 +267,7 @@ func NewBattleSprite(pImg *ebiten.Image, spriteSheet *spritesheet.SpriteSheet, x
 		IdleAnimation:            animations.NewAnimation(0, 0, 0, 10),
 		CombatIdleAnimation:      animations.NewAnimation(3, 3, 0, 10),
 		counter:                  0,
-		state:                    Idle,
+		state:                    DialogueIdle,
 		CurrentDialogueAnimation: NoDialogueSkill,
 		CurrentCombatAnimation:   NoCombatSkill,
 		inAnimation:              false,

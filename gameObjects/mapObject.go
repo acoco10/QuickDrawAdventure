@@ -1,7 +1,6 @@
 package gameObjects
 
 import (
-	"fmt"
 	"github.com/acoco10/QuickDrawAdventure/animations"
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/spritesheet"
@@ -30,7 +29,7 @@ const (
 	InsideDoor
 	StairTrigger
 	ContextualObject
-	Collider
+	ColliderObject
 	NpcSpawnObject
 )
 
@@ -41,9 +40,9 @@ type Spawn struct {
 }
 
 type Trigger struct {
-	Name        string
-	ObjectType  ObjectType
-	Rect        image.Rectangle
+	Name       string
+	ObjectType ObjectType
+	*image.Rectangle
 	Triggered   bool
 	Dir         Direction
 	CameraPoint string
@@ -56,11 +55,9 @@ type Trigger struct {
 func NewTrigger(json ObjectJSON) Trigger {
 	newTrigger := new(Trigger)
 	newTrigger.Name = json.Name
-	rect := image.Rect(int(json.X), int(json.Y), int(json.X+json.Width), int(json.Y+json.Height))
-	newTrigger.Rect = rect
+	rect := image.Rect(int(json.X), int(json.Y), int(json.X+json.Width), int(json.Y+json.Width))
+	newTrigger.Rectangle = &rect
 	newTrigger.Triggered = false
-	newTrigger.Rect.Min.Y = newTrigger.Rect.Min.Y - 32
-	newTrigger.Rect.Max.Y = newTrigger.Rect.Max.Y - 32
 	loadProperties(json.Properties, newTrigger)
 	newTrigger.Auto = true
 	return *newTrigger
@@ -69,48 +66,53 @@ func NewTrigger(json ObjectJSON) Trigger {
 func loadProperties(props []PropertiesJSON, newTrigger *Trigger) {
 
 	for _, prop := range props {
-		val, ok := prop.Value.(string)
-		if !ok {
-			log.Fatal("failed to convert property to string")
-		}
+
 		switch prop.Name {
 		case "direction":
+			val, ok := prop.Value.(string)
+			if !ok {
+				log.Fatal("failed to convert property to string")
+			}
 			newTrigger.Dir = LoadDirection(val)
 		case "cameraPoint":
+			val, ok := prop.Value.(string)
+			if !ok {
+				log.Fatal("failed to convert property to string")
+			}
 			newTrigger.CameraPoint = val
 		case "animation":
+			val, ok := prop.Value.(string)
+			if !ok {
+				log.Fatal("failed to convert property to string")
+			}
 			newTrigger.Animation = val
 		case "sprite":
+			val, ok := prop.Value.(string)
+			if !ok {
+				log.Fatal("failed to convert property to string")
+			}
 			newTrigger.Sprite = val
 		case "z":
-			val2, ok2 := prop.Value.(float64)
-			if !ok2 {
-				log.Fatal("Couldn't convert property value to float")
+			val, ok := prop.Value.(float64)
+			if !ok {
+				log.Fatal("failed to convert property to string")
 			}
-			newTrigger.Z = val2
+			newTrigger.Z = val
 		}
 	}
 }
 
-type MapItem struct {
-	State string
-	Name  string
-	*Sprite
-	Scale float64
-}
-
 type MapObjectData struct {
-	NpcSpawns        map[string]Spawn
-	Colliders        []image.Rectangle
-	Items            []MapItem
-	InteractPoints   map[string]*Trigger
-	CameraPoints     map[string]Trigger
-	ObjectSpawns     map[string]Spawn
-	EnemySpawns      map[string]Trigger
-	LayerTriggers    map[string]*Trigger
-	TriggerColliders map[string][]image.Rectangle
-	Triggers         []*Trigger
-	Doors            []*DoorObject
+	NpcSpawns      map[string]Spawn
+	Colliders      []Collider
+	Items          []MapItem
+	InteractPoints map[string]*Trigger
+	CameraPoints   map[string]Trigger
+	ObjectSpawns   map[string]Spawn
+	EnemySpawns    map[string]Trigger
+	LayerTriggers  map[string]*Trigger
+	Triggers       []*Trigger
+	Doors          []*DoorObject
 }
 
 type LayerTrigger struct {
@@ -134,7 +136,7 @@ func LoadDirection(dir string) Direction {
 
 func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 
-	colliders := []image.Rectangle{}
+	var colliders []Collider
 	var doors []*DoorObject
 	npcSpawns := make(map[string]Spawn)
 	contextualObjects := make(map[string]*Trigger)
@@ -145,29 +147,22 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	objectSpawns := make(map[string]Spawn)
 	enemies := make(map[string]Trigger)
 	var allTrig []*Trigger
-	triggerColliders := make(map[string][]image.Rectangle)
 
 	for _, layer := range tilemapJSON.Layers {
 		if layer.Name == "colliders" {
 			for _, object := range layer.Objects {
-				rect := image.Rect(
-					int(object.X),
-					int(object.Y)-32,
-					int(object.Width+object.X),
-					int(object.Y+object.Height)-32)
-				colliders = append(colliders, rect)
-			}
-		}
 
-		if layer.Name == "triggerColliders" {
-			for _, object := range layer.Objects {
 				rect := image.Rect(
 					int(object.X),
-					int(object.Y)-32,
+					int(object.Y),
 					int(object.Width+object.X),
-					int(object.Y+object.Height)-32)
-				triggerColliders[object.Name] = append(triggerColliders[object.Name], rect)
-				println("loaded Collision trigger:", object.Name)
+					int(object.Y+object.Height))
+				trig := NewTrigger(object)
+				col := Collider{
+					&rect,
+					&trig,
+				}
+				colliders = append(colliders, col)
 			}
 		}
 
@@ -199,7 +194,7 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 				switch object.Type {
 				case "objectSpawn":
 					println("loading objectSpawn:", object.Name)
-					objSpawn := Spawn{object.Name, object.X, object.Y - 16, true}
+					objSpawn := Spawn{object.Name, object.X, object.Y, true}
 					objectSpawns[object.Name] = objSpawn
 				case "contextualObject":
 					println("loading contextualObject:", object.Name)
@@ -208,39 +203,13 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					contextualObjects[object.Name] = &contextualObject
 					allTrig = append(allTrig, &contextualObject)
 				case "itemSpawn":
+
 					println("loading item:", object.Name)
-					imgPath := fmt.Sprintf("images/items/%s.png", object.Name)
-					img, _, err := ebitenutil.NewImageFromFileSystem(assets.ImagesDir, imgPath)
 
-					if err != nil {
-						log.Fatal(err)
-					}
-					sprite := Sprite{img,
-						object.X,
-						object.Y - 16,
-						0,
-						0,
-						2,
-						true,
-						false,
-						false,
-						Obj,
-					}
-
-					scale, ok := object.Properties[0].Value.(float64)
-
-					if !ok {
-						log.Fatal("cannot convert scale property to int, scale value:", object.Properties[0].Value)
-					}
-
-					item := MapItem{
-						Name:   object.Name,
-						Sprite: &sprite,
-						Scale:  scale,
-						State:  "off",
-					}
+					item := NewMapItem(object)
 
 					items = append(items, item)
+
 				case "interactPoint":
 					println("loading interactPoint:", object.Name)
 					interact := NewTrigger(object)
@@ -256,10 +225,10 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 					enemySpawn := NewTrigger(object)
 					enemies[object.Name] = enemySpawn
 				case "zTrigger":
-					println("loading layer trigger", object.Name)
-					layerTrigger := NewTrigger(object)
-					layerTriggers[object.Name] = &layerTrigger
-					allTrig = append(allTrig, &layerTrigger)
+					println("loading layer z trigger", object.Name)
+					zTrigger := NewTrigger(object)
+					//layerTriggers[object.Name] = &layerTrigger
+					allTrig = append(allTrig, &zTrigger)
 				}
 			}
 		}
@@ -274,7 +243,6 @@ func LoadMapObjectData(tilemapJSON TilemapJSON) (MapObjectData, error) {
 	mapObjects.ObjectSpawns = objectSpawns
 	mapObjects.EnemySpawns = enemies
 	mapObjects.LayerTriggers = layerTriggers
-	mapObjects.TriggerColliders = triggerColliders
 	mapObjects.Triggers = allTrig
 	mapObjects.Doors = doors
 	return mapObjects, nil

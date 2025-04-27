@@ -21,7 +21,7 @@ type StartScene struct {
 	gameLog            *sceneManager.GameLog
 	titleAnimation     *animations.Animation
 	sImg               *ebiten.Image
-	sheer              *spritesheet.SpriteSheet
+	sheet              *spritesheet.SpriteSheet
 	animationTriggered bool
 }
 
@@ -43,7 +43,7 @@ func (s *StartScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	s.sImg = startImg
 	startSheet := spritesheet.NewSpritesheet(15, 1, 378, 228)
 
-	s.sheer = startSheet
+	s.sheet = startSheet
 	s.audioPlayer = audioManagement.NewAudioPlayer()
 	startAnimation := animations.NewAnimation(0, 14, 1, 5)
 
@@ -97,7 +97,7 @@ func (s *StartScene) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Scale(4, 4)
 	frame := s.titleAnimation.Frame()
-	frameRect := s.sheer.Rect(frame)
+	frameRect := s.sheet.Rect(frame)
 	screen.DrawImage(s.sImg.SubImage(frameRect).(*ebiten.Image), opts)
 
 }

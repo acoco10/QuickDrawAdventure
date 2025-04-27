@@ -47,8 +47,8 @@ func (c *Camera) FollowTarget(targetX, targetY, screenWidth, screenHeight float6
 func (c *Camera) Constrain(TileMapWidthPixels, TileMapHeightPixels, screenWidth, screenHeight float64) {
 
 	if c.State() == Outside {
-		c.X = math.Min(c.X, 0.0)
-		c.Y = math.Min(c.Y, 0.0)
+		c.X = math.Min(c.X, 0)
+		c.Y = math.Min(c.Y, -1)
 		c.X = math.Max(c.X, screenWidth-TileMapWidthPixels)
 		c.Y = math.Max(c.Y, screenHeight-TileMapHeightPixels)
 	}

@@ -54,8 +54,8 @@ func NewObject(pImg *ebiten.Image, sheet spritesheet.SpriteSheet, enteringAnimat
 	object := &DoorObject{
 		Sprite: &Sprite{
 			Img:      pImg,
-			X:        float64(trigger.Rect.Min.X),
-			Y:        float64(trigger.Rect.Max.Y - objHeight),
+			X:        float64(trigger.Min.X),
+			Y:        float64(trigger.Max.Y - objHeight),
 			drawType: Obj,
 		},
 		Animation: map[ObjectState]*animations.Animation{

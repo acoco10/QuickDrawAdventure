@@ -4,7 +4,12 @@ import (
 	"image"
 )
 
-func CheckCollisionHorizontal(playerSprite *Sprite, colliders []image.Rectangle, npcSprites map[string]*Character) {
+type Collider struct {
+	*image.Rectangle
+	*Trigger
+}
+
+func CheckCollisionHorizontal(playerSprite *Sprite, colliders []Collider, npcSprites map[string]*Character) {
 	for _, collider := range colliders {
 		//check if player is colliding with collider
 		if collider.Overlaps(
@@ -13,7 +18,7 @@ func CheckCollisionHorizontal(playerSprite *Sprite, colliders []image.Rectangle,
 				int(playerSprite.Y)+28,
 				int(playerSprite.X)+16,
 				int(playerSprite.Y)+32),
-		) {
+		) && (collider.Z == playerSprite.Z || collider.Z == 0) {
 			if playerSprite.Dx > 0.0 { //check if player is going right
 				//update player velocity
 				playerSprite.X = float64(collider.Min.X) - 16
@@ -48,7 +53,7 @@ func CheckCollisionHorizontal(playerSprite *Sprite, colliders []image.Rectangle,
 	}
 }
 
-func CheckCollisionVertical(playerSprite *Sprite, colliders []image.Rectangle, npcSprites map[string]*Character) {
+func CheckCollisionVertical(playerSprite *Sprite, colliders []Collider, npcSprites map[string]*Character) {
 	for _, collider := range colliders {
 		//check if player is colliding with collider
 		if collider.Overlaps(
@@ -57,7 +62,7 @@ func CheckCollisionVertical(playerSprite *Sprite, colliders []image.Rectangle, n
 				int(playerSprite.Y)+28,
 				int(playerSprite.X)+16,
 				int(playerSprite.Y)+32),
-		) {
+		) && (collider.Z == playerSprite.Z || collider.Z == 0) {
 			if playerSprite.Dy > 0.0 { //check if player is going down
 				//update player position
 				playerSprite.Y = float64(collider.Min.Y) - 32

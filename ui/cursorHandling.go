@@ -63,8 +63,8 @@ func (cu *CursorUpdater) MoveToLockedSpecificPosition(x, y, maxY int) {
 	cu.maxY = maxY
 }
 
-func (cu *CursorUpdater) MoveCursorToMainMenu() {
-	cu.MoveToLockedSpecificPosition(566, 470, 540)
+func (cu *CursorUpdater) MoveCursorToMainMenu(options int) {
+	cu.MoveToLockedSpecificPosition(566, 470, 470+23*options)
 	cu.systemPosition = image.Point{566, 470}
 	cu.Ytravel = 32
 }

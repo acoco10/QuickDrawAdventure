@@ -9,20 +9,25 @@ import (
 )
 
 type TileMapLayer struct {
-	Data       []int `json:"data"`
-	TileSet    Tileset
-	Tiles      []Tile
-	Width      int              `json:"width"`
-	Height     int              `json:"height"`
-	Name       string           `json:"name"`
-	Type       string           `json:"type"`
-	Objects    []ObjectJSON     `json:"objects"`
-	Class      string           `json:"class"`
-	Properties []PropertiesJSON `json:"properties"`
-	Z          float64
-	YSort      bool
+	Data             []int `json:"data"`
+	TileSet          Tileset
+	Tiles            []Tile
+	HorizontalOffset int              `json:"offsetx"`
+	VerticalOffset   int              `json:"offsety"`
+	Width            int              `json:"width"`
+	Height           int              `json:"height"`
+	Name             string           `json:"name"`
+	Type             string           `json:"type"`
+	Objects          []ObjectJSON     `json:"objects"`
+	Class            string           `json:"class"`
+	Properties       []PropertiesJSON `json:"properties"`
+	Z                float64
+	YSort            bool
+	Layers           []*TileMapLayer `json:"layers"`
 }
-
+type TileKey struct {
+	X, Y int
+}
 type PropertiesJSON struct {
 	Name  string `json:"name"`
 	Type  string `json:"type"`
@@ -38,14 +43,19 @@ type TilemapJSON struct {
 }
 
 type Tile struct {
-	Img     *ebiten.Image
-	X, Y, Z float64
-	YSort   bool
-	Layer   string
+	Img      *ebiten.Image
+	X, Y, Z  float64
+	YSort    bool
+	Layer    string
+	TileType TileType
 }
 
 func (t Tile) GetType() DrawableType {
 	return Map
+}
+
+func (t Tile) GetSize() (h int, w int) {
+	return t.Img.Bounds().Dx(), t.Img.Bounds().Dy()
 }
 
 func (t Tile) CheckName() string {
@@ -60,8 +70,18 @@ func (t Tile) CheckYSort() bool {
 	return t.YSort
 }
 
-func (t Tile) Draw(screen *ebiten.Image, cam camera.Camera) {
+func (t Tile) Draw(screen *ebiten.Image, cam camera.Camera, player Character, debugMode bool) {
 	opts := ebiten.DrawImageOptions{}
+	if debugMode {
+		switch t.Z {
+		case 2:
+			opts.ColorScale.Scale(0.7, 0.8, 0.7, 1)
+		case 3:
+			opts.ColorScale.Scale(0.8, 0.5, 0.6, 1)
+		case 4:
+			opts.ColorScale.Scale(0.6, 0.5, 0.8, 1)
+		}
+	}
 	opts.GeoM.Translate(t.X, t.Y)
 	opts.GeoM.Translate(0.0, -(float64(t.Img.Bounds().Dy()) + 16))
 	opts.GeoM.Translate(cam.X, cam.Y)
@@ -117,6 +137,20 @@ func (t *TilemapJSON) GenTileSetMap() (map[string]Tileset, error) {
 	return tilesets, nil
 }
 
+func FlattenLayers(layers []*TileMapLayer) []*TileMapLayer {
+	var result []*TileMapLayer
+	for _, layer := range layers {
+		if len(layer.Layers) > 0 {
+			// it's a group layer
+			result = append(result, FlattenLayers(layer.Layers)...)
+		} else {
+			// it's a normal tile/object/image layer
+			result = append(result, layer)
+		}
+	}
+	return result
+}
+
 func NewTilemapJSON(contents []byte) (*TilemapJSON, error) {
 
 	var tilemapJSON TilemapJSON
@@ -125,6 +159,7 @@ func NewTilemapJSON(contents []byte) (*TilemapJSON, error) {
 	if err != nil {
 		return nil, err
 	}
+	tilemapJSON.Layers = FlattenLayers(tilemapJSON.Layers)
 
 	tilesets, err := tilemapJSON.GenTileSetMap()
 	if err != nil {
@@ -161,21 +196,27 @@ func NewTilemapJSON(contents []byte) (*TilemapJSON, error) {
 				y := index / layer.Width
 
 				x = x * 16
-				y = y * 16
+				y = (y + 2) * 16
+
+				x = x + layer.HorizontalOffset
+				y = y + layer.VerticalOffset
 
 				tile := Tile{
-					X:     float64(x),
-					Y:     float64(y),
-					Z:     layer.Z,
-					Img:   layer.TileSet.Img(id),
-					YSort: layer.YSort,
-					Layer: layer.Name,
+					X:        float64(x),
+					Y:        float64(y),
+					Z:        layer.Z,
+					Img:      layer.TileSet.Img(id),
+					YSort:    layer.YSort,
+					Layer:    layer.Name,
+					TileType: layer.TileSet.TileType(id),
 				}
 
 				tiles = append(tiles, tile)
+
 			}
 			layer.Tiles = tiles
 			println("len of tiles for layer", layer.Name, "=", len(layer.Tiles))
+
 		}
 	}
 	return &tilemapJSON, nil

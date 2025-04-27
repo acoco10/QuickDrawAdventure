@@ -6,9 +6,9 @@ import (
 	"github.com/acoco10/QuickDrawAdventure/assets"
 	"github.com/acoco10/QuickDrawAdventure/battleStats"
 	"github.com/acoco10/QuickDrawAdventure/camera"
+	"github.com/acoco10/QuickDrawAdventure/eventSystem"
 	"github.com/acoco10/QuickDrawAdventure/gameObjects"
 	"github.com/acoco10/QuickDrawAdventure/sceneManager"
-	"github.com/acoco10/QuickDrawAdventure/spritesheet"
 	"github.com/acoco10/QuickDrawAdventure/ui"
 	"github.com/ebitenui/ebitenui/input"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -44,7 +44,10 @@ type TownScene struct {
 	InMenu              bool
 	ResolutionHeight    int
 	ResolutionWidth     int
-	ZsortedDrawables    []gameObjects.Drawable
+	ZSortedDrawables    map[float64][]gameObjects.Drawable
+	Zkeys               []float64
+	debugMode           bool
+	eventHub            *events.EventHub
 }
 
 func NewTownScene() *TownScene {
@@ -53,10 +56,22 @@ func NewTownScene() *TownScene {
 }
 
 func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
+	g.debugMode = true
+	g.loaded = true
 	g.ResolutionWidth = 1512
 	g.ResolutionHeight = 918
+	g.eventHub = events.NewEventHub()
+
+	g.eventHub.Subscribe(events.PropertyUpdate{}, func(e events.Event) {
+		ev := e.(events.PropertyUpdate)
+		switch ev.Property {
+		case "debug":
+			g.debugMode = ev.Value
+		}
+	})
 
 	tileMapFile, err := assets.Map.ReadFile("map/town1Map.json")
+	//map/testMap.json
 	if err != nil {
 		log.Fatal("tilemap file not loading", err)
 	}
@@ -83,77 +98,12 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 		log.Fatal(err)
 	}
 
-	g.loaded = true
-
 	g.cam = camera.NewCamera(0.0, 0.0)
 	g.cam.UpdateState(camera.Outside)
 
-	charSpriteSheet := spritesheet.NewSpritesheet(4, 6, 16, 32)
+	g.loadAllCharacters()
 
-	npcSpawn := g.MapData.NpcSpawns
-
-	jarvis, err := gameObjects.NewCharacter(npcSpawn["jarvis"], *charSpriteSheet, gameObjects.NonPlayer)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	bethSpriteSheet := spritesheet.NewSpritesheet(3, 1, 18, 25)
-
-	bethAnne, err := gameObjects.NewCharacter(npcSpawn["bethAnne"], *bethSpriteSheet, gameObjects.NonPlayer)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	zephSpriteSheet := spritesheet.NewSpritesheet(3, 1, 15, 29)
-
-	zeph, err := gameObjects.NewCharacter(npcSpawn["zeph"], *zephSpriteSheet, gameObjects.NonPlayer)
-	if err != nil {
-		log.Fatal(err)
-	}
-	marthaSpriteSheet := spritesheet.NewSpritesheet(1, 1, 15, 27)
-
-	martha, err := gameObjects.NewCharacter(npcSpawn["marthaFelten"], *marthaSpriteSheet, gameObjects.NonPlayer)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	player, err := gameObjects.NewCharacter(npcSpawn["elyse"], *charSpriteSheet, gameObjects.Player)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	antonio, err := gameObjects.NewCharacter(npcSpawn["antonio"], *charSpriteSheet, gameObjects.NonPlayer)
-	if err != nil {
-		log.Fatal(err)
-	}
-	bMSpriteSheet := spritesheet.NewSpritesheet(1, 1, 27, 35)
-	boneMan, err := gameObjects.NewCharacter(npcSpawn["boneMan"], *bMSpriteSheet, gameObjects.NonPlayer)
-
-	oMLSpriteSheet := spritesheet.NewSpritesheet(3, 1, 14, 18)
-	oldManLandry, err := gameObjects.NewCharacter(npcSpawn["oldManLandry"], *oMLSpriteSheet, gameObjects.NonPlayer)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	georgeFelten, _ := gameObjects.NewCharacter(npcSpawn["georgeFelten"], *oMLSpriteSheet, gameObjects.NonPlayer)
-	adahFelten, _ := gameObjects.NewCharacter(npcSpawn["adahFelten"], *oMLSpriteSheet, gameObjects.NonPlayer)
-
-	g.Player = player
-
-	g.gameLog.PlayerStats = player.BattleStats
-
-	g.NPC = map[string]*gameObjects.Character{}
-
-	g.NPC["bethAnne"] = bethAnne
-	g.NPC["jarvis"] = jarvis
-	g.NPC["zeph"] = zeph
-	g.NPC["martha"] = martha
-	g.NPC["antonio"] = antonio
-	g.NPC["oldManLandry"] = oldManLandry
-	g.NPC["boneMan"] = boneMan
-	g.NPC["georgeFelten"] = georgeFelten
-	g.NPC["adahFelten"] = adahFelten
-
+	//menus
 	g.dialogueUi, err = MakeDialogueUI(1512, 918)
 	if err != nil {
 		log.Fatal(err)
@@ -164,17 +114,19 @@ func (g *TownScene) FirstLoad(gameLog *sceneManager.GameLog) {
 	g.cursor = ui.CreateCursorUpdater(1512, 918)
 	input.SetCursorUpdater(g.cursor)
 
-	g.MainMenu = ui.NewMainMenu(g.ResolutionHeight, g.ResolutionWidth, g.Player.BattleStats, g.cursor)
+	g.MainMenu = ui.NewMainMenu(g.ResolutionHeight, g.ResolutionWidth, g.Player.BattleStats, g.cursor, g.eventHub)
 	g.MainMenu.Load()
+
 	g.MainMenu.SetCursor()
+
 	g.ReadingMenu = &ui.TextBlockMenu{}
 	g.ReadingMenu.Init()
+
 	g.SortAllSprites()
 
 }
 
 func (g *TownScene) Update() sceneManager.SceneId {
-
 	sceneUpdate, completed := g.dialogueUi.Update()
 
 	if completed {
@@ -186,7 +138,6 @@ func (g *TownScene) Update() sceneManager.SceneId {
 	}
 
 	g.Player.Dx = 0
-
 	g.Player.Dy = 0
 
 	//react to key presses by adding directional velocity
@@ -194,37 +145,28 @@ func (g *TownScene) Update() sceneManager.SceneId {
 		g.PlayerMovementInput()
 	}
 	if g.Player.Dy != 0 {
-		g.SortAllSprites()
+		g.ReSortPlayerZ()
 	}
 	g.MenuInput()
-	g.UpdatePlayerZ()
+	g.PlayerActionInput()
 	//increase players position by their velocity every update
 	g.Player.X += g.Player.Dx
-
 	gameObjects.CheckCollisionHorizontal(g.Player.Sprite, g.MapData.Colliders, g.NPC)
-	g.UpdateTriggerColliders("horizontal")
 
 	g.Player.Y += g.Player.Dy
-
 	gameObjects.CheckCollisionVertical(g.Player.Sprite, g.MapData.Colliders, g.NPC)
-	g.UpdateTriggerColliders("vert")
 
 	if !g.Player.InAnimation {
-		gameObjects.CheckTriggers(g.Player, g.MapData.Triggers)
 		gameObjects.CheckDoors(g.Player, g.MapData.Doors)
+		gameObjects.CheckTriggers(g.Player, g.MapData.Triggers)
 	}
 
 	g.UpdateDoors()
 
-	playerActiveAnimation := g.Player.ActiveAnimation(g.Player.Dx, g.Player.Dy)
-	if playerActiveAnimation != nil {
-		playerActiveAnimation.Update()
-	}
-
-	bethAnneAnimation := g.NPC["bethAnne"].ActiveAnimation(0, 0)
+	bethAnneAnimation := g.NPC["bethAnne"].ActiveAnimation()
 	bethAnneAnimation.Update()
 
-	oldManActiveAnimation := g.NPC["oldManLandry"].ActiveAnimation(0, 0)
+	oldManActiveAnimation := g.NPC["oldManLandry"].ActiveAnimation()
 	oldManActiveAnimation.Update()
 
 	//updating camera to Player position
@@ -258,6 +200,9 @@ func (g *TownScene) Update() sceneManager.SceneId {
 
 	g.MainMenu.Update()
 	g.ReadingMenu.Update()
+	g.Player.ExecuteFuncQueue()
+	g.Player.Update(g.ZSortedDrawables)
+
 	return g.scene
 
 }
@@ -270,8 +215,9 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	//gameObjects.DrawMapBelowPlayer(*g.tilemapJSON, g.tilesets, *g.cam, screen, g.dark)
 
 	//draw Player
-
-	gameObjects.DrawGameObjects(g.ZsortedDrawables, screen, *g.cam)
+	for _, z := range g.Zkeys {
+		gameObjects.DrawGameObjects(g.ZSortedDrawables[z], screen, *g.cam, *g.Player, g.debugMode)
+	}
 
 	//g.DrawItems(screen)
 	//g.DrawObjects(screen)
@@ -290,16 +236,31 @@ func (g *TownScene) Draw(screen *ebiten.Image) {
 	}
 
 	if g.interactInProximity != nil && g.interactInProximity.Name != "" && !g.triggerInteraction {
-		width := float64(g.interactInProximity.Rect.Bounds().Max.X - g.interactInProximity.Rect.Bounds().Min.X)
-		DrawPopUp(screen, float64(g.interactInProximity.Rect.Min.X), float64(g.interactInProximity.Rect.Min.Y), width, g.cam)
+		width := float64(g.interactInProximity.Bounds().Max.X - g.interactInProximity.Bounds().Min.X)
+		DrawPopUp(screen, float64(g.interactInProximity.Min.X), float64(g.interactInProximity.Min.Y), width, g.cam)
 	}
 	gameObjects.DrawEvent(*g.tilemapJSON, g.tilesets, *g.cam, screen, *g.Player, g.MapData.LayerTriggers)
 	g.MainMenu.Draw(screen)
+
 	g.ReadingMenu.Draw(screen)
+
+	g.HighlightPlayerTile(screen)
+	dTriggers := []*gameObjects.Trigger{}
+	for _, door := range g.MapData.Doors {
+		dTriggers = append(dTriggers, door.Trigger)
+	}
+
+	gameObjects.DrawTriggers(dTriggers, screen, g.cam)
+	gameObjects.DrawTriggers(g.MapData.Triggers, screen, g.cam)
+	g.Player.Lasso.Draw(screen, *g.cam)
+
+	//vector.StrokeRect(screen, 1, 1, 16*4, 16*4, 1, color.RGBA{255, 0, 0, 255}, false)
+
 	err := g.dialogueUi.Draw(screen)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func (g *TownScene) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
