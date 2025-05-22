@@ -1,0 +1,60 @@
+
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+#loadingScreen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #121212;
+    font: menu
+}
+.sprite-loader {
+    margin-top: 20px;
+    image-rendering: pixelated;
+    width: 64px; /* frame width */
+    height: 64px; /* frame height */
+    background-image: url("../images/reloadSpriteSheet.png");
+    background-repeat: no-repeat;
+    animation: play 3s steps(59) infinite;
+    transform: scale(4);
+    /* OR use JS to control frame-by-frame */
+    margin-bottom: 20px;
+}
+
+@keyframes play {
+    from { background-position: 0 0; }
+    to { background-position: -3776px 0; } /* total width of sheet */
+}
+
+.header-image {
+    image-rendering: pixelated;
+    width: 500px; /* adjust as needed */
+    margin-bottom: 20px;
+    object-fit: contain;
+}
+
+#header-image {
+    height: auto;
+    width: auto;
+    max-width: 500px;
+    max-height: 500px;
+}

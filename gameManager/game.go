@@ -15,6 +15,7 @@ type Game struct {
 }
 
 func NewGame() *Game {
+
 	sceneMap := map[sceneManager.SceneId]sceneManager.Scene{
 		sceneManager.BattleSceneId:   gameScenes.NewBattleScene(),
 		sceneManager.StartSceneId:    gameScenes.NewStartScene(),
@@ -22,6 +23,7 @@ func NewGame() *Game {
 		sceneManager.WinSceneID:      gameScenes.NewWinScene(),
 		sceneManager.TownSceneID:     gameScenes.NewTownScene(),
 	}
+
 	activeSceneId := sceneManager.StartSceneId
 
 	game := &Game{

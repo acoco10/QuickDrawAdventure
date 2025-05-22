@@ -36,7 +36,9 @@ func NewDialogueEquipMenu(updater *CursorUpdater, resolutionHeight, resolutionWi
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	d := DialogueSkillEquipMenu{}
+
 	d.face = face
 	d.ResolutionHeight = resolutionHeight
 	d.ResolutionWidth = resolutionWidth
