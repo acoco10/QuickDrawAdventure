@@ -1,4 +1,4 @@
-# Quick ReadyDraw Adventure
+# Quick Draw Adventure
 Quick ReadyDraw Adventure (QDA) combines a shoot 'em-up and a classic turn-based RPG.
 
 I wanted to make a Western game that felt more like a goofy spaghetti western with one-liners, bombastic action, and some shonen vibes rather than something gritty or serious.
